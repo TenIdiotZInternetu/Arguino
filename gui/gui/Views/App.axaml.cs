@@ -4,9 +4,9 @@ using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
-using gui.Services;
+using gui.Controllers;
 
-namespace gui;
+namespace gui.Views;
 
 public partial class App : Application
 {

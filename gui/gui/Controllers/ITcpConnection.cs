@@ -1,6 +1,6 @@
 using System.Net;
 
-namespace gui.Services;
+namespace gui.Controllers;
 
 public interface ITcpConnection {
     public bool Connect(IPAddress ip, int port);

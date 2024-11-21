@@ -2,6 +2,7 @@
 using System;
 using System.Threading;
 using Avalonia.Controls;
+using gui.Views;
 
 namespace gui;
 

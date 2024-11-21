@@ -3,7 +3,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 
-namespace gui.Services;
+namespace gui.Controllers;
 
 public class TcpConnection : ITcpConnection {
     private const int BUFFER_SIZE = 64;
