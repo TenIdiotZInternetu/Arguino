@@ -8,12 +8,8 @@
 #include "TCPConnection.hpp"
 
 
-TCPConnection::TCPConnection() {
-    std::cout << "i live";
-}
-
-TcpClient::TcpClient(asio::io_context iocontext, const std::string& ipString, int port) :
-        _socket(iocontext) {
+TcpClient::TcpClient(asio::io_context& iocontext, const std::string& ipString, int port) :
+        _ioc(iocontext), _socket(_ioc) {
     asio::ip::address ip = asio::ip::address::from_string(ipString);
     auto endpoint = asio::ip::tcp::endpoint(ip, port);
     _socket.connect(endpoint);
