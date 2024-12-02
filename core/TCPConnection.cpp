@@ -3,10 +3,9 @@
 //
 
 #include <iostream>
-#include "boost/asio.hpp"
-
 #include "TCPConnection.hpp"
 
+using namespace boost;
 
 TcpClient::TcpClient(asio::io_context& iocontext, const std::string& ipString, int port) :
         _ioc(iocontext), _socket(_ioc) {
