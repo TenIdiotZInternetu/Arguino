@@ -5,7 +5,7 @@
 #ifndef BC_TCPCONNECTION_HPP
 #define BC_TCPCONNECTION_HPP
 
-using namespace boost::asio;
+using namespace boost;
 
 class TCPConnection {
 public:
@@ -16,18 +16,21 @@ private:
 
 class TcpServer {
 public:
-    TcpServer(boost::asio::io_context ioContext);
+    TcpServer(asio::io_context ioContext);
 private:
-    ip::tcp::socket _socket;
+    asio::ip::tcp::socket _socket;
 
 };
 
 class TcpClient {
 public:
-    TcpClient(boost::asio::io_context iocontext, const std::string& ipString, int port);
+    TcpClient(asio::io_context iocontext, const std::string& ipString, int port);
+    std::string ReadMessage();
 private:
+    static constexpr int BUFFER_SIZE = 64;
+
     boost::asio::io_context _ioc;
-    ip::tcp::socket _socket;
+    asio::ip::tcp::socket _socket;
 };
 
 
