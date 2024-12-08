@@ -20,7 +20,7 @@ void bla() {
     std::cout << "Listening..." << std::endl;
 
     while (true) {
-        std::cout << client.ReadMessage() << std::endl;
+        std::cout << client.ReadMessage(":<>:") << std::endl;
     }
 }
 

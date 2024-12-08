@@ -19,21 +19,21 @@ TcpClient::TcpClient(asio::io_context& iocontext, const std::string& ipString, i
     _endpoint = asio::ip::tcp::endpoint(ip, port);
 }
 
-std::string TcpClient::ReadMessage() {
-    asio::streambuf buffer(BUFFER_SIZE);
+std::string TcpClient::ReadMessage(const std::string& messageDelimeter) {
     boost::system::error_code error;
 
-    std::size_t bytes_read = asio::read_until(_socket, buffer, '\n', error);
+    std::size_t bytesRead = asio::read_until(
+    _socket, asio::dynamic_buffer(_buffer), messageDelimeter, error
+    );
 
     if (error) {
         throw system::system_error(error);
     }
 
-    buffer.commit(bytes_read);
-    std::istream is(&buffer);
+    std::size_t messageLength = bytesRead - messageDelimeter.size();
 
-    std::string message;
-    is >> message;
+    std::string message = _buffer.substr(0, messageLength);
+    _buffer.erase(0, bytesRead);
     return message;
 }
 
