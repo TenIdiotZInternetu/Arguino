@@ -10,7 +10,7 @@
 class TcpServer {
 public:
     TcpServer(boost::asio::io_context& iocontext, int port);
-    boost::system::error_code SendMessage(const std::string& message);
+    boost::system::error_code WriteMessage(const std::string& message);
 
 private:
     boost::asio::io_context& _ioc;
