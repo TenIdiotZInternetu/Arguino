@@ -4,7 +4,7 @@
 
 #include "boost/asio.hpp"
 
-void bla() {
+void testClient() {
     boost::asio::io_context ioContext;
     TcpClient client(ioContext, 2401);
     boost::system::error_code connectionError;
@@ -24,18 +24,18 @@ void bla() {
     }
 }
 
-void bom() {
+void testServer() {
     boost::asio::io_context ioContext;
     TcpServer server(ioContext, 2400);
 
     while (true) {
-        server.WriteMessage("I'm alive");
+        server.WriteMessage("I'm alive\n");
         std::this_thread::sleep_for(std::chrono::seconds(3));
     }
 }
 
 int main() {
-    std::thread t(bom);
+    std::thread t(testServer);
     t.join();
     return 0;
 }
