@@ -6,7 +6,7 @@
 
 void bla() {
     boost::asio::io_context ioContext;
-    TcpClient client(ioContext, "127.0.0.1", 2401);
+    TcpClient client(ioContext, 2401);
     boost::system::error_code connectionError;
 
     client.Connect(connectionError);

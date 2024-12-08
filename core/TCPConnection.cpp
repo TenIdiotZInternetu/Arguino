@@ -7,6 +7,12 @@
 
 using namespace boost;
 
+TcpClient::TcpClient(asio::io_context& iocontext, int port) :
+        _ioc(iocontext), _socket(_ioc), _endpoint() {
+    asio::ip::address ip = asio::ip::address::from_string(LOCAL_HOST);
+    _endpoint = asio::ip::tcp::endpoint(ip, port);
+}
+
 TcpClient::TcpClient(asio::io_context& iocontext, const std::string& ipString, int port) :
         _ioc(iocontext), _socket(_ioc), _endpoint() {
     asio::ip::address ip = asio::ip::address::from_string(ipString);
@@ -34,3 +40,5 @@ std::string TcpClient::ReadMessage() {
 void TcpClient::Connect(system::error_code& error) {
     _socket.connect(_endpoint, error);
 }
+
+

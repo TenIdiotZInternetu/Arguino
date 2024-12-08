@@ -17,11 +17,13 @@ private:
 
 class TcpClient {
 public:
+    TcpClient(boost::asio::io_context& iocontext, int port);
     TcpClient(boost::asio::io_context& iocontext, const std::string& ipString, int port);
     void Connect(boost::system::error_code& error);
     std::string ReadMessage();
 private:
     static constexpr int BUFFER_SIZE = 64;
+    static constexpr std::string LOCAL_HOST = "127.0.0.1";
 
     boost::asio::io_context& _ioc;
     boost::asio::ip::tcp::socket _socket;
