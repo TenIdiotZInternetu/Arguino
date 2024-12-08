@@ -1,5 +1,6 @@
 using System;
 using System.Net;
+using System.Threading;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
@@ -26,11 +27,18 @@ public partial class App : Application
     }
 
     private void Test() {
-        var tcp = new TcpConnection(IPAddress.Parse("127.0.0.1"), 2400);
-        Console.WriteLine("TcpCreated");
+        var tcp = new TcpVendee( 2400);
+        
+        while (!tcp.Connect()) {
+            Console.WriteLine("Waiting for connection");
+            Thread.Sleep(3000);
+        }
+        
+        Console.WriteLine("Listening");
 
         while (true) {
-            tcp.ReadMessage();
+            string message = tcp.ReadMessage(":<>:");
+            Console.WriteLine(message);
         }
     }
 }
