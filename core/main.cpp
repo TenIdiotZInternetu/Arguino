@@ -29,7 +29,7 @@ void testServer() {
     TcpServer server(ioContext, 2400);
 
     while (true) {
-        server.WriteMessage("I'm alive\n");
+        server.WriteMessage("I'm alive:<>:");
         std::this_thread::sleep_for(std::chrono::seconds(3));
     }
 }

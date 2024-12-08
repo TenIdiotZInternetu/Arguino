@@ -8,7 +8,9 @@ include_directories(${Boost_INCLUDE_DIR})
 
 add_executable(Arguino main.cpp
         TCPConnection.cpp
-        TCPConnection.hpp)
+        TCPConnection.hpp
+        PInoutState.cpp
+        PinoutState.hpp)
 
 target_link_libraries(Arguino ${Boost_LIBRARIES})
 
