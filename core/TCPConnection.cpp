@@ -15,7 +15,7 @@ TcpServer::TcpServer(asio::io_context& iocontext, int port) :
     _acceptor.accept(_socket);
 }
 
-boost::system::error_code TcpServer::WriteMessage(const std::string& message) {
+boost::system::error_code TcpServer::SendMessage(const std::string& message) {
     boost::system::error_code error;
     asio::write(_socket, asio::buffer(message), error);
     return error;
