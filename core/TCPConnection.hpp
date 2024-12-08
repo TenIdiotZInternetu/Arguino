@@ -18,12 +18,14 @@ private:
 class TcpClient {
 public:
     TcpClient(boost::asio::io_context& iocontext, const std::string& ipString, int port);
+    void Connect(boost::system::error_code& error);
     std::string ReadMessage();
 private:
     static constexpr int BUFFER_SIZE = 64;
 
     boost::asio::io_context& _ioc;
     boost::asio::ip::tcp::socket _socket;
+    boost::asio::ip::tcp::endpoint _endpoint;
 };
 
 
