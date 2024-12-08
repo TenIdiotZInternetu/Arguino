@@ -24,8 +24,18 @@ void bla() {
     }
 }
 
+void bom() {
+    boost::asio::io_context ioContext;
+    TcpServer server(ioContext, 2400);
+
+    while (true) {
+        server.WriteMessage("I'm alive");
+        std::this_thread::sleep_for(std::chrono::seconds(3));
+    }
+}
+
 int main() {
-    std::thread t(bla);
+    std::thread t(bom);
     t.join();
     return 0;
 }
