@@ -17,7 +17,8 @@ public partial class App : Application
 
     public override void OnFrameworkInitializationCompleted() {
         Console.WriteLine("I'm alive");
-        Task.Run(Test);
+        Task.Run(TestClient);
+        Task.Run(TestServer);
         
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop) {
             desktop.MainWindow = new MainWindow();
@@ -26,10 +27,10 @@ public partial class App : Application
         base.OnFrameworkInitializationCompleted();
     }
 
-    private void Test() {
-        var tcp = new TcpVendee( 2400);
+    private void TestClient() {
+        var client = new TcpVendee( 2400);
         
-        while (!tcp.Connect()) {
+        while (!client.Connect()) {
             Console.WriteLine("Waiting for connection");
             Thread.Sleep(3000);
         }
@@ -37,8 +38,17 @@ public partial class App : Application
         Console.WriteLine("Listening");
 
         while (true) {
-            string message = tcp.ReadMessage(":<>:");
+            string message = client.ReadMessage(":<>:");
             Console.WriteLine(message);
+        }
+    }
+
+    private void TestServer() {
+        var server = new TcpServer(2401);
+
+        while (true) {
+            server.WriteMessage("gui Running :<>:");
+            Thread.Sleep(2000);
         }
     }
 }

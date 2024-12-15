@@ -29,13 +29,15 @@ void testServer() {
     TcpServer server(ioContext, 2400);
 
     while (true) {
-        server.WriteMessage("I'm alive:<>:");
+        server.WriteMessage("core running:<>:");
         std::this_thread::sleep_for(std::chrono::seconds(3));
     }
 }
 
 int main() {
     std::thread t(testServer);
+    std::thread u(testClient);
     t.join();
+    u.join();
     return 0;
 }
