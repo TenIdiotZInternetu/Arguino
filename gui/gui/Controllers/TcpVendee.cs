@@ -8,22 +8,22 @@ namespace gui.Controllers;
 
 public class TcpVendee {
     public bool Connected => _client.Connected;
-    private const string LOCAL_HOST = "127.0.0.1";
+    public readonly IPEndPoint Endpoint;
     
-    private readonly IPEndPoint _endPoint;
+    private const string LOCAL_HOST = "127.0.0.1";
     private readonly TcpClient _client = new();
 
     public TcpVendee(int port) {
-        _endPoint = new IPEndPoint(IPAddress.Parse(LOCAL_HOST), port);
+        Endpoint = new IPEndPoint(IPAddress.Parse(LOCAL_HOST), port);
     }
 
     public TcpVendee(string ip, int port) {
-        _endPoint = new IPEndPoint(IPAddress.Parse(ip), port);
+        Endpoint = new IPEndPoint(IPAddress.Parse(ip), port);
     }
 
     public bool Connect() {
         try {
-            _client.Connect(_endPoint);
+            _client.Connect(Endpoint);
             return true;
         }
         catch (SocketException e) {
@@ -37,7 +37,6 @@ public class TcpVendee {
         }
 
         var stream = _client.GetStream();
-        
         var data = new StringBuilder();
 
         while (true) {
