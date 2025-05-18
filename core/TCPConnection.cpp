@@ -23,13 +23,13 @@ boost::system::error_code TcpServer::WriteMessage(const std::string& message) {
 
 TcpClient::TcpClient(asio::io_context& iocontext, int port) :
         _ioc(iocontext), _socket(_ioc), _endpoint() {
-    asio::ip::address ip = asio::ip::address::from_string(LOCAL_HOST);
+    asio::ip::address ip = asio::ip::make_address(LOCAL_HOST);
     _endpoint = asio::ip::tcp::endpoint(ip, port);
 }
 
 TcpClient::TcpClient(asio::io_context& iocontext, const std::string& ipString, int port) :
         _ioc(iocontext), _socket(_ioc), _endpoint() {
-    asio::ip::address ip = asio::ip::address::from_string(ipString);
+    asio::ip::address ip = asio::ip::make_address(ipString);
     _endpoint = asio::ip::tcp::endpoint(ip, port);
 }
 
