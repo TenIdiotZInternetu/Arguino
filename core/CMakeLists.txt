@@ -1,19 +1,8 @@
-cmake_minimum_required(VERSION 3.26)
+cmake_minimum_required(VERSION 3.30)
 set(CMAKE_CXX_STANDARD 20)
 
-project(Arguino)
+project(arguino.core)
 
-find_package(Boost REQUIRED)
-include_directories(${Boost_INCLUDE_DIR})
-
-add_executable(Arguino main.cpp
-        TCPConnection.cpp
-        TCPConnection.hpp
-        PInoutState.cpp
-        PinoutState.hpp)
-
-target_link_libraries(Arguino ${Boost_LIBRARIES})
-
-if(WIN32)
-    target_link_libraries(Arguino PRIVATE wsock32 ws2_32)
-endif()
+add_subdirectory(tcp-adapter)
+add_subdirectory(simulator)
+add_subdirectory(executable)

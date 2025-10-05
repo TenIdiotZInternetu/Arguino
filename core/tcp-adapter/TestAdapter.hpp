@@ -7,9 +7,9 @@
 
 #include "boost/asio.hpp"
 
-class TcpServer {
+class TestServer {
 public:
-    TcpServer(boost::asio::io_context& iocontext, int port);
+    TestServer(boost::asio::io_context& iocontext, int port);
     boost::system::error_code WriteMessage(const std::string& message);
 
 private:
@@ -21,10 +21,10 @@ private:
 
 };
 
-class TcpClient {
+class TestClient {
 public:
-    TcpClient(boost::asio::io_context& iocontext, int port);
-    TcpClient(boost::asio::io_context& iocontext, const std::string& ipString, int port);
+    TestClient(boost::asio::io_context& iocontext, int port);
+    TestClient(boost::asio::io_context& iocontext, const std::string& ipString, int port);
     void Connect(boost::system::error_code& error);
     std::string ReadMessage(const std::string& messageDelimeter);
 
