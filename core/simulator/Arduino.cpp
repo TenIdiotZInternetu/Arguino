@@ -7,10 +7,14 @@
 
 #include "Arduino.h"
 
-#include <iostream>
+#include "ArduinoState.hpp"
 
-void digitalWrite(uint8_t pin, uint8_t val) {
-    std::cout << "pin: " << pin << ", val: " << val;
+namespace core::simulator {
+    void digitalWrite(uint8_t pin, uint8_t val) {
+        G_ARDUINO_STATE.set_digital(pin, val == HIGH);
+    }
+
+
 }
 
 
