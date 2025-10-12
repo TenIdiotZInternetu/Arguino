@@ -5,7 +5,7 @@ add_library(arguino.simulator STATIC
         ArduinoState.cpp
 )
 
-target_link_libraries(arguino.simulator PRIVATE
+target_link_libraries(arguino.simulator PUBLIC
         timer
 )
 

@@ -13,16 +13,16 @@
 
 template<typename T>
 concept Encoder =
-    requires (T encoder, std::string msg, core::simulator::ArduinoState state) {
+    requires (T encoder, std::string msg, ArduinoState state) {
         { encoder.encode(state) } -> std::convertible_to<std::string>;
-        { encoder.decode(msg) } -> std::same_as<core::simulator::ArduinoState>;
+        { encoder.decode(msg) } -> std::same_as<ArduinoState>;
     };
 
 template<Encoder TEncoder>
 class ArguinoConnectionHandler :
    public std::enable_shared_from_this<ArguinoConnectionHandler<TEncoder>> {
 public:
-    static constexpr std::string MESSAGE_DELIMITER = "\0";
+    static constexpr char MESSAGE_DELIMITER[] = ">::<";
     static constexpr char READ_FLAG = 'R';
     static constexpr char WRITE_FLAG = 'W';
 
@@ -58,8 +58,8 @@ void ArguinoConnectionHandler<TEncoder>::handle() {
         _socket,
         boost::asio::dynamic_buffer(_incomingMessage),
         MESSAGE_DELIMITER,
-        [this](auto error, size_t bytes_read) {
-            on_read_message(error, bytes_read);
+        [me=this->shared_from_this()](auto error, size_t bytes_read) {
+            me->on_read_message(error, bytes_read);
         }
     );
 }
@@ -68,6 +68,7 @@ template<Encoder TEncoder>
 void ArguinoConnectionHandler<TEncoder>::on_read_message(boost::system::error_code& error, size_t bytes_read) {
     if (error || _incomingMessage.empty()) {
         //TODO: log
+        std::cout << error.message() << std::endl;
         return;
     }
 
@@ -84,7 +85,9 @@ void ArguinoConnectionHandler<TEncoder>::on_read_message(boost::system::error_co
 template<Encoder TEncoder>
 void ArguinoConnectionHandler<TEncoder>::handle_read_state() {
     TEncoder encoder;
-    _outcomingMessage = encoder.decode() + MESSAGE_DELIMITER;
+
+    // TODO get rid of this global reference
+    _outcomingMessage = encoder.encode(G_ARDUINO_STATE) + MESSAGE_DELIMITER;
 
     boost::asio::async_write(
         _socket,

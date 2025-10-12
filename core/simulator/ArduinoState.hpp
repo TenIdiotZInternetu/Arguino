@@ -7,44 +7,49 @@
 
 #include <array>
 
-namespace core::simulator {
-    enum class PinMode { In, Out };
+#include "Timer.hpp"
 
-    class ArduinoState {
-    public:
-        using uint = unsigned int;
-        using pin_t = uint;
-        using digital_t = bool;
-        using analog_t = float;
+enum class PinMode { In, Out };
 
-        static constexpr uint ANALOG_PIN_COUNT = 6;
-        static constexpr uint DIGITAL_PIN_COUNT = 14;
-        static constexpr uint PIN_COUNT = ANALOG_PIN_COUNT + DIGITAL_PIN_COUNT;
+class ArduinoState {
+public:
+    using uint = unsigned int;
+    using pin_t = uint;
+    using digital_t = bool;
+    using analog_t = float;
 
-        using analog_arr_t = std::array<analog_t, ANALOG_PIN_COUNT>;
-        using digital_arr_t = std::array<digital_t, DIGITAL_PIN_COUNT>;
-        using pinmode_arr_t = std::array<PinMode, PIN_COUNT>;
+    static constexpr uint ANALOG_PIN_COUNT = 6;
+    static constexpr uint DIGITAL_PIN_COUNT = 14;
+    static constexpr uint PIN_COUNT = ANALOG_PIN_COUNT + DIGITAL_PIN_COUNT;
 
-        analog_arr_t& get_analog() {return _analogPins; }
-        double get_analog(pin_t pin);
-        bool get_analog(pin_t pin, analog_t value);
+    using analog_arr_t = std::array<analog_t, ANALOG_PIN_COUNT>;
+    using digital_arr_t = std::array<digital_t, DIGITAL_PIN_COUNT>;
+    using pinmode_arr_t = std::array<PinMode, PIN_COUNT>;
 
-        digital_arr_t& get_digital() { return _digitalPins; }
-        bool get_digital(pin_t pin);
-        bool set_digital(pin_t pin, digital_t value);
+    void init_timer() { _timer.step(); }
+    float get_time() { return _timer.deltaTime(); }
 
-        pinmode_arr_t& get_pin_mode() { return _pinModes; }
-        PinMode get_pin_mode(pin_t pin);
-        bool set_pin_mode(pin_t pin, PinMode mode);
+    analog_arr_t& get_analog() {return _analogPins; }
+    double get_analog(pin_t pin);
+    bool get_analog(pin_t pin, analog_t value);
 
-    private:
-        analog_arr_t _analogPins = {};
-        digital_arr_t _digitalPins = {};
-        pinmode_arr_t _pinModes = {};
-    };
+    digital_arr_t& get_digital() { return _digitalPins; }
+    bool get_digital(pin_t pin);
+    bool set_digital(pin_t pin, digital_t value);
 
-    static ArduinoState G_ARDUINO_STATE;
-}
+    pinmode_arr_t& get_pin_mode() { return _pinModes; }
+    PinMode get_pin_mode(pin_t pin);
+    bool set_pin_mode(pin_t pin, PinMode mode);
+
+private:
+    Timer _timer;
+
+    analog_arr_t _analogPins = {};
+    digital_arr_t _digitalPins = {};
+    pinmode_arr_t _pinModes = {};
+};
+
+extern ArduinoState G_ARDUINO_STATE;
 
 
 #endif //ARGUINO_PINOUTSTATE_HPP

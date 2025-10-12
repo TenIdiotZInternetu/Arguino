@@ -50,7 +50,7 @@ namespace arguino::tcp {
 
     template <ConnectionHandler THandler>
     void TcpServer<THandler>::start_accepting() {
-        std::shared_ptr<THandler> handler = THandler::create();
+        std::shared_ptr<THandler> handler = THandler::create(_ioContext);
 
         _acceptor.async_accept(handler->socket(), [this, handler](auto error) {
             if (!error) {

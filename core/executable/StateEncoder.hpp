@@ -8,7 +8,7 @@
 
 class StateEncoder {
 public:
-    using state_t = core::simulator::ArduinoState;
+    using state_t = ArduinoState;
     std::string encode(state_t state);
     state_t decode(std::string message);
 };

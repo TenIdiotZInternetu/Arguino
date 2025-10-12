@@ -1,7 +1,8 @@
 project(timer)
 
 add_library(timer STATIC
-    Timer.cpp
+        Timer.hpp
+        Timer.cpp
 )
 
 target_include_directories(timer PUBLIC

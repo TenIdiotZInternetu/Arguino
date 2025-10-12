@@ -1,1 +1,1 @@
-arduino-cli compile -b arduino:avr:uno --build-path ./test-build --preprocess "$1" > ./sketch.cpp
+arduino-cli compile -b arduino:avr:uno --preprocess "$1" > ./sketch.cpp
