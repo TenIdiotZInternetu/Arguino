@@ -16,9 +16,7 @@ private:
     boost::asio::io_context& _ioc;
     boost::asio::ip::tcp::socket _socket;
     boost::asio::ip::tcp::endpoint _endpoint;
-
     boost::asio::ip::tcp::acceptor _acceptor;
-
 };
 
 class TestClient {

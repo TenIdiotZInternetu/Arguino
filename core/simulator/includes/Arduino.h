@@ -144,9 +144,6 @@ extern "C" {
     void attachInterrupt(uint8_t interruptNum, void (*userFunc)(void), int mode);
     void detachInterrupt(uint8_t interruptNum);
 
-    void setup(void);
-    void loop(void);
-
     #define NOT_A_PIN 0
     #define NOT_A_PORT 0
 
