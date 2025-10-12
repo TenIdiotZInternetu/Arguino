@@ -5,7 +5,7 @@
 #ifndef ARGUINO_ARDUINO_HPP
 #define ARGUINO_ARDUINO_HPP
 
-#include "includes/Arduino.h"
+#include "Arduino.h"
 
 #include <iostream>
 
