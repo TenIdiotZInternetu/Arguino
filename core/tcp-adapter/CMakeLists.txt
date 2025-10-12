@@ -2,6 +2,8 @@ project(arguino.tcp)
 
 add_library(arguino.tcp STATIC
     TestAdapter.cpp
+        TcpServer.cpp
+        TcpServer.hpp
 )
 
 if(WIN32)
