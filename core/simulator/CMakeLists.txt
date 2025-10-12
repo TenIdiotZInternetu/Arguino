@@ -5,6 +5,10 @@ add_library(arguino.simulator STATIC
         ArduinoState.cpp
 )
 
+target_link_libraries(arguino.simulator PRIVATE
+        timer
+)
+
 target_include_directories(arguino.simulator PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}
 )
