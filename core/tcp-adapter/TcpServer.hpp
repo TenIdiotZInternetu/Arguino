@@ -14,10 +14,10 @@ namespace arguino::tcp {
     template<typename T>
     concept ConnectionHandler =
         std::derived_from<T, std::enable_shared_from_this<T>> &&
-        requires (T handler) {
-        { T::create() } -> std::convertible_to<std::shared_ptr<T>>;
-        { handler.handle() } -> std::same_as<void>;
-        { handler.socket() } -> std::same_as<boost::asio::ip::tcp::socket&>;
+        requires (T handler, boost::asio::io_context& ioc) {
+            { T::create(ioc) } -> std::convertible_to<std::shared_ptr<T>>;
+            { handler.handle() } -> std::same_as<void>;
+            { handler.socket() } -> std::same_as<boost::asio::ip::tcp::socket&>;
         };
 
     template<ConnectionHandler THandler>
@@ -26,8 +26,7 @@ namespace arguino::tcp {
         TcpServer(uint16_t port);
         void launch();
     private:
-        boost::asio::io_context _io_context;
-        boost::asio::ip::tcp::socket _socket;
+        boost::asio::io_context _ioContext;
         boost::asio::ip::tcp::endpoint _endpoint;
         boost::asio::ip::tcp::acceptor _acceptor;
 
@@ -38,16 +37,15 @@ namespace arguino::tcp {
 
     template <ConnectionHandler THandler>
     TcpServer<THandler>::TcpServer(uint16_t port) :
-        _socket(_io_context),
         _endpoint(boost::asio::ip::tcp::v4(), port),
-        _acceptor(_io_context, _endpoint),
+        _acceptor(_ioContext, _endpoint),
         _port(port) {}
 
     template <ConnectionHandler THandler>
     void TcpServer<THandler>::launch() {
         _acceptor.listen();
         start_accepting();
-        _io_context.run();
+        _ioContext.run();
     }
 
     template <ConnectionHandler THandler>
