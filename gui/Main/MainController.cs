@@ -7,14 +7,27 @@ namespace gui;
 
 public static class MainController
 {
-    public static void InitApp()
+    public static async Task InitApp()
     {
         Console.WriteLine("I'm alive");
-        Task.Run(TestClient);
+        
+        var tcpClient = new TcpClient<TestMessageHandler>(8888);
+        await tcpClient.ConnectAsync();
+        Console.WriteLine("Connected!");
+        tcpClient.Handler.StateChangedEvent += TestRead;
+
+        while (true) {
+            await tcpClient.SendMessageAsync("R");
+            await Task.Delay(15);
+        }
+    }
+
+    private static void TestRead(ArduinoState state) {
+        Console.WriteLine($"Pin 3: {state.GetDigital(3)}");
     }
     
     private static void TestClient() {
-        var client = new TcpClient(8888);
+        var client = new TestTcpClient(8888);
         
         while (!client.Connect()) {
             Console.WriteLine("Waiting for connection");

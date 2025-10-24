@@ -1,15 +1,27 @@
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading.Channels;
 
 namespace TcpAdapter;
 
-public class TcpClient {
+public class TcpClient<THandler> 
+    where  THandler : IMessageHandler, new()
+{
+    public THandler Handler { get; init; } = new();
+    
     public bool Connected => _client.Connected;
     public readonly IPEndPoint Endpoint;
     
     private const string LOCAL_HOST = "127.0.0.1";
+    private const uint BUFFER_SIZE = 256;
+    
     private readonly System.Net.Sockets.TcpClient _client = new();
+    private NetworkStream? _stream = null;
+    private byte[] _buffer = new byte[BUFFER_SIZE];
+    private Channel<string> _sendQueue = Channel.CreateUnbounded<string>();
+    
+    private CancellationTokenSource _cts = new();
 
     public TcpClient(int port) {
         Endpoint = new IPEndPoint(IPAddress.Parse(LOCAL_HOST), port);
@@ -19,50 +31,55 @@ public class TcpClient {
         Endpoint = new IPEndPoint(IPAddress.Parse(ip), port);
     }
 
-    public bool Connect() {
-        try {
-            _client.Connect(Endpoint);
-            return true;
-        }
-        catch (SocketException e) {
-            return false;
-        }
-    }
-    
-    public string ReadMessage(string messageDelimeter) {
-        if (!Connected) {
-            throw new Exception("Client is not connected to the endpoint");
-        }
+    public async Task ConnectAsync() {
+        await _client.ConnectAsync(Endpoint);
+        _stream = _client.GetStream();
 
-        var stream = _client.GetStream();
-        var data = new StringBuilder();
-
-        while (true) {
-            int b = stream.ReadByte();
-            if (b == -1) continue;             // EOF
-
-            data.Append((char)b);
-            if (FoundDelimeter(data, messageDelimeter)) break;
-        }
-
-        return data.ToString(0, data.Length - messageDelimeter.Length);
+        _ = Task.Run(LoopReadAsync);
+        _ = Task.Run(LoopWriteAsync);
     }
 
-    private bool FoundDelimeter(StringBuilder data, string delimeter) {
-        if (data.Length < delimeter.Length) {
-            return false;
-        }
+    public async Task SendMessageAsync(string message) {
+        await _sendQueue.Writer.WriteAsync(message);
+    }
+
+    private async Task LoopReadAsync() {
+        StringBuilder chunkBuilder = new();
+        StringBuilder messageBuilder = new();
         
-        int delimIndex = data.Length - delimeter.Length;
-        string lastChars = data.ToString(delimIndex, delimeter.Length);
+        List<string> messages = new();
 
-        return delimeter == lastChars;
+        while (!_cts.IsCancellationRequested) {
+            int bytesRead = await _stream!.ReadAsync(_buffer,  0, _buffer.Length, _cts.Token);
+            if (bytesRead == 0) break; // Disconnected
+            
+            var chunk = Encoding.UTF8.GetString(_buffer, 0, bytesRead);
+            chunkBuilder.Append(chunk);
+            messageBuilder.Clear();
+
+            foreach (char c in chunkBuilder.ToString()) {
+                if (c == Handler.Delimeter) {
+                    messages.Add(messageBuilder.ToString());
+                    chunkBuilder.Remove(0, messageBuilder.Length + 1);
+                    messageBuilder.Clear();
+                }
+                else {
+                    messageBuilder.Append(c);
+                }
+            }
+
+            foreach (var message in messages) {
+                Handler.HandleRead(message);
+            }
+        }
     }
-    
-    public void WriteMessage(string message) {
-        var stream = _client.GetStream();
-        byte[] bytes = Encoding.ASCII.GetBytes(message);
-        
-        stream.Write(bytes, 0, message.Length);
+
+    private async Task LoopWriteAsync() {
+        while (await _sendQueue.Reader.WaitToReadAsync()) {
+            while (_sendQueue.Reader.TryRead(out var message)) {
+                var data = Encoding.UTF8.GetBytes(message + Handler.Delimeter);
+                await _stream!.WriteAsync(data, 0, data.Length);
+            }
+        }
     }
 }

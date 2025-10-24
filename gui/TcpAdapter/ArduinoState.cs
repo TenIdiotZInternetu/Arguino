@@ -1,29 +1,31 @@
-namespace gui.Models.Arduino;
+namespace TcpAdapter;
 
-public class PinoutState {
+public struct ArduinoState {
     const uint ANALOG_PIN_COUNT = 6;
     const uint DIGITAL_PIN_COUNT = 14;
 
-    private double[] _analogPins = new double[ANALOG_PIN_COUNT];
-    private bool[] _digitalPins = new bool[DIGITAL_PIN_COUNT];
+    public double[] AnalogPins { get; private set; } = new double[ANALOG_PIN_COUNT];
+    public bool[] DigitalPins { get; private set; } = new bool[DIGITAL_PIN_COUNT];
+
+    public ArduinoState() {}
 
     public double GetAnalog(uint pin) {
-        return _analogPins[pin];
+        return AnalogPins[pin];
     }
 
     public bool SetAnalog(uint pin, double value) {
         if (pin >= ANALOG_PIN_COUNT) return false;
-        _analogPins[pin] = value;
+        AnalogPins[pin] = value;
         return false;
     }
     
     public bool GetDigital(uint pin) {
-        return _digitalPins[pin];
+        return DigitalPins[pin];
     }
 
     public bool SetDigital(uint pin, bool value) {
         if (pin >= DIGITAL_PIN_COUNT) return false;
-        _digitalPins[pin] = value;
+        DigitalPins[pin] = value;
         return true;
     }
 }

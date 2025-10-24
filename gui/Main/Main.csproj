@@ -31,7 +31,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\TcpAdapter\TcpAdapter.csproj" />
       <ProjectReference Include="..\ComponentManagement\ComponentManagement.csproj" />
       <ProjectReference Include="..\TcpAdapter\TcpAdapter.csproj" />
     </ItemGroup>
