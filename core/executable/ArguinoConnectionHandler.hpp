@@ -22,7 +22,7 @@ template<Encoder TEncoder>
 class ArguinoConnectionHandler :
    public std::enable_shared_from_this<ArguinoConnectionHandler<TEncoder>> {
 public:
-    static constexpr char MESSAGE_DELIMITER[] = ">::<";
+    static constexpr char MESSAGE_DELIMITER = ';';
     static constexpr char READ_FLAG = 'R';
     static constexpr char WRITE_FLAG = 'W';
 
@@ -80,6 +80,9 @@ void ArguinoConnectionHandler<TEncoder>::on_read_message(boost::system::error_co
     if (_incomingMessage[0] == WRITE_FLAG) {
         handle_write_state();
     }
+
+    _incomingMessage.clear();
+    handle();
 }
 
 template<Encoder TEncoder>
