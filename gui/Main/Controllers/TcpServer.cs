@@ -18,15 +18,4 @@ public class TcpServer {
         _listener.Start();
         _client = _listener.AcceptTcpClient();
     }
-
-    public void WriteMessage(string message) {
-        if (!_client.Connected) {
-            _client = _listener.AcceptTcpClient();
-        }
-        
-        var stream = _client.GetStream();
-        byte[] bytes = Encoding.ASCII.GetBytes(message);
-        
-        stream.Write(bytes, 0, message.Length);
-    }
 }

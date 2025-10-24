@@ -1,6 +1,16 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "gui", "gui\gui.csproj", "{9AFEE364-829D-4CFF-AFB8-F364A37E29EC}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Main", "Main\Main.csproj", "{9AFEE364-829D-4CFF-AFB8-F364A37E29EC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TcpAdapter", "..\TcpAdapter\TcpAdapter.csproj", "{B68AECD4-C908-48DE-9993-04FBE51EEFE7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ComponentManagement", "ComponentManagement\ComponentManagement.csproj", "{0D904AC2-241A-4C08-8543-884CC5E7AB78}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Components", "Components", "{1C209373-CB59-41EF-9F21-B99EA7C565C7}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "LED", "LED", "{CA7F0D4B-1FFE-4E60-9957-F4329192021A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TcpAdapter", "TcpAdapter\TcpAdapter.csproj", "{F1919DD1-B6E9-4C1C-B6CC-C894A66AFB04}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -12,5 +22,20 @@ Global
 		{9AFEE364-829D-4CFF-AFB8-F364A37E29EC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9AFEE364-829D-4CFF-AFB8-F364A37E29EC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9AFEE364-829D-4CFF-AFB8-F364A37E29EC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B68AECD4-C908-48DE-9993-04FBE51EEFE7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B68AECD4-C908-48DE-9993-04FBE51EEFE7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B68AECD4-C908-48DE-9993-04FBE51EEFE7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B68AECD4-C908-48DE-9993-04FBE51EEFE7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0D904AC2-241A-4C08-8543-884CC5E7AB78}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0D904AC2-241A-4C08-8543-884CC5E7AB78}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0D904AC2-241A-4C08-8543-884CC5E7AB78}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0D904AC2-241A-4C08-8543-884CC5E7AB78}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F1919DD1-B6E9-4C1C-B6CC-C894A66AFB04}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F1919DD1-B6E9-4C1C-B6CC-C894A66AFB04}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F1919DD1-B6E9-4C1C-B6CC-C894A66AFB04}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F1919DD1-B6E9-4C1C-B6CC-C894A66AFB04}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{CA7F0D4B-1FFE-4E60-9957-F4329192021A} = {1C209373-CB59-41EF-9F21-B99EA7C565C7}
 	EndGlobalSection
 EndGlobal

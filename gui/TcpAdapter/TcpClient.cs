@@ -1,23 +1,21 @@
-using System;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
-using Tmds.DBus.Protocol;
 
-namespace gui.Controllers;
+namespace TcpAdapter;
 
-public class TcpVendee {
+public class TcpClient {
     public bool Connected => _client.Connected;
     public readonly IPEndPoint Endpoint;
     
     private const string LOCAL_HOST = "127.0.0.1";
-    private readonly TcpClient _client = new();
+    private readonly System.Net.Sockets.TcpClient _client = new();
 
-    public TcpVendee(int port) {
+    public TcpClient(int port) {
         Endpoint = new IPEndPoint(IPAddress.Parse(LOCAL_HOST), port);
     }
 
-    public TcpVendee(string ip, int port) {
+    public TcpClient(string ip, int port) {
         Endpoint = new IPEndPoint(IPAddress.Parse(ip), port);
     }
 
@@ -41,7 +39,7 @@ public class TcpVendee {
 
         while (true) {
             int b = stream.ReadByte();
-            if (b == -1) break;             // EOF
+            if (b == -1) continue;             // EOF
 
             data.Append((char)b);
             if (FoundDelimeter(data, messageDelimeter)) break;
@@ -59,5 +57,12 @@ public class TcpVendee {
         string lastChars = data.ToString(delimIndex, delimeter.Length);
 
         return delimeter == lastChars;
+    }
+    
+    public void WriteMessage(string message) {
+        var stream = _client.GetStream();
+        byte[] bytes = Encoding.ASCII.GetBytes(message);
+        
+        stream.Write(bytes, 0, message.Length);
     }
 }

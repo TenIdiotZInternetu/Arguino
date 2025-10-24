@@ -1,11 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <OutputType>WinExe</OutputType>
-        <TargetFramework>net8.0</TargetFramework>
+        <TargetFramework>net9.0</TargetFramework>
         <Nullable>enable</Nullable>
         <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
         <ApplicationManifest>app.manifest</ApplicationManifest>
         <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+        <AssemblyName>Gui</AssemblyName>
+        <RootNamespace>Gui</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>
@@ -26,5 +28,11 @@
         <DependentUpon>App.axaml</DependentUpon>
         <SubType>Code</SubType>
       </Compile>
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\TcpAdapter\TcpAdapter.csproj" />
+      <ProjectReference Include="..\ComponentManagement\ComponentManagement.csproj" />
+      <ProjectReference Include="..\TcpAdapter\TcpAdapter.csproj" />
     </ItemGroup>
 </Project>
