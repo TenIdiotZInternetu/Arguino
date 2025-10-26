@@ -1,6 +1,4 @@
 using Avalonia.Controls;
-using gui.ViewModels;
-using TcpAdapter;
 
 namespace gui.Views;
 

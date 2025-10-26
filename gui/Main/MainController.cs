@@ -24,7 +24,7 @@ public static class MainController {
 
         while (true) {
             await tcpClient.SendMessageAsync("R");
-            await Task.Delay(1000);
+            await Task.Delay(100);
         }
     }
 

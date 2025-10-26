@@ -2,20 +2,26 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:v="clr-namespace:gui.Views"
-        xmlns:vw="clr-namespace:gui.ViewModels"
-        xmlns:controls="clr-namespace:Gui.Controls"
+        xmlns:vm="clr-namespace:Gui.ViewModels"
+        xmlns:ucontrol="clr-namespace:Gui.Views.UserControls"
+        xmlns:ccontrol="clr-namespace:Gui.Controls"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="gui.Views.MainWindow"
-        Title="Main"
-        x:DataType="vw:TempLed">
+        Title="Main">
         
-        <Window.DataContext>
-                <vw:TempLed/>
-        </Window.DataContext>
     
-                <ZoomBorder Background="#202020">
-                                <controls:Svg/>
-                </ZoomBorder>
-        
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="9*"/> <!-- 90% -->
+            <RowDefinition Height="1*"/> <!-- 10% -->
+        </Grid.RowDefinitions>
+
+        <ZoomBorder Grid.Row="0" ClipToBounds="True">
+            <Canvas Background="#202020">
+                <ccontrol:Svg Width="100" Height="100" Canvas.Left="50" Canvas.Top="50"/>
+            </Canvas>
+        </ZoomBorder>
+
+        <ucontrol:Timer Grid.Row="1" Foreground="White" VerticalAlignment="Stretch"/>
+    </Grid>
 </Window>
