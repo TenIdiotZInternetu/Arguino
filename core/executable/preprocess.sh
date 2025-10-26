@@ -1,1 +1,0 @@
-arduino-cli compile -b arduino:avr:uno --preprocess "$1" > ./sketch.cpp
