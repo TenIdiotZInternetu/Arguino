@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
-using gui.Controllers;
 
 namespace gui.Views;
 
@@ -16,12 +15,12 @@ public partial class App : Application
     }
     
     public override void OnFrameworkInitializationCompleted() {
-        MainController.InitApp();
         
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop) {
             desktop.MainWindow = new MainWindow();
         }
 
         base.OnFrameworkInitializationCompleted();
+        MainController.InitApp();
     }
 }

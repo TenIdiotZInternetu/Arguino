@@ -5,8 +5,11 @@ using TcpAdapter;
 
 namespace gui;
 
-public static class MainController
-{
+public static class MainController {
+    public static IMessageHandler Adapter { get; private set; } = null!;
+
+    public static event Action AppInitializedEvent;
+    
     public static async Task InitApp()
     {
         Console.WriteLine("I'm alive");
@@ -14,11 +17,14 @@ public static class MainController
         var tcpClient = new TcpClient<TestMessageHandler>(8888);
         await tcpClient.ConnectAsync();
         Console.WriteLine("Connected!");
-        tcpClient.Handler.StateChangedEvent += TestRead;
+        Adapter = tcpClient.Handler;
+        // Adapter.StateChangedEvent += TestRead;
+        
+        AppInitializedEvent?.Invoke();
 
         while (true) {
             await tcpClient.SendMessageAsync("R");
-            await Task.Delay(15);
+            await Task.Delay(1000);
         }
     }
 
