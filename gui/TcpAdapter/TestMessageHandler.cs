@@ -13,5 +13,4 @@ public class TestMessageHandler : IMessageHandler {
         ReadEvent?.Invoke(message);
         StateChangedEvent?.Invoke(state);
     }
-
 }

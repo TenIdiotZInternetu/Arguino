@@ -71,6 +71,8 @@ public class TcpClient<THandler>
             foreach (var message in messages) {
                 Handler.HandleRead(message);
             }
+            
+            messages.Clear();
         }
     }
 
