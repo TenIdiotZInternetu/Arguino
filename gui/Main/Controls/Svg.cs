@@ -16,9 +16,11 @@ using TcpAdapter;
 namespace Gui.Controls;
 
 public class Svg : Control {
-     private SKSvg? _svg;
-     private SvgDocument _doc;
-     
+     private SvgDocument _svgDoc;
+     private SKSvg _svgOn;
+     private SKSvg _svgOff;
+
+     public bool IsOn { get; private set; }
      
      public Svg() {
           LoadSvg();
@@ -28,19 +30,14 @@ public class Svg : Control {
                MainController.Adapter.StateChangedEvent += OnStateChanged;
           };
      }
-     
-     static Svg()
-     {
-          AffectsRender<Svg>();
-     }
 
      private class DrawOp : ICustomDrawOperation {
-          private readonly SKSvg _svg;
+          private readonly Svg _parentControl;
           
           public Rect Bounds => new Rect(new Point(0,0), new Point(100,100));
 
-          public DrawOp(SKSvg svg) {
-               _svg = svg;
+          public DrawOp(Svg parentControl) {
+               _parentControl = parentControl;
           }
 
           public void Dispose() { }
@@ -50,10 +47,6 @@ public class Svg : Control {
           public bool Equals(ICustomDrawOperation? other) => false;
           
           public void Render(ImmediateDrawingContext context) {
-               if (_svg.Picture == null) {
-                    throw new Exception("PICTURE");
-               }
-               
                var leaseFeature = context.TryGetFeature<ISkiaSharpApiLeaseFeature>();
                if (leaseFeature == null) {
                     throw new Exception("LEASE");
@@ -62,15 +55,13 @@ public class Svg : Control {
                using var lease = leaseFeature.Lease();
                var canvas = lease.SkCanvas;
                canvas.Save();
-               canvas.Clear(SKColors.Empty);
                
-               SKPicture pic =  _svg.Picture;
-               var svgRect = pic.CullRect;
-               var scale = (float)Math.Min(Bounds.Width / svgRect.Width, Bounds.Height / svgRect.Height);
                canvas.Translate((float)Bounds.X, (float)Bounds.Y);
-               // canvas.Scale(scale);
                
-               canvas.DrawPicture(_svg.Picture);
+               SKSvg svgToRender = _parentControl.IsOn ? 
+                         _parentControl._svgOn : _parentControl._svgOff;
+               
+               canvas.DrawPicture(svgToRender.Picture);
                canvas.Restore();
           }
      }
@@ -78,21 +69,21 @@ public class Svg : Control {
      private void LoadSvg()
      {
           using var stream = File.OpenRead("/home/touster/Kodiky/arguino/gui/Components/Led/Led.svg");
-          _doc = SvgDocument.Open<SvgDocument>(stream);
-          _svg = SKSvg.CreateFromSvgDocument(_doc);
+          _svgDoc = SvgDocument.Open<SvgDocument>(stream);
+          _svgOn = SKSvg.CreateFromSvgDocument(_svgDoc);
+          _svgDoc.GetElementById("ON").Visibility = "hidden";
+          _svgOff = SKSvg.CreateFromSvgDocument(_svgDoc);
      }
 
      private void OnStateChanged(ArduinoState state) {
-          var elem = _doc.GetElementById("ON");
-          elem.Visibility = state.GetDigital(3) ? "visible" : "hidden";
-          _svg!.FromSvgDocument(_doc);
+          IsOn = state.GetDigital(3);
      }
 
      public override void Render(DrawingContext context) {
-          if (_svg == null) {
+          if (_svgOn == null) {
                throw new Exception("SVG");
           }
-          context.Custom(new DrawOp(_svg));
+          context.Custom(new DrawOp(this));
           Dispatcher.UIThread.InvokeAsync(InvalidateVisual, DispatcherPriority.Background);
      }
 }
