@@ -1,5 +1,7 @@
 Prerequisites:  
-  Boost (with ASIO), arduino-cli, .NET 9
+- Boost (with ASIO)
+- arduino-cli
+- .NET 9
 
 Current usage workflow:
   1. Run `preprocess.sh <.ino>` from the root directory
