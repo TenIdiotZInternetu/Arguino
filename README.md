@@ -4,7 +4,7 @@ Prerequisites:
 - .NET 9
 
 Current usage workflow:
-  1. Run `preprocess.sh <.ino>` from the root directory
+  1. Run `preprocess.sh test` from the root directory
       - this will create `sketch.cpp` in the `core/executable` that will be linked with the rest of simulator
   2. Build `core/CMakeLists.txt`
   3. Run core
