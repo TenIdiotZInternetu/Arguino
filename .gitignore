@@ -1,1 +1,6 @@
 /build
+/core/.vs
+/gui/.vs
+/core/ulibpp/.vs
+/core/ulibpp/lib
+/core/lib

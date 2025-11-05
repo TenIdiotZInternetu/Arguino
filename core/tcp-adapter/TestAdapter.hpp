@@ -28,7 +28,7 @@ public:
 
 private:
     static constexpr int BUFFER_SIZE = 64;
-    static constexpr std::string LOCAL_HOST = "127.0.0.1";
+    static constexpr std::string_view LOCAL_HOST = "127.0.0.1";
 
     boost::asio::io_context& _ioc;
     boost::asio::ip::tcp::socket _socket;

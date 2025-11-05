@@ -4,7 +4,7 @@
 
 #include "ArduinoState.hpp"
 
-ArduinoState G_ARDUINO_STATE = {};
+ArduinoState* G_ARDUINO_STATE_PTR = nullptr;
 
 bool ArduinoState::set_digital(pin_t pin, digital_t value) {
     _digitalPins[pin] = value;

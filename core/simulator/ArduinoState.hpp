@@ -49,7 +49,7 @@ private:
     pinmode_arr_t _pinModes = {};
 };
 
-extern ArduinoState G_ARDUINO_STATE;
+extern ArduinoState* G_ARDUINO_STATE_PTR;
 
 
 #endif //ARGUINO_PINOUTSTATE_HPP

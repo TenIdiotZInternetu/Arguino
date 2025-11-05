@@ -122,7 +122,13 @@ extern "C" {
     void init(void);
     void initVariant(void);
 
-    int atexit(void (*func)()) __attribute__((weak));
+    int atexit(void (*func)())
+#ifdef _MSC_VER
+        [[weak]]
+#else
+        __attribute__((weak))
+#endif
+        ;
 
     void pinMode(uint8_t pin, uint8_t mode);
     void digitalWrite(uint8_t pin, uint8_t val);
