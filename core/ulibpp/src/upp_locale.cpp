@@ -14,6 +14,7 @@
 #include <cassert>
 
 #include "upp_locale.hpp"
+#include <cstdint>
 
 using namespace std;
 

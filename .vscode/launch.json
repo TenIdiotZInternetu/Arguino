@@ -8,7 +8,7 @@
             "name": "C/C++ Debug (gdb Attach)",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/core/cmake-build-debug/executable/arguino",
+            "program": "${workspaceFolder}/core/build/executable/arguino",
             "MIMode": "gdb",
             "cwd": "${workspaceFolder}",
             "setupCommands": [
@@ -17,7 +17,29 @@
                     "text": "-enable-pretty-printing",
                     "ignoreFailures": true
                 }
+            ],
+            "args": [
+                "${input:Mode}",
+                "${input:shmem_Name}"
             ]
+        }
+    ],
+    "inputs": [
+        {
+            "id": "Mode",
+            "type": "pickString",
+            "description": "Choose mode in which to launch the program",
+            "options": [
+                "--single-process",
+                "--only-simulator",
+                "--start_tcp",
+                "--only-tcp"
+            ]
+        },
+        {
+            "id": "shmem_Name",
+            "type": "promptString",
+            "description": "Enter name of the shared memory region"
         }
     ]
 }

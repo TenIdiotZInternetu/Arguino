@@ -17,6 +17,7 @@
 #include <cstddef>
 #include <vector>
 #include <memory>
+#include <cstdint>
 
 #include "upp_locale.hpp"
 #include "upp_mthr.hpp"
@@ -93,6 +94,7 @@ namespace ulibpp {
 #endif
 #include <sys/fcntl.h>
 #include <aio.h>
+#include <signal.h>
 
 namespace ulibpp {
 	

@@ -1,5 +1,5 @@
 # ulibpp cmake
-set(sources upp_file.cpp upp_mthr.cpp upp_shrmem.cpp)
+set(sources upp_file.cpp upp_mthr.cpp upp_shrmem.cpp upp_locale.cpp)
 add_library(ulibpp STATIC ${sources})
 target_include_directories(ulibpp PUBLIC "../h")
 create_suffix(ulibpp outname)
