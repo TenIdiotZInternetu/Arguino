@@ -14,21 +14,21 @@
 
 void digitalWrite(uint8_t pin, uint8_t val)
 {
-    G_ARDUINO_STATE_PTR->set_digital(pin, val == HIGH);
+    CanonicalState::state().set_digital(pin, val == HIGH);
 }
 
 unsigned long millis()
 {
-    return std::floor(G_ARDUINO_STATE_PTR->get_time() / 1000);
+    return std::floor(CanonicalState::state().get_time() / 1000);
 }
 
 void pinMode(uint8_t pin, uint8_t mode)
 {
     if (mode == OUTPUT) {
-        G_ARDUINO_STATE_PTR->set_pin_mode(pin, PinMode::Out);
+        CanonicalState::state().set_pin_mode(pin, PinMode::Out);
     }
     if (mode == INPUT) {
-        G_ARDUINO_STATE_PTR->set_pin_mode(pin, PinMode::In);
+        CanonicalState::state().set_pin_mode(pin, PinMode::In);
     }
 }
 #endif  // ARGUINO_ARDUINO_HPP

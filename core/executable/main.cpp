@@ -18,7 +18,7 @@ void tcp_thread_func()
 
 void simulator_thread_func()
 {
-    G_ARDUINO_STATE_PTR->init_timer();
+    CanonicalState::state().init_timer();
     setup();
     while (true) {
         loop();
@@ -40,19 +40,18 @@ std::thread start_exec_thread(SL&&... vl)
 
 ulibpp::shared_memory sm;
 ulibpp::shared_memory_mapping smm;
-std::unique_ptr<ArduinoState> my_ptr;
 
 void map_shared_memory()
 {
-    std::size_t size = sizeof(ArduinoState);
+    std::size_t size = sizeof(CanonicalState);
     smm.map(sm, 0, size);
     void* addr = smm.get_addr();
-    G_ARDUINO_STATE_PTR = new (addr) ArduinoState();
+    CanonicalState::init(addr);
 }
 
 void create_shared_memory(const std::string& shm_name)
 {
-    std::size_t size = sizeof(ArduinoState);
+    std::size_t size = sizeof(CanonicalState);
     try {
         sm.open(shm_name, size, ulibpp::shared_memory::read | ulibpp::shared_memory::write);
     }
@@ -64,15 +63,14 @@ void create_shared_memory(const std::string& shm_name)
 
 void open_shared_memory(const std::string& shm_name)
 {
-    std::size_t size = sizeof(ArduinoState);
+    std::size_t size = sizeof(CanonicalState);
     sm.open(shm_name, size, ulibpp::shared_memory::read | ulibpp::shared_memory::write);
     map_shared_memory();
 }
 
 void map_my_memory()
 {
-    my_ptr = std::make_unique<ArduinoState>();
-    G_ARDUINO_STATE_PTR = &*my_ptr;
+    CanonicalState::init();
 }
 
 std::string only_tcp_flag = "--only-tcp";

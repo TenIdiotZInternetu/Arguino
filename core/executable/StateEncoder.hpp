@@ -24,10 +24,19 @@ inline std::string StateEncoder::encode(state_t state)
     return message;
 }
 
+// Example of a message is 0:0:0:1:1:... with 14 pin values
 inline StateEncoder::state_t StateEncoder::decode(std::string message)
 {
-    // TODO implement decode
-    return state_t{};
+    state_t newState{};
+    uint8_t messageIndex = 0;
+
+    // TODO: Validate Message
+
+    for (auto&& pin : newState.get_digital()) {
+        pin = message[messageIndex] = '1' ? true : false;
+        message += 2;
+    }
+    return newState;
 }
 
 

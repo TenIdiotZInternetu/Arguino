@@ -6,6 +6,7 @@
 #define ARGUINO_PINOUTSTATE_HPP
 
 #include <array>
+#include <mutex>
 
 #include "Timer.hpp"
 
@@ -49,7 +50,19 @@ class ArduinoState {
     pinmode_arr_t _pinModes = {};
 };
 
-extern ArduinoState* G_ARDUINO_STATE_PTR;
+class CanonicalState {
+   public:
+    static void init();
+    static void init(void* address);
+
+    static ArduinoState& state() { return s_instance->_state; }
+    static void update_state(const ArduinoState& newState);
+
+   private:
+    static CanonicalState* s_instance;
+    ArduinoState _state;
+    std::mutex _mutex;
+};
 
 
 #endif  // ARGUINO_PINOUTSTATE_HPP
