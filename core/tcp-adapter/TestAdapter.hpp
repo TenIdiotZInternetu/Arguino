@@ -8,11 +8,11 @@
 #include "boost/asio.hpp"
 
 class TestServer {
-public:
+   public:
     TestServer(boost::asio::io_context& iocontext, int port);
     boost::system::error_code WriteMessage(const std::string& message);
 
-private:
+   private:
     boost::asio::io_context& _ioc;
     boost::asio::ip::tcp::socket _socket;
     boost::asio::ip::tcp::endpoint _endpoint;
@@ -20,13 +20,13 @@ private:
 };
 
 class TestClient {
-public:
+   public:
     TestClient(boost::asio::io_context& iocontext, int port);
     TestClient(boost::asio::io_context& iocontext, const std::string& ipString, int port);
     void Connect(boost::system::error_code& error);
     std::string ReadMessage(const std::string& messageDelimeter);
 
-private:
+   private:
     static constexpr int BUFFER_SIZE = 64;
     static constexpr std::string_view LOCAL_HOST = "127.0.0.1";
 
@@ -38,4 +38,4 @@ private:
 };
 
 
-#endif //BC_TCPCONNECTION_HPP
+#endif  // BC_TCPCONNECTION_HPP

@@ -12,7 +12,7 @@
 enum class PinMode { In, Out };
 
 class ArduinoState {
-public:
+   public:
     using uint = unsigned int;
     using pin_t = uint;
     using digital_t = bool;
@@ -29,7 +29,7 @@ public:
     void init_timer() { _timer.step(); }
     float get_time() { return _timer.deltaTime(); }
 
-    analog_arr_t& get_analog() {return _analogPins; }
+    analog_arr_t& get_analog() { return _analogPins; }
     double get_analog(pin_t pin);
     bool get_analog(pin_t pin, analog_t value);
 
@@ -41,7 +41,7 @@ public:
     PinMode get_pin_mode(pin_t pin);
     bool set_pin_mode(pin_t pin, PinMode mode);
 
-private:
+   private:
     Timer _timer;
 
     analog_arr_t _analogPins = {};
@@ -52,4 +52,4 @@ private:
 extern ArduinoState* G_ARDUINO_STATE_PTR;
 
 
-#endif //ARGUINO_PINOUTSTATE_HPP
+#endif  // ARGUINO_PINOUTSTATE_HPP

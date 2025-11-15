@@ -7,19 +7,23 @@
 
 #include "ArduinoState.hpp"
 
-// Arduino.h must be the last included header because it defines macros like INPUT and OUTPUT that spoil windows.h
+// Arduino.h must be the last included header because it defines macros like INPUT and OUTPUT that
+// spoil windows.h
 
 #include "Arduino.h"
 
-void digitalWrite(uint8_t pin, uint8_t val) {
+void digitalWrite(uint8_t pin, uint8_t val)
+{
     G_ARDUINO_STATE_PTR->set_digital(pin, val == HIGH);
 }
 
-unsigned long millis() {
+unsigned long millis()
+{
     return std::floor(G_ARDUINO_STATE_PTR->get_time() / 1000);
 }
 
-void pinMode(uint8_t pin, uint8_t mode) {
+void pinMode(uint8_t pin, uint8_t mode)
+{
     if (mode == OUTPUT) {
         G_ARDUINO_STATE_PTR->set_pin_mode(pin, PinMode::Out);
     }
@@ -27,4 +31,4 @@ void pinMode(uint8_t pin, uint8_t mode) {
         G_ARDUINO_STATE_PTR->set_pin_mode(pin, PinMode::In);
     }
 }
-#endif //ARGUINO_ARDUINO_HPP
+#endif  // ARGUINO_ARDUINO_HPP
