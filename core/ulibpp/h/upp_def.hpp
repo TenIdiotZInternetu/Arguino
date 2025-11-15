@@ -1,0 +1,126 @@
+#ifndef ULIBPP_UPP_DEF_HPP_
+#define ULIBPP_UPP_DEF_HPP_
+
+/*
+
+	upp_def.h
+
+	Defaults for ULIBPP
+
+	Kuba, Feb 2004
+	Part of ULIB++
+
+*/
+
+// General
+#define ULIBPP_VERSION_MAJOR							17
+#define ULIBPP_VERSION_MINOR							0
+#define ULIBPP_VERSION_SUBMINOR							0
+
+#define ULIBPP_VERSION_STRING							"17.0.0"
+#define ULIBPP_LAST_MODIFY_DATE							"Jul 12, 2018"
+
+// Global environment definition section
+
+// OS
+#undef ULIBPP_OS_PLATFORM_WIN_NT
+#define ULIBPP_OS_PLATFORM_WIN_NT				1
+
+#undef ULIBPP_OS_PLATFORM_WIN_NT64
+#define ULIBPP_OS_PLATFORM_WIN_NT64				2
+
+#undef ULIBPP_OS_PLATFORM_CYGWIN
+#define ULIBPP_OS_PLATFORM_CYGWIN				3
+
+#undef ULIBPP_OS_PLATFORM_LINUX
+#define ULIBPP_OS_PLATFORM_LINUX				4
+
+#undef ULIBPP_OS_PLATFORM_SUNOS
+#define ULIBPP_OS_PLATFORM_SUNOS				5
+
+#undef ULIBPP_OS_PLATFORM_FREEBSD
+#define ULIBPP_OS_PLATFORM_FREEBSD				6
+
+// custom Xeon Phi x100 (KNC) OS
+#undef ULIBPP_OS_PLATFORM_K1OM
+#define ULIBPP_OS_PLATFORM_K1OM					7
+
+// HW
+#undef ULIBPP_HW_PLATFORM_IA32
+#define ULIBPP_HW_PLATFORM_IA32					1
+
+#undef ULIBPP_HW_PLATFORM_IA64
+#define ULIBPP_HW_PLATFORM_IA64					2
+
+#undef ULIBPP_HW_PLATFORM_SPARC
+#define ULIBPP_HW_PLATFORM_SPARC				3
+
+#undef ULIBPP_HW_PLATFORM_SPARC64
+#define ULIBPP_HW_PLATFORM_SPARC64				4
+
+#undef ULIBPP_HW_PLATFORM_X64
+#define ULIBPP_HW_PLATFORM_X64					5
+
+// Knight's Corner
+#undef ULIBPP_HW_PLATFORM_KNC
+#define ULIBPP_HW_PLATFORM_KNC					6
+
+// Knight's Landing
+#undef ULIBPP_HW_PLATFORM_KNL
+#define ULIBPP_HW_PLATFORM_KNL					7
+
+// COMPILER
+#undef ULIBPP_CC_PLATFORM_GCC
+#define ULIBPP_CC_PLATFORM_GCC					1
+
+#undef ULIBPP_CC_PLATFORM_MSVC
+#define ULIBPP_CC_PLATFORM_MSVC					2
+
+#undef ULIBPP_CC_PLATFORM_ICC
+#define ULIBPP_CC_PLATFORM_ICC					3
+
+#undef ULIBPP_CC_PLATFORM_LICC
+#define ULIBPP_CC_PLATFORM_LICC					4
+
+#undef ULIBPP_CC_PLATFORM_SUNCC
+#define ULIBPP_CC_PLATFORM_SUNCC				5
+
+#undef ULIBPP_CC_PLATFORM_CLANG
+#define ULIBPP_CC_PLATFORM_CLANG				6
+
+#include "_upp_guess.h"
+
+#ifndef ULIBPP_NOEXCEPT
+#if ULIBPP_CC_NOEXCEPT
+#define ULIBPP_NOEXCEPT noexcept
+#else
+#define ULIBPP_NOEXCEPT throw()
+#endif
+#endif
+
+#ifndef ULIBPP_CONSTEXPR
+#if ULIBPP_CC_CONSTEXPR
+#define ULIBPP_CONSTEXPR constexpr
+#else
+#define ULIBPP_CONSTEXPR
+#endif
+#endif
+
+#ifndef ULIBPP_DEPRECATED
+#if ULIBPP_CC_DEPRECATED_ATTR
+#define ULIBPP_DEPRECATED [[deprecated]]
+#else
+#define ULIBPP_DEPRECATED
+#endif
+#endif
+
+#ifndef ULIBPP_FS_NS
+#if !ULIBPP_CCLIB_FS && ULIBPP_CC_PLATFORM!=ULIBPP_CC_PLATFORM_GCC
+#define ULIBPP_FS_NS std::experimental::filesystem
+#else
+#define ULIBPP_FS_NS std::filesystem
+#endif
+#endif
+
+
+#endif
