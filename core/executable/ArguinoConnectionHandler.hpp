@@ -94,7 +94,7 @@ void ArguinoConnectionHandler<TEncoder>::handle_read_state()
     TEncoder encoder;
 
     // TODO get rid of this global reference
-    _outcomingMessage = encoder.encode(CanonicalState::state()) + MESSAGE_DELIMITER;
+    _outcomingMessage = encoder.encode(*G_ARDUINO_STATE_PTR) + MESSAGE_DELIMITER;
 
     boost::asio::async_write(_socket,
         boost::asio::buffer(_outcomingMessage),
