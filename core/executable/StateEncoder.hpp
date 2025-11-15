@@ -7,13 +7,14 @@
 
 
 class StateEncoder {
-public:
+   public:
     using state_t = ArduinoState;
     std::string encode(state_t state);
     state_t decode(std::string message);
 };
 
-inline std::string StateEncoder::encode(state_t state) {
+inline std::string StateEncoder::encode(state_t state)
+{
     std::string message;
     for (auto&& pinOn : state.get_digital()) {
         message += std::format(":{}", pinOn ? 1 : 0);
@@ -23,10 +24,11 @@ inline std::string StateEncoder::encode(state_t state) {
     return message;
 }
 
-inline StateEncoder::state_t StateEncoder::decode(std::string message) {
+inline StateEncoder::state_t StateEncoder::decode(std::string message)
+{
     // TODO implement decode
     return state_t{};
 }
 
 
-#endif //ARGUINO_CORE_STATEENCODER_HPP
+#endif  // ARGUINO_CORE_STATEENCODER_HPP

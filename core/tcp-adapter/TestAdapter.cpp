@@ -2,45 +2,49 @@
 // Created by TIZI on 05/10/2024.
 //
 
-#include <iostream>
 #include "TestAdapter.hpp"
+
+#include <iostream>
 
 using namespace boost;
 using namespace boost::system;
 
-TestServer::TestServer(asio::io_context& iocontext, int port) :
-        _ioc(iocontext),
-        _socket(_ioc),
-        _endpoint(asio::ip::tcp::v4(), port),
-        _acceptor(_ioc, _endpoint) {
+TestServer::TestServer(asio::io_context& iocontext, int port)
+    : _ioc(iocontext),
+      _socket(_ioc),
+      _endpoint(asio::ip::tcp::v4(), port),
+      _acceptor(_ioc, _endpoint)
+{
     _acceptor.accept(_socket);
 }
 
-error_code TestServer::WriteMessage(const std::string& message) {
+error_code TestServer::WriteMessage(const std::string& message)
+{
     error_code error;
     asio::write(_socket, asio::buffer(message), error);
     return error;
 }
 
-TestClient::TestClient(asio::io_context& iocontext, int port) :
-        _ioc(iocontext), _socket(_ioc), _endpoint()
+TestClient::TestClient(asio::io_context& iocontext, int port)
+    : _ioc(iocontext), _socket(_ioc), _endpoint()  //
 {
     asio::ip::address ip = asio::ip::make_address(LOCAL_HOST);
     _endpoint = asio::ip::tcp::endpoint(ip, port);
 }
 
-TestClient::TestClient(asio::io_context& iocontext, const std::string& ipString, int port) :
-        _ioc(iocontext), _socket(_ioc), _endpoint() {
+TestClient::TestClient(asio::io_context& iocontext, const std::string& ipString, int port)
+    : _ioc(iocontext), _socket(_ioc), _endpoint()
+{
     asio::ip::address ip = asio::ip::make_address(ipString);
     _endpoint = asio::ip::tcp::endpoint(ip, port);
 }
 
-std::string TestClient::ReadMessage(const std::string& messageDelimeter) {
+std::string TestClient::ReadMessage(const std::string& messageDelimeter)
+{
     error_code error;
 
     std::size_t bytesRead = asio::read_until(
-    _socket, asio::dynamic_buffer(_buffer), messageDelimeter, error
-    );
+        _socket, asio::dynamic_buffer(_buffer), messageDelimeter, error);
 
     if (error) {
         throw system_error(error);
@@ -53,6 +57,7 @@ std::string TestClient::ReadMessage(const std::string& messageDelimeter) {
     return message;
 }
 
-void TestClient::Connect(error_code& error) {
+void TestClient::Connect(error_code& error)
+{
     _socket.connect(_endpoint, error);
 }
