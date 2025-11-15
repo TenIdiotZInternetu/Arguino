@@ -19,6 +19,7 @@
 #include <utility>
 #include <iterator>
 #include <string_view>
+#include <cstdint>
 
 namespace ulibpp {
 

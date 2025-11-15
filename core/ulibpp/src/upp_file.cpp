@@ -811,6 +811,7 @@ namespace ulibpp {
 #include <cstdio>
 #include <cstring>
 #include <sys/stat.h>
+#include <signal.h>
 
 namespace {
 
