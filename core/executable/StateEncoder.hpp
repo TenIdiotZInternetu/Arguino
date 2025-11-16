@@ -24,17 +24,17 @@ inline std::string StateEncoder::encode(state_t state)
     return message;
 }
 
-// Example of a message is 0:0:0:1:1:... with 14 pin values
+// Example of a message is :0:0:0:1:1:... with 14 pin values
 inline StateEncoder::state_t StateEncoder::decode(std::string message)
 {
     state_t newState{};
-    uint8_t messageIndex = 0;
+    uint8_t messageIndex = 1;
 
     // TODO: Validate Message
 
     for (auto&& pin : newState.get_digital()) {
-        pin = message[messageIndex] = '1' ? true : false;
-        message += 2;
+        pin = message[messageIndex] == '1' ? true : false;
+        messageIndex += 2;
     }
     return newState;
 }
