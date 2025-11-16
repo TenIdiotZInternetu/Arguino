@@ -30,6 +30,7 @@ void CanonicalState::init(void* address)
 
 void CanonicalState::update_state(const ArduinoState& newState)
 {
-    std::lock_guard lock(s_instance->_mutex);
-    s_instance->_state = newState;
+    uint8_t writeState = 1 - s_instance->_readState;
+    s_instance->_states[writeState] = newState;
+    s_instance->_readState = writeState;
 }

@@ -55,13 +55,13 @@ class CanonicalState {
     static void init();
     static void init(void* address);
 
-    static ArduinoState& state() { return s_instance->_state; }
+    static ArduinoState& state() { return s_instance->_states[s_instance->_readState]; }
     static void update_state(const ArduinoState& newState);
 
    private:
     static CanonicalState* s_instance;
-    ArduinoState _state;
-    std::mutex _mutex;
+    ArduinoState _states[2];  // one for reading, one for writing
+    uint8_t _readState = 0;
 };
 
 

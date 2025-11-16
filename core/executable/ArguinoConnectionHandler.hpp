@@ -106,7 +106,10 @@ void ArguinoConnectionHandler<TEncoder>::handle_read_state()
 template <Encoder TEncoder>
 void ArguinoConnectionHandler<TEncoder>::handle_write_state()
 {
-    // TODO implement writing to state
+    TEncoder encoder;
+    ArduinoState newState = encoder.decode(_incomingMessage.substr(1));  // skip write flag
+    CanonicalState::update_state(newState);
+    // TODO log
 }
 
 
