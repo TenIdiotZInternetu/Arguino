@@ -17,6 +17,11 @@ void digitalWrite(uint8_t pin, uint8_t val)
     CanonicalState::state().set_digital(pin, val == HIGH);
 }
 
+int digitalRead(uint8_t pin)
+{
+    return CanonicalState::state().get_digital(pin);
+}
+
 unsigned long millis()
 {
     return std::floor(CanonicalState::state().get_time() / 1000);

@@ -6,10 +6,20 @@
 
 CanonicalState* CanonicalState::s_instance;
 
+bool ArduinoState::get_digital(pin_t pin) const
+{
+    return _digitalPins[pin];
+}
+
 bool ArduinoState::set_digital(pin_t pin, digital_t value)
 {
     _digitalPins[pin] = value;
     return true;
+}
+
+PinMode ArduinoState::get_pin_mode(pin_t pin) const
+{
+    return _pinModes[pin];
 }
 
 bool ArduinoState::set_pin_mode(pin_t pin, PinMode mode)
@@ -28,9 +38,17 @@ void CanonicalState::init(void* address)
     s_instance = new (address) CanonicalState();
 }
 
+// update_start is expected to be called from a single thread
 void CanonicalState::update_state(const ArduinoState& newState)
 {
-    uint8_t writeState = 1 - s_instance->_readState;
-    s_instance->_states[writeState] = newState;
-    s_instance->_readState = writeState;
+    ArduinoState& writeState = s_instance->get_write_state();
+    writeState.get_pin_mode() = state().get_pin_mode();
+
+    for (ArduinoState::pin_t i = 0; i < ArduinoState::DIGITAL_PIN_COUNT; i++) {
+        if (writeState.get_pin_mode(i) == PinMode::In) {
+            writeState.set_digital(i, newState.get_digital(i));
+        }
+    }
+
+    s_instance->flip_states();
 }
