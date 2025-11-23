@@ -1,3 +1,5 @@
+using System.Text;
+
 namespace TcpAdapter;
 
 public class StateEncoder : IEncoder<ArduinoState>
@@ -16,8 +18,12 @@ public class StateEncoder : IEncoder<ArduinoState>
         return newState;
     }
 
-    public string Encode(ArduinoState data)
-    {
-        throw new NotImplementedException();
+    public string Encode(ArduinoState data) {
+        StringBuilder sb = new();
+        foreach (bool pin in data.DigitalPins) {
+            sb.Append($":{(pin ? '1' : '0')}");
+        }
+        
+        return sb.ToString();
     }
 }

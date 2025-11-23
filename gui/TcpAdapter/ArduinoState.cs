@@ -16,7 +16,7 @@ public struct ArduinoState {
     public bool SetAnalog(uint pin, double value) {
         if (pin >= ANALOG_PIN_COUNT) return false;
         AnalogPins[pin] = value;
-        return false;
+        return true;
     }
     
     public bool GetDigital(uint pin) {

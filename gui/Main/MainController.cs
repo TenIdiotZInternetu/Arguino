@@ -7,7 +7,7 @@ using TcpAdapter;
 namespace gui;
 
 public static class MainController {
-    public static IMessageHandler Adapter { get; private set; } = null!;
+    public static TestMessageHandler Adapter { get; private set; } = null!;
     public static Stopwatch GlobalTimer { get; private set; } = null!;
 
     public static event Action AppInitializedEvent;
@@ -21,12 +21,28 @@ public static class MainController {
         await tcpClient.ConnectAsync();
         Console.WriteLine("Connected!");
         Adapter = tcpClient.Handler;
+        Adapter.ReadEvent += ReadTest;
         
         AppInitializedEvent?.Invoke();
+
+        _ = Task.Run(TestWrite);
 
         while (true) {
             await tcpClient.SendMessageAsync("R");
             await Task.Delay(10);
         }
+    }
+
+    private static async Task TestWrite() {
+        ArduinoState state = new ArduinoState();
+        while (true) {
+            Adapter.SendWriteMessage(state);
+            state.SetDigital(8, !state.GetDigital(8));
+            await Task.Delay(3000);
+        }
+    }
+
+    private static void ReadTest(string message) {
+        // Console.WriteLine(message);
     }
 }
