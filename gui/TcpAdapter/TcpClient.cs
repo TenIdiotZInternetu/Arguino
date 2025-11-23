@@ -6,9 +6,8 @@ using System.Threading.Channels;
 namespace TcpAdapter;
 
 public class TcpClient<THandler> 
-    where  THandler : IMessageHandler, new()
-{
-    public THandler Handler { get; init; } = new();
+    where  THandler : IMessageHandler<THandler> {
+    public THandler Handler { get; init; }
     
     public bool Connected => _client.Connected;
     public readonly IPEndPoint Endpoint;
@@ -25,10 +24,12 @@ public class TcpClient<THandler>
 
     public TcpClient(int port) {
         Endpoint = new IPEndPoint(IPAddress.Parse(LOCAL_HOST), port);
+        Handler = THandler.Create(this);
     }
 
     public TcpClient(string ip, int port) {
         Endpoint = new IPEndPoint(IPAddress.Parse(ip), port);
+        Handler = THandler.Create(this);
     }
 
     public async Task ConnectAsync() {
@@ -69,7 +70,7 @@ public class TcpClient<THandler>
             }
 
             foreach (var message in messages) {
-                Handler.HandleRead(message);
+                Handler.OnReadMessage(message);
             }
             
             messages.Clear();
