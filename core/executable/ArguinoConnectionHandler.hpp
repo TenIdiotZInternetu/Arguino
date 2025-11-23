@@ -35,12 +35,12 @@ class ArguinoConnectionHandler
 
    private:
     boost::asio::ip::tcp::socket _socket;
-    std::string _incomingMessage;
+    std::string _buffer;
     std::string _outcomingMessage;
 
-    void on_read_message(boost::system::error_code& error, size_t bytes_read);
-    void handle_read_state();
-    void handle_write_state();
+    void on_read_message(boost::system::error_code& error, size_t messageSize);
+    void handle_read_state(const std::string& message);
+    void handle_write_state(const std::string& message);
 };
 
 template <Encoder TEncoder>
@@ -59,17 +59,17 @@ template <Encoder TEncoder>
 void ArguinoConnectionHandler<TEncoder>::handle()
 {
     boost::asio::async_read_until(_socket,
-        boost::asio::dynamic_buffer(_incomingMessage),
+        boost::asio::dynamic_buffer(_buffer),
         MESSAGE_DELIMITER,
         [me = this->shared_from_this()](
-            auto error, size_t bytes_read) { me->on_read_message(error, bytes_read); });
+            auto error, size_t messageSize) { me->on_read_message(error, messageSize); });
 }
 
 template <Encoder TEncoder>
 void ArguinoConnectionHandler<TEncoder>::on_read_message(
-    boost::system::error_code& error, size_t bytes_read)
+    boost::system::error_code& error, size_t messageSize)
 {
-    if (error || _incomingMessage.empty()) {
+    if (error || _buffer.empty()) {
         // TODO: log
         std::cout << error.message() << std::endl;
         return;
@@ -77,19 +77,21 @@ void ArguinoConnectionHandler<TEncoder>::on_read_message(
 
     // TODO: expect timestamp in the message
 
-    if (_incomingMessage[0] == READ_FLAG) {
-        handle_read_state();
+    const std::string& message = _buffer.substr(0, messageSize);
+
+    if (message[0] == READ_FLAG) {
+        handle_read_state(message);
     }
-    if (_incomingMessage[0] == WRITE_FLAG) {
-        handle_write_state();
+    if (message[0] == WRITE_FLAG) {
+        handle_write_state(message);
     }
 
-    _incomingMessage.clear();
+    _buffer.erase(0, messageSize);
     handle();
 }
 
 template <Encoder TEncoder>
-void ArguinoConnectionHandler<TEncoder>::handle_read_state()
+void ArguinoConnectionHandler<TEncoder>::handle_read_state(const std::string& message)
 {
     TEncoder encoder;
 
@@ -104,10 +106,10 @@ void ArguinoConnectionHandler<TEncoder>::handle_read_state()
 }
 
 template <Encoder TEncoder>
-void ArguinoConnectionHandler<TEncoder>::handle_write_state()
+void ArguinoConnectionHandler<TEncoder>::handle_write_state(const std::string& message)
 {
     TEncoder encoder;
-    ArduinoState newState = encoder.decode(_incomingMessage.substr(1));  // skip write flag
+    ArduinoState newState = encoder.decode(message.substr(1));  // skip write flag
     CanonicalState::update_state(newState);
     // TODO log
 }
