@@ -18,6 +18,7 @@
                     "ignoreFailures": true
                 }
             ],
+            "preLaunchTask": "CMake: build",
             "args": [
                 "${input:Mode}",
                 "${input:shmem_Name}"
