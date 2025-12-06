@@ -11,6 +11,8 @@
 
 #include "ArduinoState.hpp"
 
+namespace arguino::tcp {
+
 template <typename T>
 concept Encoder = requires(T encoder, std::string msg, ArduinoState state) {
     { encoder.encode(state) } -> std::convertible_to<std::string>;
@@ -113,6 +115,8 @@ void ArguinoConnectionHandler<TEncoder>::handle_write_state(const std::string& m
     CanonicalState::update_state(newState);
     // TODO log
 }
+
+}  // namespace arguino::tcp
 
 
 #endif  // ARGUINO_CORE_ARGUINOMESSAGEHANDLER_HPP

@@ -7,8 +7,8 @@
 #include "sketch.cpp"
 #include "upp_shrmem.hpp"
 
-using encoder_t = StateEncoder;
-using connection_handler_t = ArguinoConnectionHandler<encoder_t>;
+using encoder_t = arguino::tcp::StateEncoder;
+using connection_handler_t = arguino::tcp::ArguinoConnectionHandler<encoder_t>;
 
 void tcp_thread_func()
 {

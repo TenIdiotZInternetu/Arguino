@@ -5,6 +5,7 @@
 #ifndef ARGUINO_CORE_STATEENCODER_HPP
 #define ARGUINO_CORE_STATEENCODER_HPP
 
+namespace arguino::tcp {
 
 class StateEncoder {
    public:
@@ -39,5 +40,6 @@ inline StateEncoder::state_t StateEncoder::decode(std::string message)
     return newState;
 }
 
+}  // namespace arguino::tcp
 
 #endif  // ARGUINO_CORE_STATEENCODER_HPP
