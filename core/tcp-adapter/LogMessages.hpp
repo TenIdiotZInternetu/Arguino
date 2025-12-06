@@ -1,3 +1,4 @@
+#include <boost/system>
 #include <format>
 #include <string>
 
@@ -33,6 +34,15 @@ class Write {
 
 class Error {
    public:
-    Error()
+    Error(const std::string& infoMessage, const boost::system::error_code& error)
+        : _infoMessage(infoMessage), _error(error)
+    {}
+
+    std::string type() { return "TCP:ERROR"; }
+    std::string what() { return _infoMessage + error.message(); }
+
+   private:
+    std::string _infoMessage;
+    boost::system::error_code _error;
 };
 }  // namespace arguino::tcp::message
