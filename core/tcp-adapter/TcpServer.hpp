@@ -16,7 +16,7 @@ namespace arguino::tcp {
 template <typename T>
 concept IConnectionHandler = std::derived_from<T, std::enable_shared_from_this<T>> &&
     requires(T handler, boost::asio::io_context& ioc) {
-        { T::create(ioc) } -> std::convertible_to<std::shared_ptr<T>>;
+        // { T::create(ioc, logger) } -> std::convertible_to<std::shared_ptr<T>>;
         { handler.handle() } -> std::same_as<void>;
         { handler.socket() } -> std::same_as<boost::asio::ip::tcp::socket&>;
     };
@@ -57,7 +57,7 @@ void TcpServer<THandler, TLogger>::launch()
 template <IConnectionHandler THandler, logger::ILogger TLogger>
 void TcpServer<THandler, TLogger>::start_accepting()
 {
-    std::shared_ptr<THandler> handler = THandler::create(_ioContext);
+    std::shared_ptr<THandler> handler = THandler::create(_ioContext, _logger);
 
     _acceptor.async_accept(handler->socket(), [this, handler](auto error) {
         if (!error) {

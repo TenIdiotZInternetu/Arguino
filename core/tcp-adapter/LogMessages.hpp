@@ -1,3 +1,6 @@
+#ifndef ARGUINO_CORE_TCP_LOGMESSAGES_HPP
+#define ARGUINO_CORE_TCP_LOGMESSAGES_HPP
+
 #include <boost/system/error_code.hpp>
 #include <format>
 #include <string>
@@ -46,3 +49,5 @@ class Error {
     boost::system::error_code _error;
 };
 }  // namespace arguino::tcp::message
+
+#endif

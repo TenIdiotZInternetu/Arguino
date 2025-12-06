@@ -9,9 +9,9 @@
 #include "sketch.cpp"
 #include "upp_shrmem.hpp"
 
-using encoder_t = arguino::tcp::StateEncoder;
-using connection_handler_t = arguino::tcp::ArguinoConnectionHandler<encoder_t>;
 using logger_t = logger::FileLogger;
+using encoder_t = arguino::tcp::StateEncoder;
+using connection_handler_t = arguino::tcp::ArguinoConnectionHandler<encoder_t, logger_t>;
 
 void tcp_thread_func()
 {
