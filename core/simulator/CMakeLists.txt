@@ -7,6 +7,7 @@ add_library(arguino.simulator STATIC
 
 target_link_libraries(arguino.simulator PUBLIC
         timer
+        logger
 )
 
 target_include_directories(arguino.simulator PUBLIC
