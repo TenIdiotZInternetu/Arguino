@@ -1,4 +1,4 @@
-#include <boost/system>
+#include <boost/system/error_code.hpp>
 #include <format>
 #include <string>
 
@@ -39,7 +39,7 @@ class Error {
     {}
 
     std::string type() { return "TCP:ERROR"; }
-    std::string what() { return _infoMessage + error.message(); }
+    std::string what() { return _infoMessage + _error.message(); }
 
    private:
     std::string _infoMessage;

@@ -1,7 +1,9 @@
+#include <filesystem>
 #include <iostream>
 #include <thread>
 
 #include "ArguinoConnectionHandler.hpp"
+#include "FileLogger.hpp"
 #include "StateEncoder.hpp"
 #include "TcpServer.hpp"
 #include "sketch.cpp"
@@ -9,10 +11,12 @@
 
 using encoder_t = arguino::tcp::StateEncoder;
 using connection_handler_t = arguino::tcp::ArguinoConnectionHandler<encoder_t>;
+using logger_t = logger::FileLogger;
 
 void tcp_thread_func()
 {
-    arguino::tcp::TcpServer<connection_handler_t> server(8888);
+    auto logger = std::make_shared<logger_t>(std::filesystem::absolute("./core.log"));
+    arguino::tcp::TcpServer<connection_handler_t, logger_t> server(8888, logger);
     server.launch();
 }
 

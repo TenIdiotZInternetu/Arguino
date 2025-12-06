@@ -1,3 +1,6 @@
+#ifndef LOGGER_FILELOGGER_HPP
+#define LOGGER_FILELOGGER_HPP
+
 #include <filesystem>
 #include <fstream>
 #include <string>
@@ -30,3 +33,5 @@ inline void FileLogger::log(TMessage message)
 }
 
 }  // namespace logger
+
+#endif
