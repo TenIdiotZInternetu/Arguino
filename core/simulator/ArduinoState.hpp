@@ -6,6 +6,7 @@
 #define ARGUINO_PINOUTSTATE_HPP
 
 #include <array>
+#include <atomic>
 #include <mutex>
 
 #include "Timer.hpp"
@@ -63,7 +64,7 @@ class CanonicalState {
    private:
     static CanonicalState* s_instance;
     ArduinoState _states[2];  // one for reading, one for writing
-    uint8_t _readStateIdx = 0;
+    std::atomic<uint8_t> _readStateIdx = 0;
 
     ArduinoState& get_write_state() { return _states[1 - _readStateIdx]; }
     void flip_states() { _readStateIdx = 1 - _readStateIdx; }
