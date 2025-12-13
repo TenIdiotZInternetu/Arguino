@@ -6,8 +6,10 @@
 #define ARGUINO_PINOUTSTATE_HPP
 
 #include <array>
+#include <functional>
 #include <mutex>
 
+#include "ILogger.hpp"
 #include "Timer.hpp"
 
 enum class PinMode { In, Out };
@@ -60,6 +62,10 @@ class CanonicalState {
     static ArduinoState& state() { return s_instance->_states[s_instance->_readStateIdx]; }
     static void update_state(const ArduinoState& newState);
 
+    template <logger::ILogger TLogger>
+    static void init_logger(std::shared_ptr<TLogger> logger_ptr);
+    static void log(const std::string& str) { s_log_func(str); }
+
    private:
     static CanonicalState* s_instance;
     ArduinoState _states[2];  // one for reading, one for writing
@@ -67,7 +73,20 @@ class CanonicalState {
 
     ArduinoState& get_write_state() { return _states[1 - _readStateIdx]; }
     void flip_states() { _readStateIdx = 1 - _readStateIdx; }
+
+    static std::function<void(const std::string&)> s_log_func;
 };
 
+template <logger::ILogger TLogger>
+inline void CanonicalState::init_logger(std::shared_ptr<TLogger> logger_ptr)
+{
+    s_log_func = [=](const std::string& str) {
+        if (!logger_ptr) {
+            return;
+        }
+
+        logger_ptr->log(str);
+    };
+}
 
 #endif  // ARGUINO_PINOUTSTATE_HPP

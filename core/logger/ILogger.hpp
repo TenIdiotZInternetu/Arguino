@@ -1,6 +1,8 @@
 #ifndef LOGGER_ILOGGER_HPP
 #define LOGGER_ILOGGER_HPP
 
+#include <string>
+
 namespace logger {
 
 template <typename T>

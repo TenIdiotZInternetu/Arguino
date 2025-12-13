@@ -15,6 +15,7 @@
 void digitalWrite(uint8_t pin, uint8_t val)
 {
     CanonicalState::state().set_digital(pin, val == HIGH);
+    CanonicalState::log("Writing stuff");
 }
 
 int digitalRead(uint8_t pin)

@@ -5,6 +5,8 @@
 #include "ArduinoState.hpp"
 
 CanonicalState* CanonicalState::s_instance;
+std::function<void(const std::string&)> CanonicalState::s_log_func = [](const std::string&) {};
+
 
 bool ArduinoState::get_digital(pin_t pin) const
 {

@@ -16,6 +16,7 @@ using connection_handler_t = arguino::tcp::ArguinoConnectionHandler<encoder_t, l
 void tcp_thread_func()
 {
     auto logger = std::make_shared<logger_t>(std::filesystem::absolute("./core.log"));
+    logger->log("Tcp Server started");
     arguino::tcp::TcpServer<connection_handler_t, logger_t> server(8888, logger);
     server.launch();
 }
@@ -74,7 +75,9 @@ void open_shared_memory(const std::string& shm_name)
 
 void map_my_memory()
 {
+    auto logger = std::make_shared<logger_t>(std::filesystem::absolute("./core.log"));
     CanonicalState::init();
+    CanonicalState::init_logger(logger);
 }
 
 std::string only_tcp_flag = "--only-tcp";
