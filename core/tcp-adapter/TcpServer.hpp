@@ -10,19 +10,21 @@
 #include <cstdint>
 #include <memory>
 
+#include "LogMessages.hpp"
+
 namespace arguino::tcp {
 template <typename T>
-concept ConnectionHandler = std::derived_from<T, std::enable_shared_from_this<T>> &&
+concept IConnectionHandler = std::derived_from<T, std::enable_shared_from_this<T>> &&
     requires(T handler, boost::asio::io_context& ioc) {
-        { T::create(ioc) } -> std::convertible_to<std::shared_ptr<T>>;
+        // { T::create(ioc, logger) } -> std::convertible_to<std::shared_ptr<T>>;
         { handler.handle() } -> std::same_as<void>;
         { handler.socket() } -> std::same_as<boost::asio::ip::tcp::socket&>;
     };
 
-template <ConnectionHandler THandler>
+template <IConnectionHandler THandler, logger::ILogger TLogger>
 class TcpServer {
    public:
-    TcpServer(uint16_t port);
+    TcpServer(uint16_t port, std::shared_ptr<TLogger> logger);
     void launch();
 
    private:
@@ -31,34 +33,38 @@ class TcpServer {
     boost::asio::ip::tcp::acceptor _acceptor;
 
     uint16_t _port;
+    std::shared_ptr<TLogger> _logger;
 
     void start_accepting();
 };
 
-template <ConnectionHandler THandler>
-TcpServer<THandler>::TcpServer(uint16_t port)
-    : _endpoint(boost::asio::ip::tcp::v4(), port), _acceptor(_ioContext, _endpoint), _port(port)
+template <IConnectionHandler THandler, logger::ILogger TLogger>
+TcpServer<THandler, TLogger>::TcpServer(uint16_t port, std::shared_ptr<TLogger> logger)
+    : _endpoint(boost::asio::ip::tcp::v4(), port),
+      _acceptor(_ioContext, _endpoint),
+      _port(port),
+      _logger(logger)
 {}
 
-template <ConnectionHandler THandler>
-void TcpServer<THandler>::launch()
+template <IConnectionHandler THandler, logger::ILogger TLogger>
+void TcpServer<THandler, TLogger>::launch()
 {
     _acceptor.listen();
     start_accepting();
     _ioContext.run();
 }
 
-template <ConnectionHandler THandler>
-void TcpServer<THandler>::start_accepting()
+template <IConnectionHandler THandler, logger::ILogger TLogger>
+void TcpServer<THandler, TLogger>::start_accepting()
 {
-    std::shared_ptr<THandler> handler = THandler::create(_ioContext);
+    std::shared_ptr<THandler> handler = THandler::create(_ioContext, _logger);
 
     _acceptor.async_accept(handler->socket(), [this, handler](auto error) {
         if (!error) {
             handler->handle();
         }
         else {
-            // TODO log
+            _logger->log(message::Error("Error occured while accepting new connection: ", error));
         }
         start_accepting();
     });
