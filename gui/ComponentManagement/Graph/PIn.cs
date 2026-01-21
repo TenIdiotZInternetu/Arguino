@@ -8,6 +8,8 @@ public class Pin {
     public float Voltage { get; private set; }
     public float Current { get; private set; }
     
+    public event Action<Pin>? ValuesChangedEvent;
+    
     private enum PinMode { General, ReadOnly, WriteOnly }
     private PinMode _mode = PinMode.General;
     
@@ -28,6 +30,7 @@ public class Pin {
         }
         
         Voltage = value;
+        ValuesChangedEvent?.Invoke(this);
     }
 
     public void SetCurrent(float value) {
@@ -37,5 +40,6 @@ public class Pin {
         }
         
         Current = value;
+        ValuesChangedEvent?.Invoke(this);
     }
 }

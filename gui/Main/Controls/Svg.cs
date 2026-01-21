@@ -41,9 +41,7 @@ public class Svg : Control {
           }
 
           public void Dispose() { }
-
           public bool HitTest(Point p) => false;
-
           public bool Equals(ICustomDrawOperation? other) => false;
           
           public void Render(ImmediateDrawingContext context) {
