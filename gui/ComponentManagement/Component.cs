@@ -9,8 +9,8 @@ namespace ComponentManagement;
 public abstract class Component {
     public event Action<SKSvg>? SpriteChangedEvent;
     
-    protected Dictionary<string, SKSvg> Sprites;
-    protected SKSvg CurrentSprite;
+    public Dictionary<string, SKSvg> Sprites { get; private set; }
+    public SKSvg CurrentSprite { get; private set; }
     
     private ComponentConfiguration _configuration;
     private List<Pin> _pins = new();
@@ -25,7 +25,7 @@ public abstract class Component {
         CurrentSprite = Sprites.First().Value;
     }
     
-    public virtual void OnInitializationAsync() {}
+    public virtual void OnInitialization() {}
     public virtual void OnRisingEdge(Pin pin) {}
     public virtual void OnFallingEdge(Pin pin) {}
     public virtual void OnInputChange(Pin pin) {}
