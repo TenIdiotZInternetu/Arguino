@@ -1,3 +1,5 @@
+using ComponentManagement.Graph;
+
 namespace ComponentManagement.Components;
 
 public class Led : Component {

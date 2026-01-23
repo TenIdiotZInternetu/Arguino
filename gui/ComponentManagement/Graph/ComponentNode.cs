@@ -1,4 +1,4 @@
-namespace ComponentManagement;
+namespace ComponentManagement.Graph;
 
 public class ComponentNode {
     private Component _component;

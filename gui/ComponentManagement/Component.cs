@@ -1,5 +1,6 @@
 using System.Numerics;
 using System.Reflection;
+using ComponentManagement.Graph;
 using ComponentManagement.Loaders;
 using Svg.Skia;
 

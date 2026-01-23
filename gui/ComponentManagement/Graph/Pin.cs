@@ -1,4 +1,4 @@
-namespace ComponentManagement;
+namespace ComponentManagement.Graph;
 
 public class Pin {
     public Component Component { get; init; }
