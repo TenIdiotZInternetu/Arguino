@@ -1,7 +1,7 @@
 using Svg;
 using Svg.Skia;
 
-namespace ComponentManagement;
+namespace ComponentManagement.Loaders;
 
 public static class SkiaSvgLoader {
     public static Dictionary<string, SKSvg> LoadSvgs(string path) {

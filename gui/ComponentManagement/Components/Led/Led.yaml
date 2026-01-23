@@ -1,0 +1,5 @@
+name: Led
+description: Light emitting diode
+pinNames:
+  - anode
+  - cathode

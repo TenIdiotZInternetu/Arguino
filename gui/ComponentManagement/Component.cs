@@ -1,5 +1,6 @@
 using System.Numerics;
 using System.Reflection;
+using ComponentManagement.Loaders;
 using Svg.Skia;
 
 namespace ComponentManagement;
@@ -10,17 +11,17 @@ public abstract class Component {
     protected Dictionary<string, SKSvg> Sprites;
     protected SKSvg CurrentSprite;
     
-    private List<Pin> _pins;
+    private ComponentConfiguration _configuration;
+    private List<Pin> _pins = new();
     private ComponentNode _thisNode;
     
     public Component(string definitionPath) {
         _thisNode = new ComponentNode(this);
+        _configuration = YamlConfigurationLoader.LoadYaml(definitionPath + ".yaml");
+
+        InitPins();
         Sprites = SkiaSvgLoader.LoadSvgs(definitionPath);
         CurrentSprite = Sprites.First().Value;
-
-        foreach (var pin in _pins) {
-            pin.ValuesChangedEvent += _thisNode.UpdateConnectedNodes;
-        }
     }
     
     public virtual void OnInitializationAsync() {}
@@ -48,5 +49,17 @@ public abstract class Component {
 
     protected void UpdateSprite(string spriteName) {
         UpdateSprite(Sprites[spriteName]);
+    }
+
+    private void InitPins() {
+        uint pinId = 0;
+        foreach (var pinName in _configuration.PinNames) {
+            _pins.Add(new Pin(this, pinId, pinName));
+            pinId++;
+        }
+
+        for (; pinId < _pins.Count; pinId++) {
+            _pins.Add(new Pin(this, pinId));
+        }
     }
 }
