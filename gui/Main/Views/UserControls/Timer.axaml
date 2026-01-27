@@ -5,10 +5,10 @@
              xmlns:vm="clr-namespace:Gui.ViewModels"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="Gui.Views.UserControls.Timer"
-             x:DataType="vm:TimerVM">
+             x:DataType="vm:Timer">
     
     <Design.DataContext>
-        <vm:TimerVM/>
+        <vm:Timer/>
     </Design.DataContext>
     
     <TextBlock Text="{Binding ElapsedTimeText}" Foreground="White" VerticalAlignment="Stretch"/>

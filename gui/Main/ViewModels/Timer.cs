@@ -7,7 +7,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace Gui.ViewModels;
 
-public partial class TimerVM : ObservableObject {
+public partial class Timer : ObservableObject {
     private const int REFRESH_RATE = 60;
     
     private readonly Stopwatch _stopwatch = Stopwatch.StartNew();
@@ -15,7 +15,7 @@ public partial class TimerVM : ObservableObject {
     
     [ObservableProperty] private string _elapsedTimeText = "00:00.000";
 
-    public TimerVM() {
+    public Timer() {
         _timer.Interval = TimeSpan.FromMilliseconds(1000.0 / REFRESH_RATE);
         _timer.Tick += UpdateText;
         _timer.Start();

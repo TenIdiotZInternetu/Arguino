@@ -7,10 +7,12 @@ using Svg.Skia;
 namespace ComponentManagement;
 
 public abstract class Component {
-    public event Action<SKSvg>? SpriteChangedEvent;
+    public string Name => _configuration.Name;
+    public string Description => _configuration.Description;
     
     public Dictionary<string, SKSvg> Sprites { get; private set; }
     public SKSvg CurrentSprite { get; private set; }
+    public event Action<SKSvg>? SpriteChangedEvent;
     
     private ComponentConfiguration _configuration;
     private List<Pin> _pins = new();

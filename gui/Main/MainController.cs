@@ -2,6 +2,9 @@ using System;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
+using ComponentManagement;
+using ComponentManagement.Components;
+using Gui.Controls;
 using TcpAdapter;
 
 namespace gui;
@@ -22,7 +25,7 @@ public static class MainController {
         Console.WriteLine("Connected!");
         Adapter = tcpClient.Handler;
         Adapter.ReadEvent += ReadTest;
-        
+
         AppInitializedEvent?.Invoke();
 
         _ = Task.Run(TestWrite);
