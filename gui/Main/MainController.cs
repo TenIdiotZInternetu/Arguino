@@ -13,7 +13,7 @@ public static class MainController {
     public static TestMessageHandler Adapter { get; private set; } = null!;
     public static Stopwatch GlobalTimer { get; private set; } = null!;
 
-    public static event Action AppInitializedEvent;
+    public static event Action? AppInitializedEvent;
     
     public static async Task InitApp()
     {

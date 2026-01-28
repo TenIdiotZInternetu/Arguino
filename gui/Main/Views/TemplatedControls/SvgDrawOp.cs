@@ -1,6 +1,5 @@
 using System;
 using Avalonia;
-using Avalonia.Controls;
 using Avalonia.Media;
 using Avalonia.Platform;
 using Avalonia.Rendering.SceneGraph;
@@ -9,7 +8,7 @@ using Svg.Skia;
 
 namespace Gui.Controls;
 
-public class SvgDrawOp(Control Parentcontrol, SKSvg Svg) : ICustomDrawOperation {
+public class SvgDrawOp(SKSvg Svg) : ICustomDrawOperation {
           
     public Rect Bounds => new(new Point(0,0), new Point(100,100));
 
