@@ -15,7 +15,7 @@
             <RowDefinition Height="1*"/>
         </Grid.RowDefinitions>
 
-        <ucontrol:CircuitCanvas Grid.Row="0"/>
+        <ucontrol:CircuitCanvas Grid.Row="0" x:Name="CircuitCanvas"/>
 
         <ucontrol:Timer Grid.Row="1" Foreground="White" VerticalAlignment="Stretch"/>
     </Grid>

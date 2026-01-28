@@ -20,7 +20,7 @@ public abstract class Component {
     
     public Component(string definitionPath) {
         _thisNode = new ComponentNode(this);
-        _configuration = YamlConfigurationLoader.LoadYaml(definitionPath + ".yaml");
+        _configuration = YamlConfigurationLoader.LoadYaml(definitionPath);
 
         InitPins();
         Sprites = SkiaSvgLoader.LoadSvgs(definitionPath);

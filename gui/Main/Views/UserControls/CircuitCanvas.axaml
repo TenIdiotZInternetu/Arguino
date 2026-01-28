@@ -15,7 +15,7 @@
             <ItemsControl ItemsSource="{Binding Components}">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
-                        <Canvas/>
+                        <Canvas Width="100" Height="100"/>
                     </ItemsPanelTemplate>
                 </ItemsControl.ItemsPanel>
         

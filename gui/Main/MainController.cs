@@ -1,6 +1,9 @@
 using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
+using ComponentManagement.Components;
+using Gui.ViewModels;
+using Gui.Views;
 using TcpAdapter;
 
 namespace Gui;
@@ -11,16 +14,26 @@ public static class MainController {
 
     public static event Action? AppInitializedEvent;
     
-    public static async Task InitApp()
+    public static async Task InitApp(MainWindow mainWindow)
     {
         Console.WriteLine("I'm alive");
         GlobalTimer = Stopwatch.StartNew();
+
+        var canvas = new CircuitCanvas();
+        canvas.Components.Add(new Led("/home/touster/Kodiky/arguino/gui/ComponentManagement/Components/Led"));
+        canvas.Components.Add(new Led("/home/touster/Kodiky/arguino/gui/ComponentManagement/Components/Led"));
+        canvas.Components.Add(new Led("/home/touster/Kodiky/arguino/gui/ComponentManagement/Components/Led"));
+        mainWindow.CircuitCanvas.DataContext = canvas; 
+        
+        
         
         var tcpClient = new TcpClient<TestMessageHandler>(8888);
         await tcpClient.ConnectAsync();
         Console.WriteLine("Connected!");
         Adapter = tcpClient.Handler;
         Adapter.ReadEvent += ReadTest;
+        
+        
 
         AppInitializedEvent?.Invoke();
 

@@ -1,7 +1,6 @@
 using System.Collections.ObjectModel;
-using System.ComponentModel;
 using CommunityToolkit.Mvvm.ComponentModel;
-using Gui.Views.TemplatedControls;
+using ComponentManagement;
 
 namespace Gui.ViewModels;
 

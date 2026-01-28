@@ -8,7 +8,7 @@ using Svg.Skia;
 namespace Gui.Views.TemplatedControls;
 
 public class ComponentControl : Control {
-     private Component _component;
+     private Component _component = null!;
 
      public static readonly DirectProperty<ComponentControl, Component> ComponentProperty = AvaloniaProperty.RegisterDirect<ComponentControl, Component>(
           nameof(Component), o => o.Component, (o, v) => o.Component = v);
@@ -24,6 +24,10 @@ public class ComponentControl : Control {
      public Point Position {
           get => GetValue(PositionProperty);
           set => SetValue(PositionProperty, value);
+     }
+
+     public ComponentControl() {
+          MainController.AppInitializedEvent += InvalidateVisual;
      }
 
      protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change) {
