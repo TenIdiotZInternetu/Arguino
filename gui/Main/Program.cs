@@ -1,10 +1,8 @@
-﻿using Avalonia;
-using System;
-using System.Threading;
-using Avalonia.Controls;
-using gui.Views;
+﻿using System;
+using Avalonia;
+using Gui.Views;
 
-namespace gui;
+namespace Gui;
 
 class Program {
     // Initialization code. Don't use any Avalonia, third-party APIs or any

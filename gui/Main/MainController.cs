@@ -1,13 +1,9 @@
 using System;
 using System.Diagnostics;
-using System.Threading;
 using System.Threading.Tasks;
-using ComponentManagement;
-using ComponentManagement.Components;
-using Gui.Controls;
 using TcpAdapter;
 
-namespace gui;
+namespace Gui;
 
 public static class MainController {
     public static TestMessageHandler Adapter { get; private set; } = null!;

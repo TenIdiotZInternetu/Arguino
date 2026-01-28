@@ -1,12 +1,8 @@
-using System;
-using System.Net;
-using System.Threading;
-using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 
-namespace gui.Views;
+namespace Gui.Views;
 
 public partial class App : Application
 {

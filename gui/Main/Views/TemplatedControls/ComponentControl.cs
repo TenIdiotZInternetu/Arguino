@@ -3,7 +3,6 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Media;
 using ComponentManagement;
-using Gui.Controls;
 using Svg.Skia;
 
 namespace Gui.Views.TemplatedControls;

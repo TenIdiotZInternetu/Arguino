@@ -4,9 +4,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:vm="clr-namespace:Gui.ViewModels"
         xmlns:ucontrol="clr-namespace:Gui.Views.UserControls"
-        xmlns:ccontrol="clr-namespace:Gui.Controls"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-        x:Class="gui.Views.MainWindow"
+        x:Class="Gui.Views.MainWindow"
         Title="Main">
         
     

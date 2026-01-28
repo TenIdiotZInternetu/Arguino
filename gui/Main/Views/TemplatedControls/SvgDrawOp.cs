@@ -6,7 +6,7 @@ using Avalonia.Rendering.SceneGraph;
 using Avalonia.Skia;
 using Svg.Skia;
 
-namespace Gui.Controls;
+namespace Gui.Views.TemplatedControls;
 
 public class SvgDrawOp(SKSvg Svg) : ICustomDrawOperation {
           

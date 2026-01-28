@@ -4,7 +4,6 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="clr-namespace:Gui.ViewModels"
              xmlns:componentManagement="clr-namespace:ComponentManagement;assembly=ComponentManagement"
-             xmlns:controls="clr-namespace:Gui.Controls"
              xmlns:tcontrol="clr-namespace:Gui.Views.TemplatedControls"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="Gui.Views.UserControls.CircuitCanvas"
