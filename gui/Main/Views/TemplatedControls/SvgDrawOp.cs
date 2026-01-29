@@ -4,11 +4,12 @@ using Avalonia.Media;
 using Avalonia.Platform;
 using Avalonia.Rendering.SceneGraph;
 using Avalonia.Skia;
+using SkiaSharp;
 using Svg.Skia;
 
 namespace Gui.Views.TemplatedControls;
 
-public class SvgDrawOp(SKSvg Svg) : ICustomDrawOperation {
+public class SvgDrawOp(SKSvg Svg, SKPoint Translation) : ICustomDrawOperation {
           
     public Rect Bounds => new(new Point(0,0), new Point(100,100));
 
@@ -25,8 +26,8 @@ public class SvgDrawOp(SKSvg Svg) : ICustomDrawOperation {
         using var lease = leaseFeature.Lease();
         var canvas = lease.SkCanvas;
         canvas.Save();
-               
-        canvas.Translate((float)Bounds.X, (float)Bounds.Y);
+ 
+        canvas.Translate(Translation);
         canvas.DrawPicture(Svg.Picture);
         canvas.Restore();
     }

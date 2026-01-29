@@ -9,6 +9,8 @@ namespace ComponentManagement;
 public abstract class Component {
     public string Name => _configuration.Name;
     public string Description => _configuration.Description;
+
+    public Transform Transform { get; set; } = new();
     
     public Dictionary<string, SKSvg> Sprites { get; private set; }
     public SKSvg CurrentSprite { get; private set; }

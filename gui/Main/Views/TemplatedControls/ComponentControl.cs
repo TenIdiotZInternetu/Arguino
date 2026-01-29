@@ -3,6 +3,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Media;
 using ComponentManagement;
+using SkiaSharp;
 using Svg.Skia;
 
 namespace Gui.Views.TemplatedControls;
@@ -16,14 +17,6 @@ public class ComponentControl : Control {
      public Component Component {
           get => _component;
           set => SetAndRaise(ComponentProperty, ref _component, value);
-     }
-
-     public static readonly StyledProperty<Point> PositionProperty = AvaloniaProperty.Register<ComponentControl, Point>(
-          nameof(Position));
-
-     public Point Position {
-          get => GetValue(PositionProperty);
-          set => SetValue(PositionProperty, value);
      }
 
      public ComponentControl() {
@@ -49,6 +42,11 @@ public class ComponentControl : Control {
      private void InvalidateVisual(SKSvg _)  => InvalidateVisual();
 
      public override void Render(DrawingContext context) {
-          context.Custom(new SvgDrawOp(Component.CurrentSprite));
+          var bounds = new Rect(
+               new Point(0,0),
+               new Size(Component.Transform.ScaleX, Component.Transform.ScaleY)
+          );
+          var skpoint=  new SKPoint(Component.Transform.PositionX, Component.Transform.PositionY);
+          context.Custom(new SvgDrawOp(Component.CurrentSprite, skpoint));
      }
 }

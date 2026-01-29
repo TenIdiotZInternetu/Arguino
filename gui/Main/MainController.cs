@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using System.Numerics;
 using System.Threading.Tasks;
 using ComponentManagement.Components;
 using Gui.ViewModels;
@@ -20,9 +21,16 @@ public static class MainController {
         GlobalTimer = Stopwatch.StartNew();
 
         var canvas = new CircuitCanvas();
-        canvas.Components.Add(new Led("/home/touster/Kodiky/arguino/gui/ComponentManagement/Components/Led"));
-        canvas.Components.Add(new Led("/home/touster/Kodiky/arguino/gui/ComponentManagement/Components/Led"));
-        canvas.Components.Add(new Led("/home/touster/Kodiky/arguino/gui/ComponentManagement/Components/Led"));
+        string ledPath = "/home/touster/Kodiky/arguino/gui/ComponentManagement/Components/Led";
+        var led1 = new Led(ledPath);
+        var led2 = new Led(ledPath);
+        led2.Transform.Position = 200 * Vector2.One;
+        var led3 = new Led(ledPath);
+        led3.Transform.PositionX = 400;
+        
+        canvas.Components.Add(led1);
+        canvas.Components.Add(led2);
+        canvas.Components.Add(led3);
         mainWindow.CircuitCanvas.DataContext = canvas; 
         
         

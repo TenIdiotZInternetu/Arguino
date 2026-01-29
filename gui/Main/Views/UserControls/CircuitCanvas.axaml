@@ -15,7 +15,7 @@
             <ItemsControl ItemsSource="{Binding Components}">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
-                        <Canvas Width="100" Height="100"/>
+                        <Canvas Width="1920" Height="1080"/>
                     </ItemsPanelTemplate>
                 </ItemsControl.ItemsPanel>
         
@@ -23,13 +23,11 @@
                     <DataTemplate DataType="componentManagement:Component">
                         <tcontrol:ComponentControl 
                             Component="{Binding}"
-                            Canvas.Left="{Binding $self.Position.X}"
-                            Canvas.Top="{Binding $self.Position.Y}"
                         />
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
+                
             </ItemsControl>
-            
         </Canvas>
     </ZoomBorder>
 </UserControl>
