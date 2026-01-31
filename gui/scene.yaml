@@ -1,0 +1,9 @@
+Components:
+  - Name: Led 
+    Position: 0 100
+    Rotation: 90
+  - Name: Led
+    Position: 100 100
+    Scale: 0.5 0.5
+  - Name: Led
+    Position: 200 100

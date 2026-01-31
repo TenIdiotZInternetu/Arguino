@@ -1,7 +1,7 @@
 namespace ComponentManagement;
 
-public class ComponentConfiguration {
-    public string Name;
+public record ComponentConfiguration {
+    public required string Name;
     public string Description = "";
     public uint Pins = 0;
     public List<string> PinNames = new();
