@@ -7,6 +7,9 @@ using Svg.Skia;
 namespace ComponentManagement;
 
 public abstract class Component {
+    
+    // TODO: Replace ComponentConfiguration by an Interface
+    
     public string Name => _configuration.Name;
     public string Description => _configuration.Description;
 

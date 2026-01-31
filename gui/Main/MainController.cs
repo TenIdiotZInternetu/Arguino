@@ -1,8 +1,10 @@
 using System;
 using System.Diagnostics;
+using System.Linq;
 using System.Numerics;
 using System.Threading.Tasks;
 using ComponentManagement.Components;
+using ComponentManagement.Loaders;
 using Gui.ViewModels;
 using Gui.Views;
 using TcpAdapter;
@@ -20,20 +22,17 @@ public static class MainController {
         Console.WriteLine("I'm alive");
         GlobalTimer = Stopwatch.StartNew();
 
+        var scene = YamlSceneLoader.LoadScene(
+            "/home/touster/Kodiky/arguino/gui/scene.yaml",
+            "/home/touster/Kodiky/arguino/gui/ComponentManagement/Components/Led"
+        );
+
         var canvas = new CircuitCanvas();
-        string ledPath = "/home/touster/Kodiky/arguino/gui/ComponentManagement/Components/Led";
-        var led1 = new Led(ledPath);
-        var led2 = new Led(ledPath);
-        led2.Transform.Position = 200 * Vector2.One;
-        var led3 = new Led(ledPath);
-        led3.Transform.PositionX = 400;
+        foreach (var comp in scene.Components) {
+            canvas.Components.Add(comp);
+        }
         
-        canvas.Components.Add(led1);
-        canvas.Components.Add(led2);
-        canvas.Components.Add(led3);
         mainWindow.CircuitCanvas.DataContext = canvas; 
-        
-        
         
         var tcpClient = new TcpClient<TestMessageHandler>(8888);
         await tcpClient.ConnectAsync();

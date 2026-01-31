@@ -10,8 +10,9 @@ using Svg.Skia;
 namespace Gui.Views.TemplatedControls;
 
 public class SvgDrawOp(SKSvg Svg, SKPoint Translation) : ICustomDrawOperation {
-          
-    public Rect Bounds => new(new Point(0,0), new Point(100,100));
+    
+    // TODO: Change based on actual window resolution
+    public Rect Bounds => new(new Point(0,0), new Point(1920,1080));
 
     public void Dispose() { }
     public bool HitTest(Point p) => false;
@@ -27,6 +28,7 @@ public class SvgDrawOp(SKSvg Svg, SKPoint Translation) : ICustomDrawOperation {
         var canvas = lease.SkCanvas;
         canvas.Save();
  
+        // TODO: Scale and Rotation
         canvas.Translate(Translation);
         canvas.DrawPicture(Svg.Picture);
         canvas.Restore();

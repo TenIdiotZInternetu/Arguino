@@ -9,7 +9,7 @@ using YamlDotNet.Serialization;
 
 namespace ComponentManagement.Loaders;
 
-public class SceneLoader {
+public class YamlSceneLoader {
     public record SceneDto {
         public record ComponentDto {
             public required string Name;
@@ -51,7 +51,9 @@ public class SceneLoader {
         // TODO: Change assembly for custom added scripts
         // TODO: Log unknown component names
 
-        Type? compType = Assembly.GetExecutingAssembly().GetType(compDto.Name);
+        Type? compType = Assembly.GetExecutingAssembly()
+            .GetTypes()
+            .First(type => type.Name == compDto.Name);
 
         if (compType == null) {
             throw new Exception($"Component {compDto.Name} does not exist");
@@ -68,7 +70,9 @@ public class SceneLoader {
     }
 
     private static Vector2? StringToVector2(string valuePair) {
+        
         // TODO: Log incorrect use of value pair
+        
         string[] values = valuePair.Split();
         if (values.Length != 2) {
             return null;
