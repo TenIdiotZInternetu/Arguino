@@ -12,7 +12,7 @@ namespace Gui.Views.TemplatedControls;
 public class SvgDrawOp(SKSvg Svg, SKPoint Translation) : ICustomDrawOperation {
     
     // TODO: Change based on actual window resolution
-    public Rect Bounds => new(new Point(0,0), new Point(1920,1080));
+    public Rect Bounds => new(Translation.X, Translation.Y, Svg.Picture.CullRect.Width, Svg.Picture.CullRect.Height);
 
     public void Dispose() { }
     public bool HitTest(Point p) => Bounds.Contains(p);
