@@ -15,7 +15,7 @@ public class SvgDrawOp(SKSvg Svg, SKPoint Translation) : ICustomDrawOperation {
     public Rect Bounds => new(new Point(0,0), new Point(1920,1080));
 
     public void Dispose() { }
-    public bool HitTest(Point p) => false;
+    public bool HitTest(Point p) => Bounds.Contains(p);
     public bool Equals(ICustomDrawOperation? other) => false;
           
     public void Render(ImmediateDrawingContext context) {

@@ -1,8 +1,10 @@
 using System.Numerics;
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Input;
 using Avalonia.Media;
 using ComponentManagement;
+using Gui.Utils.ExtensionMethods;
 using SkiaSharp;
 using Svg.Skia;
 
@@ -39,14 +41,24 @@ public class ComponentControl : Control {
           }
      }
 
-     private void InvalidateVisual(SKSvg _)  => InvalidateVisual();
-
      public override void Render(DrawingContext context) {
-          var bounds = new Rect(
-               new Point(0,0),
-               new Size(Component.Transform.ScaleX, Component.Transform.ScaleY)
-          );
-          var skpoint=  new SKPoint(Component.Transform.PositionX, Component.Transform.PositionY);
+          SKPoint skpoint = Component.Transform.Position.ToSKPoint();
           context.Custom(new SvgDrawOp(Component.CurrentSprite, skpoint));
      }
+     
+     protected override void OnPointerPressed(PointerPressedEventArgs e) {
+          bool leftPressed = e.Properties.IsLeftButtonPressed;
+          var position = e.GetCurrentPoint(this).Position;
+          
+          if (leftPressed) {
+               _component.OnControlPress(position.ToVector2());
+          }
+     }
+
+     protected override void OnPointerReleased(PointerReleasedEventArgs e) {
+          var position = e.GetCurrentPoint(this).Position;
+          _component.OnControlRelease(position.ToVector2());
+     }
+     
+     private void InvalidateVisual(SKSvg _)  => InvalidateVisual();
 }
