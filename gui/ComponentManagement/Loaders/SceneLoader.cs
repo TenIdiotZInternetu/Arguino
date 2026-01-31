@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Numerics;
+using System.Reflection;
 using System.Threading.Tasks;
 using YamlDotNet.Serialization;
 
@@ -17,17 +18,20 @@ public class SceneLoader {
             public string Scale = "1 1";
         }
 
-        public required List<ComponentDto> Components;
+        // ReSharper disable once CollectionNeverUpdated.Global
+        public required List<ComponentDto> Components { get; init; } = new();
     }
 
-    public static void LoadScene(string scenePath, string componentsPath) {
+    public static Scene LoadScene(string scenePath, string componentsPath) {
         var sceneDto = Deserialize(scenePath);
         var scene = new Scene();
 
         foreach (var compDto in sceneDto.Components) {
             var component = CreateComponent(compDto, componentsPath);
-            scene.Components.Add(new )
+            scene.Components.Add(component);
         }
+
+        return scene;
     }
 
     private static SceneDto Deserialize(string scenePath) {
@@ -42,16 +46,43 @@ public class SceneLoader {
     }
 
     private static Component CreateComponent(SceneDto.ComponentDto compDto, string componentsPath) {
-        var transform = new Transform{
-            Position = StringToVector2(compDto.Position),
-            Rotation = compDto.Rotation,
-            Scale = StringToVector2(compDto.Scale)
-        };
 
-        var component = new Component()
+        // TODO: Cache already defined components
+        // TODO: Change assembly for custom added scripts
+        // TODO: Log unknown component names
+
+        Type? compType = Assembly.GetExecutingAssembly().GetType(compDto.Name);
+
+        if (compType == null) {
+            throw new Exception($"Component {compDto.Name} does not exist");
+        }
+        
+        var component = Activator.CreateInstance(compType, componentsPath) as Component;
+        component!.Transform = new Transform{
+            Position = StringToVector2(compDto.Position) ?? Vector2.Zero,
+            Rotation = compDto.Rotation,
+            Scale = StringToVector2(compDto.Scale) ?? Vector2.One
+        };
+        
+        return component;
     }
 
-    private static Vector2 StringToVector2(string valuePair) {
+    private static Vector2? StringToVector2(string valuePair) {
+        // TODO: Log incorrect use of value pair
+        string[] values = valuePair.Split();
+        if (values.Length != 2) {
+            return null;
+        }
 
+        float x = 0, y = 0;
+        bool success = true;
+        success = success && float.TryParse(values[0], out x);
+        success = success && float.TryParse(values[1], out y);
+
+        if (!success) {
+            return null;
+        }
+        
+        return new Vector2(x, y);
     }
 }
