@@ -8,8 +8,10 @@ public class Button : Component {
     private const string SPRITE_BUTTON_DOWN =  "buttonDown";
     
     private bool _isPushed = false;
-    
-    public Button(string definitionPath) : base(definitionPath) { }
+
+    public Button(string definitionPath) : base(definitionPath) {
+        UpdateSprite(SPRITE_BUTTON_UP);
+    }
 
     public override void OnInputChange(Pin pin) {
         if (!_isPushed) {

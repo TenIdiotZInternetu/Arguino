@@ -8,8 +8,10 @@ public class Led : Component {
 
     private const string PIN_ANODE = "anode";
     private const string PIN_CATHODE = "cathode";
-    
-    public Led(string definitionPath) : base(definitionPath) {}
+
+    public Led(string definitionPath) : base(definitionPath) {
+        UpdateSprite(SPRITE_LED_OFF);
+    }
 
     public override void OnRisingEdge(Pin pin) {
         UpdateSprite(SPRITE_LED_ON);

@@ -24,7 +24,7 @@ public static class MainController {
 
         var scene = YamlSceneLoader.LoadScene(
             "/home/touster/Kodiky/arguino/gui/scene.yaml",
-            "/home/touster/Kodiky/arguino/gui/ComponentManagement/Components/Led"
+            "/home/touster/Kodiky/arguino/gui/ComponentManagement/Components"
         );
 
         var canvas = new CircuitCanvas();

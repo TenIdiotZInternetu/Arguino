@@ -27,7 +27,8 @@ public class YamlSceneLoader {
         var scene = new Scene();
 
         foreach (var compDto in sceneDto.Components) {
-            var component = CreateComponent(compDto, componentsPath);
+            var componentDir = Path.Combine(componentsPath, compDto.Name);
+            var component = CreateComponent(compDto, componentDir);
             scene.Components.Add(component);
         }
 

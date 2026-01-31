@@ -1,9 +1,16 @@
 Components:
   - Name: Led 
-    Position: 0 100
+    Position: 100 150
     Rotation: 90
   - Name: Led
-    Position: 100 100
+    Position: 300 150
     Scale: 0.5 0.5
   - Name: Led
-    Position: 300 300
+    Position: 500 150
+  - Name: Button
+    Position: 100 400
+  - Name: Button
+    Position: 300 400
+  - Name: Button
+    Position: 500 400
+
