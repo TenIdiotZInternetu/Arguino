@@ -59,10 +59,8 @@ public class ComponentControl : Control {
      }
 
      protected override void OnPointerReleased(PointerReleasedEventArgs e) {
-          var position = e.GetCurrentPoint(this).Position;
-
           if (!_pressHeld) {
-               _component.OnControlRelease(position.ToVector2());
+               _component.OnControlRelease();
           }
      }
      
@@ -86,7 +84,7 @@ public class ComponentControl : Control {
 
      private void OnGlobalKeyUp(object? _, KeyEventArgs e) {
           if (_pressHeld && e.PhysicalKey == PhysicalKey.AltLeft) {
-               _component.OnControlRelease(new Vector2());
+               _component.OnControlRelease();
                _pressHeld = false;
           } 
      }

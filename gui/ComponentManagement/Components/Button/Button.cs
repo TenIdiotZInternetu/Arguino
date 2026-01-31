@@ -27,7 +27,7 @@ public class Button : Component {
         UpdateSprite(SPRITE_BUTTON_DOWN);
     }
 
-    public override void OnControlRelease(Vector2 cursorPosition) {
+    public override void OnControlRelease() {
         _isPushed = false;
         UpdateSprite(SPRITE_BUTTON_UP);
     }

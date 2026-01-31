@@ -37,7 +37,7 @@ public abstract class Component {
     public virtual void OnFallingEdge(Pin pin) {}
     public virtual void OnInputChange(Pin pin) {}
     public virtual void OnControlPress(Vector2 cursorPosition) {}
-    public virtual void OnControlRelease(Vector2 cursorPosition) {}
+    public virtual void OnControlRelease() {}
     // TODO: OnInspect()
 
     public Pin GetPin(string name) {
