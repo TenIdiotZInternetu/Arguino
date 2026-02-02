@@ -46,6 +46,7 @@ public static class MainController {
         }
         
         GlobalTimer = Stopwatch.StartNew();
+        _isInitialized = true;
         AppInitializedEvent?.Invoke();
     }
 
