@@ -1,16 +1,29 @@
 Components:
-  - Name: Led 
+  Led1:
+    Type: Led
     Position: 100 150
     Rotation: 90
-  - Name: Led
+  Led2:
+    Type: Led
     Position: 300 150
     Scale: 0.5 0.5
-  - Name: Led
+  Led3:
+    Type: Led
     Position: 500 150
-  - Name: Button
+  Btn1:
+    Type: Button
     Position: 100 400
-  - Name: Button
+  Btn2:
+    Type: Button
     Position: 300 400
-  - Name: Button
+  Btn3:
+    Type: Button
     Position: 500 400
-
+  VCC1:
+    Type: Vcc
+    Position: 800 400
+Nodes:
+  - Led1.cathode Btn1.0
+  - Led2.cathode Btn2.1
+  - Led3.cathode Btn3.0
+  - VCC.0 Btn.1 Btn2.0 Btn3.0
