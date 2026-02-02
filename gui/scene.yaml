@@ -23,7 +23,7 @@ Components:
     Type: Vcc
     Position: 800 400
 Nodes:
-  - Led1.cathode Btn1.0
-  - Led2.cathode Btn2.1
-  - Led3.cathode Btn3.0
-  - VCC.0 Btn.1 Btn2.0 Btn3.0
+  - [Led1.cathode, Btn1.0]
+  - [Led2.cathode, Btn2.1]
+  - [Led3.cathode, Btn3.0]
+  - [VCC.0, Btn.1, Btn2.0, Btn3.0]

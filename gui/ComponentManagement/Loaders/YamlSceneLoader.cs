@@ -9,28 +9,33 @@ using YamlDotNet.Serialization;
 
 namespace ComponentManagement.Loaders;
 
+using ComponentsMap = Dictionary<string, YamlSceneLoader.SceneDto.ComponentDto>;
+using NodesList = List<List<string>>;
+
 public class YamlSceneLoader {
     public record SceneDto {
+        public required ComponentsMap Components { get; init; } = [];
+        public required NodesList Nodes { get; init; } = [];
+
         public record ComponentDto {
-            public required string Name;
+            public required string Type;
             public string Position = "0 0";
             public float Rotation = 0;
             public string Scale = "1 1";
         }
-
-        // ReSharper disable once CollectionNeverUpdated.Global
-        public required List<ComponentDto> Components { get; init; } = new();
     }
+
+    private 
 
     public static Scene LoadScene(string scenePath, string componentsPath) {
         var sceneDto = Deserialize(scenePath);
         var scene = new Scene();
 
-        foreach (var compDto in sceneDto.Components) {
-            var componentDir = Path.Combine(componentsPath, compDto.Name);
-            var component = CreateComponent(compDto, componentDir);
-            scene.Components.Add(component);
-        }
+        scene.Components.AddRange(
+            HandleComponents(sceneDto.Components, componentsPath)
+        );
+
+
 
         return scene;
     }
@@ -46,6 +51,18 @@ public class YamlSceneLoader {
         return deserializer.Deserialize<SceneDto>(fileStream);
     }
 
+    private static List<Component> HandleComponents(ComponentsMap componentDtos, string componentsPath) {
+        List<Component> processedComponents = [];
+        
+        foreach (var (name, comp) in componentDtos) {
+            var componentDir = Path.Combine(componentsPath, comp.Type);
+            var component = CreateComponent(comp, componentDir);
+            processedComponents.Add(component);
+        }
+
+        return processedComponents;
+    }
+
     private static Component CreateComponent(SceneDto.ComponentDto compDto, string componentsPath) {
 
         // TODO: Cache already defined components
@@ -54,10 +71,10 @@ public class YamlSceneLoader {
 
         Type? compType = Assembly.GetExecutingAssembly()
             .GetTypes()
-            .First(type => type.Name == compDto.Name);
+            .First(type => type.Name == compDto.Type);
 
         if (compType == null) {
-            throw new Exception($"Component {compDto.Name} does not exist");
+            throw new Exception($"Component of type {compDto.Type} does not exist");
         }
         
         var component = Activator.CreateInstance(compType, componentsPath) as Component;
