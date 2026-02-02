@@ -7,7 +7,6 @@ public class Pin {
     
     // TODO: Either go fully digital, or start using these correctly
     public float Voltage { get; private set; }
-    public float Current { get; private set; }
     
     public event Action<Pin>? ValuesChangedEvent;
     
@@ -31,16 +30,6 @@ public class Pin {
         }
         
         Voltage = value;
-        ValuesChangedEvent?.Invoke(this);
-    }
-
-    public void SetCurrent(float value) {
-        if (_mode == PinMode.ReadOnly) {
-            // TODO: Log misuse
-            return;
-        }
-        
-        Current = value;
-        ValuesChangedEvent?.Invoke(this);
+        VoltageChangedEvent?.Invoke(this);
     }
 }
