@@ -14,7 +14,7 @@ using TcpAdapter;
 namespace Gui;
 
 public static class MainController {
-    public static CommandLineArguments Arguments = null!;
+    public static CommandLineArguments Arguments { get; private set; } = null!;
     public static MainWindow MainWindow { get; private set; } = null!;
     public static TestMessageHandler Adapter { get; private set; } = null!;
     public static Stopwatch GlobalTimer { get; private set; } = null!;
