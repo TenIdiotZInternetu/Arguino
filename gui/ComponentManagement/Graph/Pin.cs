@@ -5,10 +5,9 @@ public class Pin {
     public uint Id { get; init; }
     public string? Name { get; init; }
     
-    // TODO: Either go fully digital, or start using these correctly
     public float Voltage { get; private set; }
     
-    public event Action<Pin>? ValuesChangedEvent;
+    public event Action<Pin>? VoltageChangedEvent;
     
     private enum PinMode { General, ReadOnly, WriteOnly }
     private PinMode _mode = PinMode.General;

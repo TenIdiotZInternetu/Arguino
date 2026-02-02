@@ -7,9 +7,6 @@ using Svg.Skia;
 namespace ComponentManagement;
 
 public abstract class Component {
-    
-    // TODO: Replace ComponentConfiguration by an Interface
-    
     public string Name => _configuration.Name;
     public string Description => _configuration.Description;
 
@@ -19,9 +16,9 @@ public abstract class Component {
     public SKSvg CurrentSprite { get; private set; }
     public event Action<SKSvg>? SpriteChangedEvent;
     
+    // TODO: Replace ComponentConfiguration by an Interface
     private ComponentConfiguration _configuration;
     private List<Pin> _pins = new();
-    private ComponentNode _thisNode;
     
     public Component(string definitionPath) {
         _configuration = YamlConfigurationLoader.LoadYaml(definitionPath);
@@ -39,6 +36,7 @@ public abstract class Component {
     public virtual void OnControlRelease() {}
     // TODO: OnInspect()
 
+    // TODO: Log getting unknown Pins and Sprites
     public Pin GetPin(string name) {
         return _pins.First(pin => pin.Name == name);
     }
@@ -65,8 +63,12 @@ public abstract class Component {
             pinId++;
         }
 
-        for (; pinId < _pins.Count; pinId++) {
+        for (; pinId < _configuration.Pins; pinId++) {
             _pins.Add(new Pin(this, pinId));
+        }
+
+        foreach (Pin pin in _pins) {
+            pin.VoltageChangedEvent += OnInputChange;
         }
     }
 }
