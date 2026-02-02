@@ -24,7 +24,6 @@ public abstract class Component {
     private ComponentNode _thisNode;
     
     public Component(string definitionPath) {
-        _thisNode = new ComponentNode(this);
         _configuration = YamlConfigurationLoader.LoadYaml(definitionPath);
 
         InitPins();
