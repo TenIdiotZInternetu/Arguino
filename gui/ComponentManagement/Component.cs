@@ -29,8 +29,8 @@ public abstract class Component {
     }
     
     public virtual void OnPinConnected(Pin pin) {}
-    public virtual void OnPinDisconnected(Pin pin, PinConnection connection) {}
-    public virtual void OnInputChange(Pin pin) {}
+    public virtual void OnPinDisconnected(Pin pin) {}
+    public virtual void OnInputChange(Pin pin, float voltage) {}
     public virtual void OnControlPress(Vector2 cursorPosition) {}
     public virtual void OnControlRelease() {}
     // TODO: OnInspect()
