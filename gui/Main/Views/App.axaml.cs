@@ -1,3 +1,4 @@
+using System;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
@@ -15,9 +16,11 @@ public partial class App : Application
         
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop) {
             desktop.MainWindow = mainWindow;
+            MainController.InitApp(desktop);
+        } else {
+            throw new NotImplementedException("Only Desktop style applications are supported");
         }
 
         base.OnFrameworkInitializationCompleted();
-        MainController.InitApp(mainWindow);
     }
 }

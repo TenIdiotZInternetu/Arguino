@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Numerics;
 using System.Threading.Tasks;
+using Avalonia.Controls.ApplicationLifetimes;
 using ComponentManagement.Components;
 using ComponentManagement.Loaders;
 using Gui.ViewModels;
@@ -12,19 +13,39 @@ using TcpAdapter;
 namespace Gui;
 
 public static class MainController {
+    public static MainWindow MainWindow { get; private set; } = null!;
     public static TestMessageHandler Adapter { get; private set; } = null!;
     public static Stopwatch GlobalTimer { get; private set; } = null!;
 
     public static event Action? AppInitializedEvent;
-    
-    public static async Task InitApp(MainWindow mainWindow)
-    {
-        Console.WriteLine("I'm alive");
-        GlobalTimer = Stopwatch.StartNew();
 
+    private static bool _isInitialized = false;
+    
+    public static void InitApp(IClassicDesktopStyleApplicationLifetime desktop)
+    {
+        if (_isInitialized) {
+            throw new InvalidOperationException("Repeated call of InitApp");
+        }
+
+        Console.WriteLine("I'm alive");
+
+        if (desktop.MainWindow is MainWindow mainWindow) {
+            MainWindow = mainWindow;
+        } else {
+            throw new UnreachableException("Only main window of type MainWindow is supported");
+        }
+
+        InitCanvas();
+        
+        // Task.Run(TempTcpTest);
+        GlobalTimer = Stopwatch.StartNew();
+        AppInitializedEvent?.Invoke();
+    }
+
+    private static void InitCanvas() {
         var scene = YamlSceneLoader.LoadScene(
-            "/home/touster/Kodiky/arguino/gui/scene.yaml",
-            "/home/touster/Kodiky/arguino/gui/ComponentManagement/Components"
+            "C:\\Users\\abalko\\Desktop\\Cringe\\Arguino\\gui\\scene.yaml",
+            "C:\\Users\\abalko\\Desktop\\Cringe\\Arguino\\gui\\ComponentManagement\\Components"
         );
 
         var canvas = new CircuitCanvas();
@@ -32,17 +53,16 @@ public static class MainController {
             canvas.Components.Add(comp);
         }
         
-        mainWindow.CircuitCanvas.DataContext = canvas; 
-        
+        MainWindow.CircuitCanvas.DataContext = canvas;
+    }
+
+    private static async void TempTcpTest() {
         var tcpClient = new TcpClient<TestMessageHandler>(8888);
         await tcpClient.ConnectAsync();
         Console.WriteLine("Connected!");
         Adapter = tcpClient.Handler;
         Adapter.ReadEvent += ReadTest;
-        
-        
 
-        AppInitializedEvent?.Invoke();
 
         _ = Task.Run(TestWrite);
 
