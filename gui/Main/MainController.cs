@@ -4,6 +4,7 @@ using System.Linq;
 using System.Numerics;
 using System.Threading.Tasks;
 using Avalonia.Controls.ApplicationLifetimes;
+using CommandLine;
 using ComponentManagement.Components;
 using ComponentManagement.Loaders;
 using Gui.ViewModels;
@@ -13,6 +14,7 @@ using TcpAdapter;
 namespace Gui;
 
 public static class MainController {
+    public static CommandLineArguments Arguments = null!;
     public static MainWindow MainWindow { get; private set; } = null!;
     public static TestMessageHandler Adapter { get; private set; } = null!;
     public static Stopwatch GlobalTimer { get; private set; } = null!;
@@ -35,17 +37,22 @@ public static class MainController {
             throw new UnreachableException("Only main window of type MainWindow is supported");
         }
 
+        Arguments = Parser.Default.ParseArguments<CommandLineArguments>(desktop.Args).Value;
+
         InitCanvas();
         
-        // Task.Run(TempTcpTest);
+        if (!Arguments.NoTcp) {
+            Task.Run(TempTcpTest);
+        }
+        
         GlobalTimer = Stopwatch.StartNew();
         AppInitializedEvent?.Invoke();
     }
 
     private static void InitCanvas() {
         var scene = YamlSceneLoader.LoadScene(
-            "C:\\Users\\abalko\\Desktop\\Cringe\\Arguino\\gui\\scene.yaml",
-            "C:\\Users\\abalko\\Desktop\\Cringe\\Arguino\\gui\\ComponentManagement\\Components"
+            Arguments.ScenePath,
+            Arguments.ComponentsPath
         );
 
         var canvas = new CircuitCanvas();
@@ -57,7 +64,7 @@ public static class MainController {
     }
 
     private static async void TempTcpTest() {
-        var tcpClient = new TcpClient<TestMessageHandler>(8888);
+        var tcpClient = new TcpClient<TestMessageHandler>(Arguments.TcpPort);
         await tcpClient.ConnectAsync();
         Console.WriteLine("Connected!");
         Adapter = tcpClient.Handler;
