@@ -13,11 +13,13 @@ public class PinConnection {
     public void AddPin(Pin pin) {
         _pins.Add(pin);
         pin.VoltageChangedEvent += Propagate;
+        pin.Component.OnPinConnected(pin);
     }
 
     public void RemovePin(Pin pin) {
         _pins.Remove(pin);
         pin.VoltageChangedEvent -= Propagate;
+        pin.Component.OnPinDisconnected(pin, this);
     }
 
     private void Propagate(Pin sourcePin) {

@@ -28,9 +28,8 @@ public abstract class Component {
         CurrentSprite = Sprites.First().Value;
     }
     
-    public virtual void OnInitialization() {}
-    public virtual void OnRisingEdge(Pin pin) {}
-    public virtual void OnFallingEdge(Pin pin) {}
+    public virtual void OnPinConnected(Pin pin) {}
+    public virtual void OnPinDisconnected(Pin pin, PinConnection connection) {}
     public virtual void OnInputChange(Pin pin) {}
     public virtual void OnControlPress(Vector2 cursorPosition) {}
     public virtual void OnControlRelease() {}
