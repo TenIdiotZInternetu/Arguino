@@ -22,6 +22,6 @@ public class Vcc : Component {
     }
 
     public override void OnPinDisconnected(Pin pin) {
-        pin.SetVoltage(0);
+        pin.SetVoltage(Pin.GND_VOLTAGE);
     }
 }

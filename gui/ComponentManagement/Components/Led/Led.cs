@@ -1,34 +1,39 @@
+using System.Runtime.Serialization;
 using ComponentManagement.Graph;
 
 namespace ComponentManagement.Components;
 
 public class Led : Component {
+    private const float FORWARD_VOLTAGE = 3.3f;
+
     private const string SPRITE_LED_ON = "ledOn";
     private const string SPRITE_LED_OFF = "ledOff";
 
     private const string PIN_ANODE = "anode";
     private const string PIN_CATHODE = "cathode";
 
+    private Pin _anode;
+    private Pin _cathode;
+
     public Led(string definitionPath) : base(definitionPath) {
         UpdateSprite(SPRITE_LED_OFF);
+        _anode = GetPin(PIN_ANODE);
+        _cathode = GetPin(PIN_CATHODE);
     }
 
-    public override void OnRisingEdge(Pin pin) {
-        UpdateSprite(SPRITE_LED_ON);
-        PassCurrent(pin);
-    }
+    public override void OnInputChange(Pin pin, float voltage) {
+        float anodeVoltage = _anode.IsConnected ?
+            _anode.Voltage :
+            Pin.GND_VOLTAGE;
 
-    public override void OnFallingEdge(Pin pin) {
-        UpdateSprite(SPRITE_LED_OFF);
-        PassCurrent(pin);
-    }
+        bool conducts = _cathode.Voltage - anodeVoltage > FORWARD_VOLTAGE;
 
-    private void PassCurrent(Pin inputPin) {
-        Pin outputPin = inputPin.Name == PIN_ANODE ?
-            GetPin(PIN_CATHODE) :
-            GetPin(PIN_ANODE);
-        
-        outputPin.SetCurrent(inputPin.Current);
-        outputPin.SetVoltage(inputPin.Voltage);
+        if (conducts) {
+            _anode.SetVoltage(voltage);
+            UpdateSprite(SPRITE_LED_ON);
+        }
+        else {
+            UpdateSprite(SPRITE_LED_OFF);
+        }
     }
 }
