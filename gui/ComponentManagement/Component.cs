@@ -7,7 +7,8 @@ using Svg.Skia;
 namespace ComponentManagement;
 
 public abstract class Component {
-    public string Name => _configuration.Name;
+    public string Name { get; set; }
+    public string TypeName => _configuration.Name;
     public string Description => _configuration.Description;
 
     public Transform Transform { get; set; } = new();

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Numerics;
 using System.Reflection;
@@ -12,7 +13,7 @@ namespace ComponentManagement.Loaders;
 using ComponentsMap = Dictionary<string, YamlSceneLoader.SceneDto.ComponentDto>;
 using NodesList = List<List<string>>;
 
-public class YamlSceneLoader {
+public static class YamlSceneLoader {
     public record SceneDto {
         public required ComponentsMap Components { get; init; } = [];
         public required NodesList Nodes { get; init; } = [];
@@ -25,7 +26,7 @@ public class YamlSceneLoader {
         }
     }
 
-    private 
+    private static Dictionary<string, Type> _typeNamesMap = [];
 
     public static Scene LoadScene(string scenePath, string componentsPath) {
         var sceneDto = Deserialize(scenePath);
@@ -34,8 +35,6 @@ public class YamlSceneLoader {
         scene.Components.AddRange(
             HandleComponents(sceneDto.Components, componentsPath)
         );
-
-
 
         return scene;
     }
@@ -52,43 +51,54 @@ public class YamlSceneLoader {
     }
 
     private static List<Component> HandleComponents(ComponentsMap componentDtos, string componentsPath) {
-        List<Component> processedComponents = [];
+        List<Component> handledComponents = [];
         
-        foreach (var (name, comp) in componentDtos) {
-            var componentDir = Path.Combine(componentsPath, comp.Type);
-            var component = CreateComponent(comp, componentDir);
-            processedComponents.Add(component);
+        foreach (var (name, dto) in componentDtos) {
+            string typeName = dto.Type;
+            Type? type;
+
+            if (!_typeNamesMap.TryGetValue(typeName, out type)) {
+                type = MapComponentType(typeName);
+            }
+
+            if (Activator.CreateInstance(type, componentsPath) is Component compInstance) {
+                compInstance.Name = name;
+                compInstance.Transform = ParseTransform(dto);
+                handledComponents.Add(compInstance);
+            } 
+            else {
+                throw new UnreachableException($"{typeName} instance could not be created.");
+            }
         }
 
-        return processedComponents;
+        return handledComponents;
     }
 
-    private static Component CreateComponent(SceneDto.ComponentDto compDto, string componentsPath) {
-
-        // TODO: Cache already defined components
+    private static Type MapComponentType(string typeName) {
         // TODO: Change assembly for custom added scripts
-        // TODO: Log unknown component names
-
+        // TODO: Log unknown component types
+        
         Type? compType = Assembly.GetExecutingAssembly()
             .GetTypes()
-            .First(type => type.Name == compDto.Type);
+            .First(type => type.Name == typeName);
 
         if (compType == null) {
-            throw new Exception($"Component of type {compDto.Type} does not exist");
+            throw new Exception($"Component of type {typeName} does not exist");
         }
-        
-        var component = Activator.CreateInstance(compType, componentsPath) as Component;
-        component!.Transform = new Transform{
+
+        _typeNamesMap.Add(typeName, compType);
+        return compType;
+    }
+
+    private static Transform ParseTransform(SceneDto.ComponentDto compDto) {
+        return new Transform {
             Position = StringToVector2(compDto.Position) ?? Vector2.Zero,
             Rotation = compDto.Rotation,
             Scale = StringToVector2(compDto.Scale) ?? Vector2.One
         };
-        
-        return component;
     }
 
     private static Vector2? StringToVector2(string valuePair) {
-        
         // TODO: Log incorrect use of value pair
         
         string[] values = valuePair.Split();
