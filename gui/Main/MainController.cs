@@ -57,7 +57,7 @@ public static class MainController {
         );
 
         var canvas = new CircuitCanvas();
-        foreach (var comp in scene.Components) {
+        foreach (var comp in scene.ComponentsMap.Values) {
             canvas.Components.Add(comp);
         }
         

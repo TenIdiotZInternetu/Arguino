@@ -6,6 +6,7 @@ using System.Linq;
 using System.Numerics;
 using System.Reflection;
 using System.Threading.Tasks;
+using ComponentManagement.Graph;
 using YamlDotNet.Serialization;
 
 namespace ComponentManagement.Loaders;
@@ -26,20 +27,21 @@ public static class YamlSceneLoader {
         }
     }
 
-    private static Dictionary<string, Type> _typeNamesMap = [];
+    private static readonly Dictionary<string, Type> _typeNamesMap = [];
 
     public static Scene LoadScene(string scenePath, string componentsPath) {
-        var sceneDto = Deserialize(scenePath);
-        var scene = new Scene();
+        var sceneDto = DeserializeYaml(scenePath);
 
-        scene.Components.AddRange(
-            HandleComponents(sceneDto.Components, componentsPath)
-        );
+        var instantiatedComponents = InstantiateComponents(sceneDto.Components, componentsPath);
+        var instantiatedNodes = InstantiatedNodes(sceneDto.Nodes, instantiatedComponents);
 
-        return scene;
+        return new Scene {
+            ComponentsMap = instantiatedComponents,
+            Nodes = instantiatedNodes
+        };
     }
 
-    private static SceneDto Deserialize(string scenePath) {
+    private static SceneDto DeserializeYaml(string scenePath) {
         using var file = File.OpenRead(scenePath);
         var fileStream = new StreamReader(file);
 
@@ -50,8 +52,8 @@ public static class YamlSceneLoader {
         return deserializer.Deserialize<SceneDto>(fileStream);
     }
 
-    private static List<Component> HandleComponents(ComponentsMap componentDtos, string componentsPath) {
-        List<Component> handledComponents = [];
+    private static Dictionary<string, Component> InstantiateComponents(ComponentsMap componentDtos, string componentsPath) {
+        Dictionary<string, Component> components = [];
         
         foreach (var (name, dto) in componentDtos) {
             string typeName = dto.Type;
@@ -64,14 +66,14 @@ public static class YamlSceneLoader {
             if (Activator.CreateInstance(type, componentsPath) is Component compInstance) {
                 compInstance.Name = name;
                 compInstance.Transform = ParseTransform(dto);
-                handledComponents.Add(compInstance);
+                components.Add(name, compInstance);
             } 
             else {
                 throw new UnreachableException($"{typeName} instance could not be created.");
             }
         }
 
-        return handledComponents;
+        return components;
     }
 
     private static Type MapComponentType(string typeName) {
@@ -116,5 +118,28 @@ public static class YamlSceneLoader {
         }
         
         return new Vector2(x, y);
+    }
+
+    private static List<ElectricalNode> InstantiatedNodes(NodesList nodesDto, Dictionary<string, Component> components) {
+        List<ElectricalNode> nodes = [];
+
+        foreach (List<string> nodeDto in nodesDto) {
+            ElectricalNode node = new();
+
+            foreach (string pinDto in nodeDto) {
+                string[] pinDtoElements = pinDto.Split('.');
+                string compName = pinDtoElements[0];
+                string compPinName = pinDtoElements[1];
+
+                // TODO Error Logs
+
+                Component component = components[compName];
+                node.AddPin(component.GetPin(compPinName));
+            }
+
+            nodes.Add(node);
+        }
+
+        return nodes;
     }
 }
