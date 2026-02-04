@@ -12,8 +12,8 @@ public class ElectricalNode {
 
     public void AddPin(Pin pin) {
         _pins.Add(pin);
-        pin.ConnectToNode(this);
         pin.VoltageSetEvent += Propagate;
+        pin.ConnectToNode(this);
     }
 
     public void RemovePin(Pin pin) {

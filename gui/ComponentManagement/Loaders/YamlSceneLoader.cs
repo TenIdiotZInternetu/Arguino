@@ -63,7 +63,9 @@ public static class YamlSceneLoader {
                 type = MapComponentType(typeName);
             }
 
-            if (Activator.CreateInstance(type, componentsPath) is Component compInstance) {
+            string componentDir = componentsPath + "/" + typeName;
+
+            if (Activator.CreateInstance(type, componentDir) is Component compInstance) {
                 compInstance.Name = name;
                 compInstance.Transform = ParseTransform(dto);
                 components.Add(name, compInstance);
@@ -131,10 +133,17 @@ public static class YamlSceneLoader {
                 string compName = pinDtoElements[0];
                 string compPinName = pinDtoElements[1];
 
-                // TODO Error Logs
-
+                // TODO: Error Logs
                 Component component = components[compName];
-                node.AddPin(component.GetPin(compPinName));
+
+                if (uint.TryParse(compPinName, out uint pinId)) {
+                    node.AddPin(component.GetPin(pinId));
+                }
+                else {
+                    node.AddPin(component.GetPin(compPinName));
+                }
+
+                // TODO: Transitivity through nodes
             }
 
             nodes.Add(node);

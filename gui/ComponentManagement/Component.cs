@@ -8,8 +8,8 @@ namespace ComponentManagement;
 
 public abstract class Component {
     public string Name { get; set; }
-    public string TypeName => _configuration.Name;
-    public string Description => _configuration.Description;
+    public string TypeName => Configuration.Name;
+    public string Description => Configuration.Description;
 
     public Transform Transform { get; set; } = new();
     
@@ -18,11 +18,11 @@ public abstract class Component {
     public event Action<SKSvg>? SpriteChangedEvent;
     
     // TODO: Replace ComponentConfiguration by an Interface
-    private ComponentConfiguration _configuration;
-    private List<Pin> _pins = new();
+    protected ComponentConfiguration Configuration;
+    protected List<Pin> Pins = [];
     
     public Component(string definitionPath) {
-        _configuration = YamlConfigurationLoader.LoadYaml(definitionPath);
+        Configuration = YamlConfigurationLoader.LoadYaml(definitionPath);
 
         InitPins();
         Sprites = SkiaSvgLoader.LoadSvgs(definitionPath);
@@ -38,11 +38,11 @@ public abstract class Component {
 
     // TODO: Log getting unknown Pins and Sprites
     public Pin GetPin(string name) {
-        return _pins.First(pin => pin.Name == name);
+        return Pins.First(pin => pin.Name == name);
     }
 
     public Pin GetPin(uint id) {
-        return _pins.First(pin => pin.Id == id);
+        return Pins.First(pin => pin.Id == id);
     }
 
     protected void UpdateSprite(SKSvg sprite) {
@@ -58,17 +58,19 @@ public abstract class Component {
 
     private void InitPins() {
         uint pinId = 0;
-        foreach (var pinName in _configuration.PinNames) {
-            _pins.Add(new Pin(this, pinId, pinName));
+        foreach (var pinName in Configuration.PinNames) {
+            Pins.Add(new Pin(this, pinId, pinName));
             pinId++;
         }
 
-        for (; pinId < _configuration.Pins; pinId++) {
-            _pins.Add(new Pin(this, pinId));
+        for (; pinId < Configuration.Pins; pinId++) {
+            Pins.Add(new Pin(this, pinId));
         }
 
-        foreach (Pin pin in _pins) {
+        foreach (Pin pin in Pins) {
             pin.VoltageChangedEvent += OnInputChange;
+            pin.PinConnectedEvent += OnPinConnected;
+            pin.PinDisconnectedEvent += OnPinDisconnected;
         }
     }
 }

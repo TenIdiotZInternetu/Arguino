@@ -1,13 +1,14 @@
 namespace ComponentManagement.Graph;
 
 public class Pin {
+    public const float GND_VOLTAGE = 0;
     private const float EPSILON = 1e-7f;
 
     public uint Id { get; init; }
     public string? Name { get; init; }
 
     public float Voltage => _node?.Voltage ?? float.NaN;
-    public bool Connected => _node != null;
+    public bool IsConnected => _node != null;
     public bool UnderVoltage => !float.IsNaN(Voltage);
     
     public event Action<Pin, float>? VoltageSetEvent;
