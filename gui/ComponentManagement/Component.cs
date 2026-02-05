@@ -7,7 +7,7 @@ using Svg.Skia;
 namespace ComponentManagement;
 
 public abstract class Component {
-    public string Name { get; set; }
+    public required string Name { get; set; }
     public string TypeName => Configuration.Name;
     public string Description => Configuration.Description;
 
@@ -31,7 +31,7 @@ public abstract class Component {
     
     public virtual void OnPinConnected(Pin pin) {}
     public virtual void OnPinDisconnected(Pin pin) {}
-    public virtual void OnInputChange(Pin pin, float voltage) {}
+    public virtual void OnPinStateChanged(Pin pin) {}
     public virtual void OnControlPress(Vector2 cursorPosition) {}
     public virtual void OnControlRelease() {}
     // TODO: OnInspect()
@@ -68,9 +68,11 @@ public abstract class Component {
         }
 
         foreach (Pin pin in Pins) {
-            pin.StateChangedEvent += OnInputChange;
+            pin.StateChangedEvent += OnPinStateChanged;
             pin.PinConnectedEvent += OnPinConnected;
             pin.PinDisconnectedEvent += OnPinDisconnected;
         }
     }
+
+    private void OnPinStateChanged(Pin pin, DigitalState _) => OnPinStateChanged(pin);
 }
