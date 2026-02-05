@@ -68,7 +68,7 @@ public abstract class Component {
         }
 
         foreach (Pin pin in Pins) {
-            pin.VoltageChangedEvent += OnInputChange;
+            pin.StateChangedEvent += OnInputChange;
             pin.PinConnectedEvent += OnPinConnected;
             pin.PinDisconnectedEvent += OnPinDisconnected;
         }

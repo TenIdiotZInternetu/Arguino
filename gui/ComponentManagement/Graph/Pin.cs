@@ -1,18 +1,17 @@
 namespace ComponentManagement.Graph;
 
 public class Pin {
-    public const float GND_VOLTAGE = 0;
-    private const float EPSILON = 1e-7f;
-
     public uint Id { get; init; }
     public string? Name { get; init; }
 
-    public float Voltage => _node?.Voltage ?? float.NaN;
+    public bool IsDriving { get; private set; }
+    public bool IsHigh => _state == DigitalState.High;
+    public bool IsLow => _state == DigitalState.Low;
+
     public bool IsConnected => _node != null;
-    public bool UnderVoltage => !float.IsNaN(Voltage);
     
-    public event Action<Pin, float>? VoltageSetEvent;
-    public event Action<Pin, float>? VoltageChangedEvent;
+    public event Action<Pin, bool>? DrivingChangedEvent;
+    public event Action<Pin, DigitalState>? StateChangedEvent;
 
     public event Action<Pin>? PinConnectedEvent;
     public event Action<Pin>? PinDisconnectedEvent;
@@ -22,10 +21,16 @@ public class Pin {
     
     private enum PinMode { General, ReadOnly, WriteOnly }
     private PinMode _mode = PinMode.General;
+
+    private DigitalState _state => (IsDriving || (_node?.IsHigh ?? false)) ?
+                                   DigitalState.High : DigitalState.Low;
     
     public void MakeReadOnly() => _mode = PinMode.ReadOnly;
     public void MakeWriteOnly() => _mode = PinMode.WriteOnly;
     public void MakeGeneral() => _mode = PinMode.General;
+
+    public void SetHigh() => SetDriving(true);
+    public void SetLow() => SetDriving(false);
 
     public Pin(Component component, uint id, string? name = null) {
         _component = component;
@@ -33,27 +38,13 @@ public class Pin {
         Name = name;
     }
 
-    public void SetVoltage(float value) {
-        bool voltagesAlmostEqual = Math.Abs(value - Voltage) < EPSILON;
-        if (voltagesAlmostEqual) {
-            return;
-        }
-
-        if (_mode == PinMode.ReadOnly) {
-            // TODO: Log misuse
-            return;
-        }
-        
-        VoltageSetEvent?.Invoke(this, value);
-    }
-
-    public void NotifyVoltageChange(float value) {
+    public void NotifyStateChange() {
         if (_mode == PinMode.WriteOnly) {
             // TODO: Log misuse
             return;
         }
 
-        VoltageChangedEvent?.Invoke(this, value);
+        StateChangedEvent?.Invoke(this, _state);
     }
 
     public void ConnectToNode(ElectricalNode node) {
@@ -64,5 +55,19 @@ public class Pin {
     public void Disconnect() {
         _node = null;
         PinDisconnectedEvent?.Invoke(this);
+    }
+
+    private void SetDriving(bool value) {
+        if (_mode == PinMode.ReadOnly) {
+            // TODO: Log misuse
+            return;
+        }
+        
+        bool wasDriving = IsDriving;
+        IsDriving = value;
+
+        if (wasDriving != IsDriving) {
+            DrivingChangedEvent?.Invoke(this, value);
+        }
     }
 }
