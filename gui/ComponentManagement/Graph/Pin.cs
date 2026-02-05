@@ -5,8 +5,11 @@ public class Pin {
     public string? Name { get; init; }
 
     public bool IsDriving { get; private set; }
-    public bool IsHigh => _state == DigitalState.High;
-    public bool IsLow => _state == DigitalState.Low;
+    public DigitalState State => (IsDriving || (_node?.IsHigh ?? false)) ?
+                                 DigitalState.High : DigitalState.Low;
+
+    public bool IsHigh => State == DigitalState.High;
+    public bool IsLow => State == DigitalState.Low;
 
     public bool IsWriteOnly => _mode == PinMode.WriteOnly;
     public bool IsReadOnly => _mode == PinMode.ReadOnly;
