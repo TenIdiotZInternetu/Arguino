@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Numerics;
 using System.Reflection;
 using ComponentManagement.Graph;
@@ -75,4 +76,6 @@ public abstract class Component {
     }
 
     private void OnPinStateChanged(Pin pin, DigitalState _) => OnPinStateChanged(pin);
+
+    public override string ToString() => Name;
 }

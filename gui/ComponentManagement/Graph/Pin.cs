@@ -1,3 +1,5 @@
+using System.Diagnostics;
+
 namespace ComponentManagement.Graph;
 
 public class Pin {
@@ -28,8 +30,6 @@ public class Pin {
     private enum PinMode { General, ReadOnly, WriteOnly }
     private PinMode _mode = PinMode.General;
 
-    private DigitalState _state => (IsDriving || (_node?.IsHigh ?? false)) ?
-                                   DigitalState.High : DigitalState.Low;
     
     public void MakeReadOnly() => _mode = PinMode.ReadOnly;
     public void MakeWriteOnly() => _mode = PinMode.WriteOnly;
@@ -52,6 +52,7 @@ public class Pin {
             _node.StateChangedEvent += NotifyStateChange;
         }
         
+        NotifyStateChange(_node, _node.State);
         PinConnectedEvent?.Invoke(this);
     }
 
@@ -60,7 +61,7 @@ public class Pin {
 
         _node.StateChangedEvent -= NotifyStateChange;
         _node = null;
-        NotifyStateChange(null, _state);
+        NotifyStateChange(null, State);
         PinDisconnectedEvent?.Invoke(this);
     }
 
@@ -85,6 +86,8 @@ public class Pin {
         }
 
         if (IsDriving) return;
-        StateChangedEvent?.Invoke(this, _state);
+        StateChangedEvent?.Invoke(this, State);
     }
+
+    public override string ToString() => _component.Name + "." + (Name ?? Id.ToString());
 }

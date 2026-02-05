@@ -2,58 +2,67 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.NetworkInformation;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace ComponentManagement.Graph;
 
 public class ElectricalNode {
-    public bool IsHigh => _state == DigitalState.Low;
-    public bool IsLow => _state == DigitalState.High;
+    public uint DrivingPins { get; private set; } = 0;
+    public DigitalState State => DrivingPins > 0 ?
+                                 DigitalState.High : DigitalState.Low;
+
+    public bool IsHigh => State == DigitalState.High;
+    public bool IsLow => State == DigitalState.Low;
 
     public event Action<ElectricalNode, DigitalState>? StateChangedEvent;
 
     private List<Pin> _pins = new();
-    private uint _drivingPins = 0;
 
-    private DigitalState _state => _drivingPins > 0 ?
-                                   DigitalState.High : DigitalState.Low;
 
     public void AddPin(Pin pin) {
         _pins.Add(pin);
 
         if (pin.IsDriving) {
-            _drivingPins++;
+            DrivingPins++;
         }
         
-        pin.DrivingChangedEvent += Propagate;
         pin.ConnectToNode(this);
-        Propagate(pin, pin.IsDriving);
+        pin.DrivingChangedEvent += Propagate;
     }
 
     public void RemovePin(Pin pin) {
         _pins.Remove(pin);
 
         if (pin.IsDriving) {
-            _drivingPins--;
+            DrivingPins--;
         }
 
-        pin.Disconnect();
         pin.DrivingChangedEvent -= Propagate;
+        pin.Disconnect();
         Propagate(pin, false);
     }
 
     private void Propagate(Pin sourcePin, bool beganDriving) {
-        var prevState = _state;
+        var prevState = State;
 
         if (beganDriving) {
-            _drivingPins++;
+            DrivingPins++;
         }
         else {
-            _drivingPins--;
+            DrivingPins--;
         }
 
-        if (prevState != _state) {
-            StateChangedEvent?.Invoke(this, _state);
+        if (prevState != State) {
+            StateChangedEvent?.Invoke(this, State);
         }
+    }
+
+    public override string ToString() {
+        StringBuilder sb = new();
+        sb.Append("[ ");
+        sb.AppendJoin(", ", _pins);
+        sb.Append(" ]");
+        return sb.ToString();
     }
 }
