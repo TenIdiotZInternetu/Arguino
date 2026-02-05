@@ -7,6 +7,7 @@ using System.Numerics;
 using System.Reflection;
 using System.Threading.Tasks;
 using ComponentManagement.Graph;
+using ComponentManagement.Scenes;
 using YamlDotNet.Serialization;
 
 namespace ComponentManagement.Loaders;

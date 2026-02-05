@@ -1,3 +1,4 @@
+using ComponentManagement.Scenes;
 using YamlDotNet.RepresentationModel;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;

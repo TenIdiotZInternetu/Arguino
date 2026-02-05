@@ -3,6 +3,7 @@ using System.Numerics;
 using System.Reflection;
 using ComponentManagement.Graph;
 using ComponentManagement.Loaders;
+using ComponentManagement.Scenes;
 using Svg.Skia;
 
 namespace ComponentManagement;

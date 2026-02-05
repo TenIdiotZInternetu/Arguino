@@ -1,4 +1,4 @@
-namespace ComponentManagement;
+namespace ComponentManagement.Scenes;
 
 public record ComponentConfiguration {
     public required string Name;
