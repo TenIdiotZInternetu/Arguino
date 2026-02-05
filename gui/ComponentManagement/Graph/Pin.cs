@@ -57,6 +57,7 @@ public class Pin {
 
         _node.StateChangedEvent -= NotifyStateChange;
         _node = null;
+        NotifyStateChange(null, _state);
         PinDisconnectedEvent?.Invoke(this);
     }
 
@@ -74,7 +75,7 @@ public class Pin {
         }
     }
 
-    private void NotifyStateChange(ElectricalNode _, DigitalState nodeState) {
+    private void NotifyStateChange(ElectricalNode? _, DigitalState nodeState) {
         if (_mode == PinMode.WriteOnly) {
             // TODO: Log misuse
             return;

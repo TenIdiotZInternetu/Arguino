@@ -13,32 +13,33 @@ public class Button : Component {
         UpdateSprite(SPRITE_BUTTON_UP);
     }
 
-    public override void OnInputChange(Pin pin, float voltage) => UpdateVoltages();
-    public override void OnPinConnected(Pin pin) => UpdateVoltages();
-    public override void OnPinDisconnected(Pin pin) => UpdateVoltages();
+    public override void OnPinStateChanged(Pin pin) => UpdatePins();
 
     public override void OnControlPress(Vector2 cursorPosition) {
         _isPushed = true;
         UpdateSprite(SPRITE_BUTTON_DOWN);
-        UpdateVoltages();
+        UpdatePins();
     }
 
     public override void OnControlRelease() {
         _isPushed = false;
         UpdateSprite(SPRITE_BUTTON_UP);
-        UpdateVoltages();
+        UpdatePins();
     }
 
-    private void UpdateVoltages() {
-        Pin higherVoltagePin = Pins.MaxBy(p => p.Voltage)!;
-        Pin lowerVoltagePin = GetPin(1 - higherVoltagePin.Id);
+    private void UpdatePins() {
+        UpdatePin(GetPin(0));
+        UpdatePin(GetPin(1));
+    }
 
-        if (_isPushed) {
-            lowerVoltagePin.SetVoltage(higherVoltagePin.Voltage);
+    private void UpdatePin(Pin pin) {
+        Pin otherPin = GetPin(1 - pin.Id);
+
+        if (otherPin.IsHigh && _isPushed) {
+            pin.SetHigh();
         }
         else {
-            // TODO: Blatantly wrong
-            lowerVoltagePin.SetVoltage(Pin.GND_VOLTAGE);
+            pin.SetLow();
         }
     }
 }
