@@ -8,6 +8,9 @@ public class Pin {
     public bool IsHigh => _state == DigitalState.High;
     public bool IsLow => _state == DigitalState.Low;
 
+    public bool IsWriteOnly => _mode == PinMode.WriteOnly;
+    public bool IsReadOnly => _mode == PinMode.ReadOnly;
+
     public bool IsConnected => _node != null;
     
     public event Action<Pin, bool>? DrivingChangedEvent;
@@ -38,21 +41,21 @@ public class Pin {
         Name = name;
     }
 
-    public void NotifyStateChange() {
-        if (_mode == PinMode.WriteOnly) {
-            // TODO: Log misuse
-            return;
-        }
-
-        StateChangedEvent?.Invoke(this, _state);
-    }
-
     public void ConnectToNode(ElectricalNode node) {
+        Disconnect();
         _node = node;
+
+        if (!IsWriteOnly) {
+            _node.StateChangedEvent += NotifyStateChange;
+        }
+        
         PinConnectedEvent?.Invoke(this);
     }
 
     public void Disconnect() {
+        if (_node == null) return;
+
+        _node.StateChangedEvent -= NotifyStateChange;
         _node = null;
         PinDisconnectedEvent?.Invoke(this);
     }
@@ -69,5 +72,15 @@ public class Pin {
         if (wasDriving != IsDriving) {
             DrivingChangedEvent?.Invoke(this, value);
         }
+    }
+
+    private void NotifyStateChange(ElectricalNode _, DigitalState nodeState) {
+        if (_mode == PinMode.WriteOnly) {
+            // TODO: Log misuse
+            return;
+        }
+
+        if (IsDriving) return;
+        StateChangedEvent?.Invoke(this, _state);
     }
 }
