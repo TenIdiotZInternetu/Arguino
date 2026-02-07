@@ -33,8 +33,22 @@ public class Pin {
     public void MakeWriteOnly() => _mode = PinMode.WriteOnly;
     public void MakeGeneral() => _mode = PinMode.General;
 
-    public void SetHigh() => SetDriving(true);
-    public void SetLow() => SetDriving(false);
+    public void SetHigh() => SetValue(true);
+    public void SetLow() => SetValue(false);
+    
+    public void SetValue(bool value) {
+        if (_mode == PinMode.ReadOnly) {
+            // TODO: Log misuse
+            return;
+        }
+        
+        bool wasDriving = IsDriving;
+        IsDriving = value;
+
+        if (wasDriving != IsDriving) {
+            DrivingChangedEvent?.Invoke(this, value);
+        }
+    }
 
     public Pin(Component component, uint id, string? name = null) {
         _component = component;
@@ -63,19 +77,6 @@ public class Pin {
         PinDisconnectedEvent?.Invoke(this);
     }
 
-    private void SetDriving(bool value) {
-        if (_mode == PinMode.ReadOnly) {
-            // TODO: Log misuse
-            return;
-        }
-        
-        bool wasDriving = IsDriving;
-        IsDriving = value;
-
-        if (wasDriving != IsDriving) {
-            DrivingChangedEvent?.Invoke(this, value);
-        }
-    }
 
     private void NotifyStateChange(ElectricalNode? _, DigitalState nodeState) {
         if (_mode == PinMode.WriteOnly) {
