@@ -69,8 +69,7 @@ public static class YamlSceneLoader {
                 compInstance.Transform = ParseTransform(dto);
                 HandleExtraProps(compInstance, dto.ExtraProps);
                 components.Add(name, compInstance);
-                compInstance.OnInitialized();
-            } 
+            }
             else {
                 throw new UnreachableException($"{typeName} instance could not be created.");
             }
