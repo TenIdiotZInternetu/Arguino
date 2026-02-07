@@ -76,11 +76,12 @@ template <IEncoder TEncoder, logger::ILogger TLogger>
 void ArguinoConnectionHandler<TEncoder, TLogger>::on_read_message(
     boost::system::error_code error, size_t messageSize)
 {
-    if (error || _buffer.empty()) {
-        // TODO: log
-        std::cout << error.message() << std::endl;
+    if (error) {
+        _logger->log(message::Error("Error occured while reading from socket: ", error));
         return;
     }
+
+    if (_buffer.empty()) return;
 
     // TODO: expect timestamp in the message
 
@@ -108,7 +109,7 @@ void ArguinoConnectionHandler<TEncoder, TLogger>::handle_read_state(const std::s
     boost::asio::async_write(_socket,
         boost::asio::buffer(_outcomingMessage),
         [me = this->shared_from_this()](auto error, size_t bytes_written) {
-            // TODO another log maybe?
+            me->_logger->log(message::Read(me->_outcomingMessage));
         });
 }
 
@@ -118,7 +119,7 @@ void ArguinoConnectionHandler<TEncoder, TLogger>::handle_write_state(const std::
     TEncoder encoder;
     ArduinoState newState = encoder.decode(message.substr(1));  // skip write flag
     CanonicalState::update_state(newState);
-    // TODO log
+    _logger->log(message::Write(message));
 }
 
 }  // namespace arguino::tcp

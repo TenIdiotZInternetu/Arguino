@@ -61,6 +61,7 @@ void TcpServer<THandler, TLogger>::start_accepting()
 
     _acceptor.async_accept(handler->socket(), [this, handler](auto error) {
         if (!error) {
+            _logger->log("Connection accepted!");
             handler->handle();
         }
         else {
