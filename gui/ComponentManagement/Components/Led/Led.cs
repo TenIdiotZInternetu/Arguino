@@ -1,4 +1,3 @@
-using System.Runtime.Serialization;
 using ComponentManagement.Graph;
 
 namespace ComponentManagement.Components;

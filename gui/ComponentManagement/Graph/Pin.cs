@@ -1,5 +1,3 @@
-using System.Diagnostics;
-
 namespace ComponentManagement.Graph;
 
 public class Pin {

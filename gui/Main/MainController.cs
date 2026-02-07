@@ -1,11 +1,8 @@
 using System;
 using System.Diagnostics;
-using System.Linq;
-using System.Numerics;
 using System.Threading.Tasks;
 using Avalonia.Controls.ApplicationLifetimes;
 using CommandLine;
-using ComponentManagement.Components;
 using ComponentManagement.Loaders;
 using Gui.ViewModels;
 using Gui.Views;

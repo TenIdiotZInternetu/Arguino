@@ -1,5 +1,3 @@
-using System.Net.Sockets;
-
 namespace TcpAdapter;
 
 public interface IMessageHandler<TSelf> 

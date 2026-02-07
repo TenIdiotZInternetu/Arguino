@@ -1,7 +1,5 @@
 using System;
 using System.Diagnostics;
-using Avalonia.Controls;
-using Avalonia.Media;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 

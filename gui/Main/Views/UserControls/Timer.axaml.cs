@@ -1,7 +1,4 @@
-using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Markup.Xaml;
-using Gui.ViewModels;
 
 namespace Gui.Views.UserControls;
 
