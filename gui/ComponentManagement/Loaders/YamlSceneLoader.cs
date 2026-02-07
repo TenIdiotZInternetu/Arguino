@@ -8,6 +8,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using ComponentManagement.Graph;
 using ComponentManagement.Scenes;
+using YamlDotNet.Core;
 using YamlDotNet.Serialization;
 
 namespace ComponentManagement.Loaders;
@@ -25,10 +26,13 @@ public static class YamlSceneLoader {
             public string Position = "0 0";
             public float Rotation = 0;
             public string Scale = "1 1";
+            
+            // TODO: Flatten extra properties
+            public Dictionary<string, object>? ExtraProps { get; set; } 
         }
     }
 
-    private static readonly Dictionary<string, Type> _typeNamesMap = [];
+    private static readonly Dictionary<string, Type> TYPE_NAMES_MAP = [];
 
     public static Scene LoadScene(string scenePath, string componentsPath) {
         var sceneDto = DeserializeYaml(scenePath);
@@ -60,7 +64,7 @@ public static class YamlSceneLoader {
             string typeName = dto.Type;
             Type? type;
 
-            if (!_typeNamesMap.TryGetValue(typeName, out type)) {
+            if (!TYPE_NAMES_MAP.TryGetValue(typeName, out type)) {
                 type = MapComponentType(typeName);
             }
 
@@ -69,6 +73,7 @@ public static class YamlSceneLoader {
             if (Activator.CreateInstance(type, componentDir) is Component compInstance) {
                 compInstance.Name = name;
                 compInstance.Transform = ParseTransform(dto);
+                HandleExtraProps(compInstance, dto.ExtraProps);
                 components.Add(name, compInstance);
             } 
             else {
@@ -91,7 +96,7 @@ public static class YamlSceneLoader {
             throw new Exception($"Component of type {typeName} does not exist");
         }
 
-        _typeNamesMap.Add(typeName, compType);
+        TYPE_NAMES_MAP.Add(typeName, compType);
         return compType;
     }
 
@@ -101,6 +106,23 @@ public static class YamlSceneLoader {
             Rotation = compDto.Rotation,
             Scale = StringToVector2(compDto.Scale) ?? Vector2.One
         };
+    }
+
+    private static void HandleExtraProps(Component component, Dictionary<string, object>? properties) {
+        if (properties == null) return;        
+        
+        foreach (var (key, value) in properties) {
+            Type type = component.GetType();
+            var property = type.GetProperty(key);
+
+            if (property == null) {
+                // TODO: Log
+                continue;
+            }
+            
+            var convertedValue = Convert.ChangeType(value, property.PropertyType);
+            property.SetValue(component, convertedValue);
+        }
     }
 
     private static Vector2? StringToVector2(string valuePair) {

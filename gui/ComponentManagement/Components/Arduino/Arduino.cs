@@ -5,9 +5,8 @@ using System.Threading.Tasks;
 
 namespace ComponentManagement.Components;
 
-public class Arduino : Component
-{
-    public Arduino(string definitionPath) : base(definitionPath) {}
-
+public class Arduino : Component  {
+    public int TcpPort { get; set; }
     
+    public Arduino(string definitionPath) : base(definitionPath) { }
 }
