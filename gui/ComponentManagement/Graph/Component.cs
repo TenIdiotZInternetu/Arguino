@@ -29,6 +29,7 @@ public abstract class Component {
         CurrentSprite = Sprites.First().Value;
     }
     
+    public virtual void OnInitialized() {}
     public virtual void OnPinConnected(Pin pin) {}
     public virtual void OnPinDisconnected(Pin pin) {}
     public virtual void OnPinStateChanged(Pin pin) {}
