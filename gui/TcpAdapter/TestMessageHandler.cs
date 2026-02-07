@@ -24,6 +24,10 @@ public class TestMessageHandler : IMessageHandler<TestMessageHandler> {
         ReadEvent?.Invoke(message);
         StateChangedEvent?.Invoke(state);
     }
+
+    public void SendReadMessage() {
+        _ = _client.SendMessageAsync("R");
+    }
     
     public void SendWriteMessage(ArduinoState state) {
         StringBuilder messageBuilder = new StringBuilder()
