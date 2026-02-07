@@ -1,7 +1,62 @@
+using ComponentManagement.Graph;
+using TcpAdapter;
+
 namespace ComponentManagement.Components;
 
-public class Arduino : Component  {
-    public int TcpPort { get; set; }
+public class Arduino : Component {
+    public const int POLLING_RATE_MS = 10;
     
+    public int TcpPort { get; set; }
+
+    private ArduinoState _state = new();
+    
+    // TODO: Replace by interface
+    private bool _clientRunning;
+    private TcpClient<TestMessageHandler>? _tcpClient;
+    private TestMessageHandler? _tcpHandler => _tcpClient?.Handler;
+
     public Arduino(string definitionPath) : base(definitionPath) { }
+
+    public override void OnInitialized() {
+        if (TcpPort == 0) {
+            // TODO: Log uninitialzed port
+            return;
+        }
+
+        _tcpClient = new TcpClient<TestMessageHandler>(TcpPort);
+        _tcpHandler!.StateChangedEvent += UpdateCircuit;
+        Task.Run(RunClient);
+    }
+
+    public override void OnPinStateChanged(Pin pin) {
+        uint idx = GetPinIndex(pin.Name!);
+        _state.DigitalPins[idx] = pin.IsHigh;
+    }
+
+    private void UpdateCircuit(ArduinoState newState) {
+        _state = newState;
+        
+        for (int i = 0; i < ArduinoState.DIGITAL_PIN_COUNT; i++) {
+            bool pinValue = newState.DigitalPins[i];
+            Pin pin = GetDigitalPin(i);
+            pin.SetValue(pinValue);
+        }
+        
+        // The value changes should make a round trip across the circuit back to Arduino
+        _tcpHandler!.SendWriteMessage(_state);
+    }
+
+    private async Task RunClient() {
+        await _tcpClient!.ConnectAsync();
+        _clientRunning = true;
+
+        while (_clientRunning) {
+            _tcpHandler!.SendReadMessage();
+            await Task.Delay(POLLING_RATE_MS);
+        }
+    }
+
+    private Pin GetDigitalPin(int index) => GetPin("D" + index);
+    private Pin GetAnalogPin(int index) => GetPin("A" + index);
+    private uint GetPinIndex(string pinName) => uint.Parse(pinName[1..]);
 }

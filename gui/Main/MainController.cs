@@ -38,9 +38,9 @@ public static class MainController {
 
         InitCanvas();
         
-        if (!Arguments.NoTcp) {
-            Task.Run(TempTcpTest);
-        }
+        // if (!Arguments.NoTcp) {
+        //     Task.Run(TempTcpTest);
+        // }
         
         GlobalTimer = Stopwatch.StartNew();
         _isInitialized = true;
@@ -81,7 +81,7 @@ public static class MainController {
         ArduinoState state = new ArduinoState();
         while (true) {
             Adapter.SendWriteMessage(state);
-            state.SetDigital(8, !state.GetDigital(8));
+            // state.SetDigital(8, !state.GetDigital(8));
             await Task.Delay(3000);
         }
     }
