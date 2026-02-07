@@ -4,6 +4,7 @@ namespace TcpAdapter;
 
 public class TestMessageHandler : IMessageHandler<TestMessageHandler> {
     public const char WRITE_FLAG = 'W';
+    public const char READ_FLAG = 'R';
 
     public char Delimeter => ';';
     
@@ -26,7 +27,11 @@ public class TestMessageHandler : IMessageHandler<TestMessageHandler> {
     }
 
     public void SendReadMessage() {
-        _ = _client.SendMessageAsync("R");
+        StringBuilder messageBuilder = new StringBuilder()
+            .Append(READ_FLAG)
+            .Append(Delimeter);
+        
+        _ = _client.SendMessageAsync(messageBuilder.ToString());
     }
     
     public void SendWriteMessage(ArduinoState state) {
