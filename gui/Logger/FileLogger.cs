@@ -2,14 +2,19 @@ using System.Diagnostics;
 
 namespace Logger;
 
-public class FileLogger : ILogger, IDisposable, IAsyncDisposable {
+public class FileLogger : ILogger, IDisposable {
+    private const float FLUSH_INTERVAL = 2f;
+    
     public Stopwatch? Timer { get; set; }
+    
     StreamWriter _writer;
+    PeriodicTimer _flushTimer;
+    Task _flushTask;
     
     public FileLogger(string path) {
-        _writer = new StreamWriter(path) {
-            AutoFlush = true
-        };
+        _writer = new StreamWriter(path);
+        _flushTimer = new PeriodicTimer(TimeSpan.FromSeconds(FLUSH_INTERVAL));
+        _flushTask = BackgroundFlushAsync();
     }
     
     public void Log(string message) {
@@ -21,11 +26,10 @@ public class FileLogger : ILogger, IDisposable, IAsyncDisposable {
     }
 
     public void Dispose() {
+        _writer.Flush();
         _writer.Dispose();
-    }
-
-    public async ValueTask DisposeAsync() {
-        await _writer.DisposeAsync();
+        _flushTimer.Dispose();
+        _flushTask.Dispose();
     }
 
     private string GetTimestamp() {
@@ -34,5 +38,11 @@ public class FileLogger : ILogger, IDisposable, IAsyncDisposable {
         }
         
         return $"[{Timer.Elapsed:mm\\:ss\\.ffffff}]";
+    }
+    
+    private async Task BackgroundFlushAsync() {
+        while (await _flushTimer.WaitForNextTickAsync()) {
+            await _writer.FlushAsync();
+        }
     }
 }
