@@ -45,12 +45,14 @@ public class MessageHandler {
     }
 
     private void SendMessage(string message) {
-        try {
-            _ = _client.SendMessageAsync(message);
-            _logger?.Log(new LogMessage.Send(message));
-        }
-        catch (Exception e) {
-            _logger?.Log(new LogMessage.Error($"Error while sending message: {e.Message}"));
-        }
+        Task.Run(async () => {
+            try {
+                await _client.SendMessageAsync(message);
+                _logger?.Log(new LogMessage.Send(message));
+            }
+            catch (Exception e) {
+                _logger?.Log(new LogMessage.Error($"Error while sending message: {e.Message}"));
+            }
+        });
     }
 }
