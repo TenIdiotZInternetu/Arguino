@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Avalonia.Controls.ApplicationLifetimes;
 using CommandLine;
+using ComponentManagement;
 using ComponentManagement.Components;
 using ComponentManagement.Loaders;
 using ComponentManagement.Scenes;
@@ -20,19 +21,18 @@ public static class MainController {
     public static Scene Scene { get; private set; } = null!;
     public static MessageHandler Adapter { get; private set; } = null!;
     public static Stopwatch GlobalTimer { get; private set; } = null!;
+    
+    public static ILogger Logger { get; private set; } = null!;
 
     public static event Action? AppInitializedEvent;
 
     private static bool _isInitialized = false;
     
-    public static void InitApp(IClassicDesktopStyleApplicationLifetime desktop)
-    {
+    public static void InitApp(IClassicDesktopStyleApplicationLifetime desktop) {
         if (_isInitialized) {
             throw new InvalidOperationException("Repeated call of InitApp");
         }
-
-        Console.WriteLine("I'm alive");
-
+        
         if (desktop.MainWindow is MainWindow mainWindow) {
             MainWindow = mainWindow;
         } else {
@@ -41,12 +41,22 @@ public static class MainController {
 
         Arguments = Parser.Default.ParseArguments<CommandLineArguments>(desktop.Args).Value;
         GlobalTimer = Stopwatch.StartNew();
+        InitLogger();
+        Logger.Log(new InfoMessage("Starting App initialization."));
 
         InitScene();
         InitArduino();
         
         _isInitialized = true;
         AppInitializedEvent?.Invoke();
+        Logger.Log(new InfoMessage("App initialization complete."));
+    }
+
+    private static void InitLogger() {
+        var fileLogger = new FileLogger(Arguments.CircuitLogFile);
+        fileLogger.Timer = GlobalTimer;
+        Logger = new CompositeLogger(fileLogger);
+        ComponentManager.Logger = Logger;
     }
 
     private static void InitScene() {
@@ -72,12 +82,12 @@ public static class MainController {
             arduino = Scene.ComponentsMap.First(c => c.Value.TypeName == nameof(Arduino)).Value as Arduino;
         }
         catch (InvalidOperationException) {
-            // TODO: Log no Arduino found
+            Logger.Log(new WarningMessage("Arduino not found in the scene. Skipping TCP initialization."));
             return;
         }
 
         if (Arguments.NoTcp) {
-            // TODO: Log
+            Logger.Log(new InfoMessage("--no-tcp flag is set. Skipping TCP initialization."));
             return;
         }
         

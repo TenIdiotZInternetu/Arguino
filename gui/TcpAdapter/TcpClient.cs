@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -40,16 +41,16 @@ public class TcpClient {
             _stream = _client.GetStream();
         }
         catch (Exception e) {
-            _logger?.Log(new LogMessage.Error($"Error while connecting to server: {e.Message}"));
+            _logger?.Log(new ErrorMessage($"Error while connecting to server: {e.Message}"));
             return;
         }
 
-        _logger?.Log(new LogMessage.Info("Connected to server."));
+        _logger?.Log(new InfoMessage("Connected to server."));
         
         _ = Task.Run(LoopReadAsync);
-        _logger?.Log(new LogMessage.Info("Reading loop began."));
+        _logger?.Log(new InfoMessage("Reading loop began."));
         _ = Task.Run(LoopWriteAsync);
-        _logger?.Log(new LogMessage.Info("Writing loop began."));
+        _logger?.Log(new InfoMessage("Writing loop began."));
     }
 
     public async Task SendMessageAsync(string message) {
@@ -71,7 +72,7 @@ public class TcpClient {
             int bytesRead = await _stream!.ReadAsync(_buffer,  0, _buffer.Length, _cts.Token);
             if (bytesRead == 0) break; // Disconnected
             
-            _logger?.Log(new LogMessage.Info($"Reading {bytesRead} bytes..."));
+            _logger?.Log(new DebugMessage($"Reading {bytesRead} bytes..."));
             
             var chunk = Encoding.UTF8.GetString(_buffer, 0, bytesRead);
             chunkBuilder.Append(chunk);
@@ -101,7 +102,7 @@ public class TcpClient {
             while (_sendQueue.Reader.TryRead(out var message)) {
                 var data = Encoding.UTF8.GetBytes(message + Handler.Delimeter);
                 await _stream!.WriteAsync(data, 0, data.Length);
-                _logger?.Log(new LogMessage.Info($"Sent {data.Length} bytes..."));
+                _logger?.Log(new DebugMessage($"Sent {data.Length} bytes..."));
             }
         }
     }

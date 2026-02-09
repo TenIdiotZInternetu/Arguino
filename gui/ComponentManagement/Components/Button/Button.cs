@@ -28,12 +28,12 @@ public class Button : Component {
     }
 
     private void UpdatePins() {
-        UpdatePin(GetPin(0));
-        UpdatePin(GetPin(1));
+        UpdatePin(GetPin(0)!);
+        UpdatePin(GetPin(1)!);
     }
 
     private void UpdatePin(Pin pin) {
-        Pin otherPin = GetPin(1 - pin.Id);
+        Pin otherPin = GetPin(1 - pin.Id)!;
 
         if (otherPin.IsHigh && _isPushed) {
             pin.SetHigh();

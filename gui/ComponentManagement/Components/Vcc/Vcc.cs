@@ -10,7 +10,7 @@ public class Vcc : Component {
     private Pin _pin;
 
     public Vcc(string definitionPath) : base(definitionPath) {
-        _pin = GetPin(0);
+        _pin = GetPin(0)!;
         _pin.MakeWriteOnly();
         _pin.SetHigh();
     }

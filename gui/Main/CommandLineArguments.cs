@@ -16,6 +16,9 @@ public class CommandLineArguments {
     public bool NoTcp { get; set; }
     
     [Option("log-tcp", Default = "./frontend_tcp.log", HelpText = "Path to the log file for TCP messages")]
-    public string TcpLogFile { get; set; } =  "./tcp.log";
+    public string TcpLogFile { get; set; } =  "./frontend_tcp.log";
+    
+    [Option("log-circuit", Default = "./frontend.log", HelpText = "Path to the log file for general circuitry events")]
+    public string CircuitLogFile { get; set; } =  "./frontend.log";
 }
         

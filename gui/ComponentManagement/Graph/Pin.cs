@@ -1,3 +1,5 @@
+using Logger;
+
 namespace ComponentManagement.Graph;
 
 public class Pin {
@@ -38,7 +40,7 @@ public class Pin {
     
     public void SetValue(bool value) {
         if (_mode == PinMode.ReadOnly) {
-            // TODO: Log misuse
+            ComponentManager.Logger?.Log(new WarningMessage($"Attempting to set value to a ReadOnly pin {this}"));
             return;
         }
         
@@ -80,7 +82,7 @@ public class Pin {
 
     public void NotifyStateChange(ElectricalNode? _, DigitalState nodeState) {
         if (_mode == PinMode.WriteOnly) {
-            // TODO: Log misuse
+            ComponentManager.Logger?.Log(new WarningMessage($"Attempting to read value from a WriteOnly pin {this}"));
             return;
         }
 

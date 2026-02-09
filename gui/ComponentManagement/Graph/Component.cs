@@ -2,6 +2,7 @@ using System.Numerics;
 using ComponentManagement.Graph;
 using ComponentManagement.Loaders;
 using ComponentManagement.Scenes;
+using Logger;
 using Svg.Skia;
 
 namespace ComponentManagement;
@@ -37,13 +38,24 @@ public abstract class Component {
     public virtual void OnControlRelease() {}
     // TODO: OnInspect()
 
-    // TODO: Log getting unknown Pins and Sprites
-    public Pin GetPin(string name) {
-        return Pins.First(pin => pin.Name == name);
+    public Pin? GetPin(string name) {
+        try {
+            return Pins.First(pin => pin.Name == name);
+        }
+        catch (InvalidOperationException) {
+            ComponentManager.Logger?.Log(new ErrorMessage($"Accessing unknown pin '{name}' of the component {this}"));
+            return null;
+        }
     }
 
-    public Pin GetPin(uint id) {
-        return Pins.First(pin => pin.Id == id);
+    public Pin? GetPin(uint id) {
+        try {
+            return Pins.First(pin => pin.Id == id);
+        }
+        catch (InvalidOperationException) {
+            ComponentManager.Logger?.Log(new ErrorMessage($"Accessing unknown pin with '{id}' of the component {this}"));
+            return null;
+        }
     }
 
     protected void UpdateSprite(SKSvg sprite) {
@@ -54,7 +66,12 @@ public abstract class Component {
     }
 
     protected void UpdateSprite(string spriteName) {
-        UpdateSprite(Sprites[spriteName]);
+        try {
+            UpdateSprite(Sprites[spriteName]);
+        }
+        catch (IndexOutOfRangeException) {
+            ComponentManager.Logger?.Log(new ErrorMessage($"Accessing unknown sprite '{spriteName}' of the component {this}"));
+        }
     }
 
     private void InitPins() {

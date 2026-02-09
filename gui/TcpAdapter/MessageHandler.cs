@@ -51,7 +51,7 @@ public class MessageHandler {
                 _logger?.Log(new LogMessage.Send(message));
             }
             catch (Exception e) {
-                _logger?.Log(new LogMessage.Error($"Error while sending message: {e.Message}"));
+                _logger?.Log(new ErrorMessage($"Error while sending message: {e.Message}"));
             }
         });
     }

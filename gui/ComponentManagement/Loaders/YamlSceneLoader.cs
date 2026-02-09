@@ -3,6 +3,7 @@ using System.Numerics;
 using System.Reflection;
 using ComponentManagement.Graph;
 using ComponentManagement.Scenes;
+using Logger;
 using YamlDotNet.Serialization;
 
 namespace ComponentManagement.Loaders;
@@ -60,6 +61,7 @@ public static class YamlSceneLoader {
 
             if (!TYPE_NAMES_MAP.TryGetValue(typeName, out type)) {
                 type = MapComponentType(typeName);
+                if (type == null) continue;
             }
 
             string componentDir = componentsPath + "/" + typeName;
@@ -69,29 +71,34 @@ public static class YamlSceneLoader {
                 compInstance.Transform = ParseTransform(dto);
                 HandleExtraProps(compInstance, dto.ExtraProps);
                 components.Add(name, compInstance);
+                ComponentManager.Logger?.Log(new InfoMessage($"Instantiated component {name} of type {typeName}"));
             }
             else {
-                throw new UnreachableException($"{typeName} instance could not be created.");
+                ComponentManager.Logger?.Log(new ErrorMessage($"{typeName} instance could not be created."));
             }
         }
 
         return components;
     }
 
-    private static Type MapComponentType(string typeName) {
+    private static Type? MapComponentType(string typeName) {
         // TODO: Change assembly for custom added scripts
-        // TODO: Log unknown component types
-        
-        Type? compType = Assembly.GetExecutingAssembly()
-            .GetTypes()
-            .First(type => type.Name == typeName);
 
-        if (compType == null) {
-            throw new Exception($"Component of type {typeName} does not exist");
+        Type type;
+
+        try {
+            type = Assembly.GetExecutingAssembly()
+                .GetTypes()
+                .First(t => t.Name == typeName);
+        }
+        catch (InvalidOperationException) {
+            ComponentManager.Logger?.Log(new ErrorMessage($"Component of type {typeName} is not defined."));
+            return null;
         }
 
-        TYPE_NAMES_MAP.Add(typeName, compType);
-        return compType;
+        TYPE_NAMES_MAP.Add(typeName, type);
+        ComponentManager.Logger?.Log(new InfoMessage($"Defined the component type {typeName}"));
+        return type;
     }
 
     private static Transform ParseTransform(SceneDto.ComponentDto compDto) {
@@ -110,20 +117,20 @@ public static class YamlSceneLoader {
             var property = type.GetProperty(key);
 
             if (property == null) {
-                // TODO: Log
+                ComponentManager.Logger?.Log(new WarningMessage($"Unknown extra property '{key}' of {component} found in the scene's YAML"));
                 continue;
             }
             
             var convertedValue = Convert.ChangeType(value, property.PropertyType);
             property.SetValue(component, convertedValue);
+            ComponentManager.Logger?.Log(new DebugMessage($"Added extra property '{key}' to {component}"));
         }
     }
 
     private static Vector2? StringToVector2(string valuePair) {
-        // TODO: Log incorrect use of value pair
-        
         string[] values = valuePair.Split();
         if (values.Length != 2) {
+            ComponentManager.Logger?.Log(new ErrorMessage($"Incorrect vector2 definition '{valuePair}'; Must be 2 float values separated by a space."));
             return null;
         }
 
@@ -133,6 +140,7 @@ public static class YamlSceneLoader {
         success = success && float.TryParse(values[1], out y);
 
         if (!success) {
+            ComponentManager.Logger?.Log(new ErrorMessage($"Incorrect vector2 definition '{valuePair}'; Float parsing failed."));
             return null;
         }
         
@@ -150,20 +158,23 @@ public static class YamlSceneLoader {
                 string compName = pinDtoElements[0];
                 string compPinName = pinDtoElements[1];
 
-                // TODO: Error Logs
                 Component component = components[compName];
+                Pin? pin = uint.TryParse(compPinName, out uint pinId) ?
+                    component.GetPin(pinId) :
+                    component.GetPin(compPinName);
 
-                if (uint.TryParse(compPinName, out uint pinId)) {
-                    node.AddPin(component.GetPin(pinId));
+                if (pin != null) {
+                    node.AddPin(pin);
                 }
                 else {
-                    node.AddPin(component.GetPin(compPinName));
+                    ComponentManager.Logger?.Log(new ErrorMessage($"Failed to add a pin to the node '{node}'"));
                 }
-
+                
                 // TODO: Transitivity through nodes
             }
 
             nodes.Add(node);
+            ComponentManager.Logger?.Log(new InfoMessage($"Instantiated node '{node}'"));
         }
 
         return nodes;
