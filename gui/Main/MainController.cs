@@ -18,7 +18,7 @@ public static class MainController {
     public static CommandLineArguments Arguments { get; private set; } = null!;
     public static MainWindow MainWindow { get; private set; } = null!;
     public static Scene Scene { get; private set; } = null!;
-    public static TestMessageHandler Adapter { get; private set; } = null!;
+    public static MessageHandler Adapter { get; private set; } = null!;
     public static Stopwatch GlobalTimer { get; private set; } = null!;
 
     public static event Action? AppInitializedEvent;
@@ -84,14 +84,14 @@ public static class MainController {
         var fileLogger = new FileLogger(Arguments.TcpLogFile);
         fileLogger.Timer = GlobalTimer;
 
-        var tcpClient = new TcpClient<TestMessageHandler>(Arguments.TcpPort)
+        var tcpClient = new TcpClient(Arguments.TcpPort)
             .SetLogger(new CompositeLogger(fileLogger));
         
         arduino?.ConnectToSimulator(tcpClient);
     }
 
     private static async void TempTcpTest() {
-        var tcpClient = new TcpClient<TestMessageHandler>(Arguments.TcpPort);
+        var tcpClient = new TcpClient(Arguments.TcpPort);
         await tcpClient.ConnectAsync();
         Console.WriteLine("Connected!");
         Adapter = tcpClient.Handler;

@@ -6,9 +6,8 @@ using Logger;
 
 namespace TcpAdapter;
 
-public class TcpClient<THandler> 
-    where  THandler : IMessageHandler<THandler> {
-    public THandler Handler { get; init; }
+public class TcpClient {
+    public MessageHandler Handler { get; init; }
     
     public bool Connected => _client.Connected;
     public readonly IPEndPoint Endpoint;
@@ -27,12 +26,12 @@ public class TcpClient<THandler>
 
     public TcpClient(int port) {
         Endpoint = new IPEndPoint(IPAddress.Parse(LOCAL_HOST), port);
-        Handler = THandler.Create(this);
+        Handler = new MessageHandler(this);
     }
 
     public TcpClient(string ip, int port) {
         Endpoint = new IPEndPoint(IPAddress.Parse(ip), port);
-        Handler = THandler.Create(this);
+        Handler = new MessageHandler(this);
     }
 
     public async Task ConnectAsync() {
@@ -57,8 +56,9 @@ public class TcpClient<THandler>
         await _sendQueue.Writer.WriteAsync(message);
     }
 
-    public TcpClient<THandler> SetLogger(ILogger logger) {
+    public TcpClient SetLogger(ILogger logger) {
         _logger = logger;
+        Handler.SetLogger(logger);
         return this;
     }
 

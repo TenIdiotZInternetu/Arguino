@@ -12,8 +12,8 @@ public class Arduino : Component {
     
     // TODO: Replace by interface
     private bool _clientRunning;
-    private TcpClient<TestMessageHandler>? _tcpClient;
-    private TestMessageHandler? _tcpHandler => _tcpClient?.Handler;
+    private TcpClient? _tcpClient;
+    private MessageHandler? _tcpHandler => _tcpClient?.Handler;
 
     public Arduino(string definitionPath) : base(definitionPath) { }
 
@@ -26,7 +26,7 @@ public class Arduino : Component {
         }
     }
 
-    public void ConnectToSimulator(TcpClient<TestMessageHandler> tcpClient) {
+    public void ConnectToSimulator(TcpClient tcpClient) {
         _tcpClient = tcpClient;
         _tcpHandler!.StateChangedEvent += UpdateCircuit;
         

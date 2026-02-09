@@ -3,7 +3,7 @@ using Logger;
 
 namespace TcpAdapter;
 
-public class TestMessageHandler : IMessageHandler<TestMessageHandler> {
+public class MessageHandler {
     public const char WRITE_FLAG = 'W';
     public const char READ_FLAG = 'R';
 
@@ -13,14 +13,12 @@ public class TestMessageHandler : IMessageHandler<TestMessageHandler> {
     public event Action<ArduinoState>? StateChangedEvent;
 
     private StateEncoder _stateEncoder = new();
-    private TcpClient<TestMessageHandler> _client;
+    private TcpClient _client;
     
     private ILogger? _logger;
 
-    public static TestMessageHandler Create(TcpClient<TestMessageHandler> client) {
-        return new TestMessageHandler {
-            _client = client
-        };
+    public MessageHandler(TcpClient client) {
+        _client = client;
     }
 
     public void OnReadMessage(string message) {
