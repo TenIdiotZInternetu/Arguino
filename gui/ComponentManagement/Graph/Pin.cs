@@ -48,6 +48,7 @@ public class Pin {
         IsDriving = value;
 
         if (wasDriving != IsDriving) {
+            ComponentManager.Logger?.Log(new DebugMessage($"Changed the driving value of pin {this} to {value}"));
             DrivingChangedEvent?.Invoke(this, value);
         }
     }
@@ -61,6 +62,7 @@ public class Pin {
     public void ConnectToNode(ElectricalNode node) {
         Disconnect();
         _node = node;
+        ComponentManager.Logger?.Log(new DebugMessage($"Connected pin {this} to node {_node}"));
 
         if (!IsWriteOnly) {
             _node.StateChangedEvent += NotifyStateChange;
@@ -75,6 +77,7 @@ public class Pin {
 
         _node.StateChangedEvent -= NotifyStateChange;
         _node = null;
+        ComponentManager.Logger?.Log(new DebugMessage($"Disconnected pin {this} from node {_node}"));
         NotifyStateChange(null, State);
         PinDisconnectedEvent?.Invoke(this);
     }
@@ -87,6 +90,7 @@ public class Pin {
         }
 
         if (IsDriving) return;
+        ComponentManager.Logger?.Log(new DebugMessage($"Reading value of the pin {this} changed to {nodeState}"));
         StateChangedEvent?.Invoke(this, State);
     }
 

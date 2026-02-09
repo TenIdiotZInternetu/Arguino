@@ -1,4 +1,5 @@
 using System.Text;
+using Logger;
 
 namespace ComponentManagement.Graph;
 
@@ -47,8 +48,11 @@ public class ElectricalNode {
         else {
             DrivingPins--;
         }
+        
+        ComponentManager.Logger?.Log(new DebugMessage($"Number of driving pins changed to {DrivingPins} on the node {this}."));
 
         if (prevState != State) {
+            ComponentManager.Logger?.Log(new DebugMessage($"State changed to {State} on the node {this}."));
             foreach (var pin in _pins.FindAll(p => p != sourcePin)) {
                 pin.NotifyStateChange(this, State);
             }
