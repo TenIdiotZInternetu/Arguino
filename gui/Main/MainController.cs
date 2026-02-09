@@ -40,11 +40,11 @@ public static class MainController {
         }
 
         Arguments = Parser.Default.ParseArguments<CommandLineArguments>(desktop.Args).Value;
+        GlobalTimer = Stopwatch.StartNew();
 
         InitScene();
         InitArduino();
         
-        GlobalTimer = Stopwatch.StartNew();
         _isInitialized = true;
         AppInitializedEvent?.Invoke();
     }
