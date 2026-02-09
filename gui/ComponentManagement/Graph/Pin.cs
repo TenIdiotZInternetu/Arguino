@@ -27,9 +27,14 @@ public class Pin {
     private Component _component;
     private ElectricalNode? _node;
     
-    private enum PinMode { General, ReadOnly, WriteOnly }
+    public enum PinMode { General, ReadOnly, WriteOnly }
     private PinMode _mode = PinMode.General;
 
+    public Pin(Component component, uint id, string? name = null) {
+        _component = component;
+        Id = id;
+        Name = name;
+    }
     
     public void MakeReadOnly() => _mode = PinMode.ReadOnly;
     public void MakeWriteOnly() => _mode = PinMode.WriteOnly;
@@ -46,18 +51,25 @@ public class Pin {
         
         bool wasDriving = IsDriving;
         IsDriving = value;
+        if (wasDriving == IsDriving) return;
 
-        if (wasDriving != IsDriving) {
-            ComponentManager.Logger?.Log(new DebugMessage($"Changed the driving value of pin {this} to {value}"));
-            DrivingChangedEvent?.Invoke(this, value);
+        ComponentManager.Logger?.Log(new DebugMessage($"Changed the driving value of pin {this} to {value}"));
+        DrivingChangedEvent?.Invoke(this, value);
+    }
+
+    public void SetMode(PinMode mode) {
+        if (mode == _mode) return;
+        _mode = mode;
+        ComponentManager.Logger?.Log(new DebugMessage($"Changed the access mode of pin {this} to {mode}"));
+
+        if (_node == null) return;
+        _node.StateChangedEvent -= NotifyStateChange;
+
+        if (!IsWriteOnly) {
+            _node.StateChangedEvent += NotifyStateChange;
         }
     }
 
-    public Pin(Component component, uint id, string? name = null) {
-        _component = component;
-        Id = id;
-        Name = name;
-    }
 
     public void ConnectToNode(ElectricalNode node) {
         Disconnect();
@@ -76,8 +88,8 @@ public class Pin {
         if (_node == null) return;
 
         _node.StateChangedEvent -= NotifyStateChange;
-        _node = null;
         ComponentManager.Logger?.Log(new DebugMessage($"Disconnected pin {this} from node {_node}"));
+        _node = null;
         NotifyStateChange(null, State);
         PinDisconnectedEvent?.Invoke(this);
     }

@@ -41,9 +41,18 @@ public class Arduino : Component {
 
     private void UpdateCircuit(ArduinoState newState) {
         for (int i = 0; i < ArduinoState.DIGITAL_PIN_COUNT; i++) {
-            bool pinValue = newState.DigitalPins[i];
             Pin pin = GetDigitalPin(i);
-            pin.SetValue(pinValue);
+            bool pinValue = newState.DigitalPins[i];
+            var pinMode = newState.PinModes[i];
+
+            if (pinMode == ArduinoState.PinMode.In) {
+                pin.MakeReadOnly();
+            }
+
+            if (pinMode == ArduinoState.PinMode.Out) {
+                pin.MakeWriteOnly();
+                pin.SetValue(pinValue);
+            }
         }
     }
 
