@@ -78,7 +78,7 @@ public class Pin {
     }
 
 
-    private void NotifyStateChange(ElectricalNode? _, DigitalState nodeState) {
+    public void NotifyStateChange(ElectricalNode? _, DigitalState nodeState) {
         if (_mode == PinMode.WriteOnly) {
             // TODO: Log misuse
             return;

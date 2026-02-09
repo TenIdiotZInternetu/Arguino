@@ -49,7 +49,9 @@ public class ElectricalNode {
         }
 
         if (prevState != State) {
-            StateChangedEvent?.Invoke(this, State);
+            foreach (var pin in _pins.FindAll(p => p != sourcePin)) {
+                pin.NotifyStateChange(this, State);
+            }
         }
     }
 

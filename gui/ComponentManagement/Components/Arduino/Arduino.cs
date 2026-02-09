@@ -31,19 +31,18 @@ public class Arduino : Component {
     public override void OnPinStateChanged(Pin pin) {
         uint idx = GetPinIndex(pin.Name!);
         _state.DigitalPins[idx] = pin.IsHigh;
+
+        if (_clientRunning) {
+            _tcpHandler!.SendWriteMessage(_state);
+        }
     }
 
     private void UpdateCircuit(ArduinoState newState) {
-        _state = newState;
-        
         for (int i = 0; i < ArduinoState.DIGITAL_PIN_COUNT; i++) {
             bool pinValue = newState.DigitalPins[i];
             Pin pin = GetDigitalPin(i);
             pin.SetValue(pinValue);
         }
-        
-        // The value changes should make a round trip across the circuit back to Arduino
-        _tcpHandler!.SendWriteMessage(_state);
     }
 
     private async Task RunClient() {
