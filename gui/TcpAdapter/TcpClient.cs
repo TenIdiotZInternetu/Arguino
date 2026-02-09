@@ -2,6 +2,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Channels;
+using Logger;
 
 namespace TcpAdapter;
 
@@ -21,6 +22,8 @@ public class TcpClient<THandler>
     private Channel<string> _sendQueue = Channel.CreateUnbounded<string>();
     
     private CancellationTokenSource _cts = new();
+
+    private ILogger? _logger;
 
     public TcpClient(int port) {
         Endpoint = new IPEndPoint(IPAddress.Parse(LOCAL_HOST), port);
@@ -44,10 +47,14 @@ public class TcpClient<THandler>
         await _sendQueue.Writer.WriteAsync(message);
     }
 
+    public TcpClient<THandler> SetLogger(ILogger logger) {
+        _logger = logger;
+        return this;
+    }
+
     private async Task LoopReadAsync() {
         StringBuilder chunkBuilder = new();
         StringBuilder messageBuilder = new();
-        
         List<string> messages = new();
 
         while (!_cts.IsCancellationRequested) {
