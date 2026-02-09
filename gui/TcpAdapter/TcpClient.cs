@@ -36,11 +36,21 @@ public class TcpClient<THandler>
     }
 
     public async Task ConnectAsync() {
-        await _client.ConnectAsync(Endpoint);
-        _stream = _client.GetStream();
+        try {
+            await _client.ConnectAsync(Endpoint);
+            _stream = _client.GetStream();
+        }
+        catch (Exception e) {
+            _logger?.Log(new LogMessage.Error($"Error while connecting to server: {e.Message}"));
+            return;
+        }
 
+        _logger?.Log(new LogMessage.Info("Connected to server."));
+        
         _ = Task.Run(LoopReadAsync);
+        _logger?.Log(new LogMessage.Info("Reading loop began."));
         _ = Task.Run(LoopWriteAsync);
+        _logger?.Log(new LogMessage.Info("Writing loop began."));
     }
 
     public async Task SendMessageAsync(string message) {
@@ -60,6 +70,8 @@ public class TcpClient<THandler>
         while (!_cts.IsCancellationRequested) {
             int bytesRead = await _stream!.ReadAsync(_buffer,  0, _buffer.Length, _cts.Token);
             if (bytesRead == 0) break; // Disconnected
+            
+            _logger?.Log(new LogMessage.Info($"Reading {bytesRead} bytes..."));
             
             var chunk = Encoding.UTF8.GetString(_buffer, 0, bytesRead);
             chunkBuilder.Append(chunk);
@@ -89,6 +101,7 @@ public class TcpClient<THandler>
             while (_sendQueue.Reader.TryRead(out var message)) {
                 var data = Encoding.UTF8.GetBytes(message + Handler.Delimeter);
                 await _stream!.WriteAsync(data, 0, data.Length);
+                _logger?.Log(new LogMessage.Info($"Sent {data.Length} bytes..."));
             }
         }
     }
