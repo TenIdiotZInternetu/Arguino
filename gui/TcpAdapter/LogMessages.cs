@@ -20,7 +20,7 @@ public struct LogMessage {
     
     public record struct Send(string TcpMessage) : IMessage {
         public string AsString() => $"Sent message to the server: {TcpMessage}";
-        public string Type() => "TCP::Info";
+        public string Type() => "TCP::SEND";
     }
 }
 
