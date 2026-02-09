@@ -4,26 +4,28 @@ namespace Logger;
 
 public class FileLogger : ILogger, IDisposable, IAsyncDisposable {
     public Stopwatch? Timer { get; set; }
-    StreamWriter _file;
+    StreamWriter _writer;
     
     public FileLogger(string path) {
-        _file = new StreamWriter(path);
+        _writer = new StreamWriter(path) {
+            AutoFlush = true
+        };
     }
     
     public void Log(string message) {
-        _file.WriteLine($"{GetTimestamp()} {message}");
+        _writer.WriteLine($"{GetTimestamp()} {message}");
     }
     
     public void Log(IMessage message) {
-        _file.WriteLine($"{GetTimestamp()}[{message.Type()}] {message.AsString()}");
+        _writer.WriteLine($"{GetTimestamp()}[{message.Type()}] {message.AsString()}");
     }
 
     public void Dispose() {
-        _file.Dispose();
+        _writer.Dispose();
     }
 
     public async ValueTask DisposeAsync() {
-        await _file.DisposeAsync();
+        await _writer.DisposeAsync();
     }
 
     private string GetTimestamp() {
