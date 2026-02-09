@@ -80,9 +80,12 @@ public static class MainController {
             // TODO: Log
             return;
         }
+        
+        var fileLogger = new FileLogger(Arguments.TcpLogFile);
+        fileLogger.Timer = GlobalTimer;
 
         var tcpClient = new TcpClient<TestMessageHandler>(Arguments.TcpPort)
-            .SetLogger(new CompositeLogger(new FileLogger(Arguments.TcpLogFile)));
+            .SetLogger(new CompositeLogger(fileLogger));
         
         arduino?.ConnectToSimulator(tcpClient);
     }
