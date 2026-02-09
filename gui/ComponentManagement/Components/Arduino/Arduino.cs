@@ -6,8 +6,6 @@ namespace ComponentManagement.Components;
 public class Arduino : Component {
     public const int POLLING_RATE_MS = 10;
     
-    public int TcpPort { get; set; }
-
     private ArduinoState _state = new();
     
     // TODO: Replace by interface

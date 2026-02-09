@@ -2,8 +2,6 @@ Components:
   Arduino:
     Type: Arduino
     Position: 10 10
-    ExtraProps:
-      TcpPort: 8888
   Led0:
     Type: Led
     Position: 700 10
