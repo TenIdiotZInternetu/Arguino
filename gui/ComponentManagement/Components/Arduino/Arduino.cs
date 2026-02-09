@@ -12,8 +12,12 @@ public class Arduino : Component {
     private bool _clientRunning;
     private TcpClient? _tcpClient;
     private MessageHandler? _tcpHandler => _tcpClient?.Handler;
+    
+    private readonly SynchronizationContext _uiContext;
 
-    public Arduino(string definitionPath) : base(definitionPath) { }
+    public Arduino(string definitionPath) : base(definitionPath) {
+        _uiContext = SynchronizationContext.Current!;
+    }
 
     public override void OnPinStateChanged(Pin pin) {
         uint idx = GetPinIndex(pin.Name!);
@@ -26,12 +30,15 @@ public class Arduino : Component {
 
     public void ConnectToSimulator(TcpClient tcpClient) {
         _tcpClient = tcpClient;
-        _tcpHandler!.StateChangedEvent += UpdateCircuit;
+        
+        _tcpHandler!.StateChangedEvent += state => {
+            _uiContext.Post(_ => UpdateCircuit(state), null);    
+        };
         
         Task.Run(async () => {
             await _tcpClient!.ConnectAsync();
             _clientRunning = true;
-
+        
             while (_clientRunning) {
                 _tcpHandler!.SendReadMessage();
                 await Task.Delay(POLLING_RATE_MS);
