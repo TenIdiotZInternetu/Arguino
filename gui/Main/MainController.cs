@@ -99,33 +99,4 @@ public static class MainController {
         
         arduino?.ConnectToSimulator(tcpClient);
     }
-
-    private static async void TempTcpTest() {
-        var tcpClient = new TcpClient(Arguments.TcpPort);
-        await tcpClient.ConnectAsync();
-        Console.WriteLine("Connected!");
-        Adapter = tcpClient.Handler;
-        Adapter.ReadEvent += ReadTest;
-
-
-        _ = Task.Run(TestWrite);
-
-        while (true) {
-            await tcpClient.SendMessageAsync("R");
-            await Task.Delay(10);
-        }
-    }
-
-    private static async Task TestWrite() {
-        ArduinoState state = new ArduinoState();
-        while (true) {
-            Adapter.SendWriteMessage(state);
-            // state.SetDigital(8, !state.GetDigital(8));
-            await Task.Delay(3000);
-        }
-    }
-
-    private static void ReadTest(string message) {
-        // Console.WriteLine(message);
-    }
 }
