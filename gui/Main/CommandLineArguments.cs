@@ -14,5 +14,8 @@ public class CommandLineArguments {
 
     [Option("no-tcp", Default = false, HelpText = "Turn off connection to TCP server at initialization")]
     public bool NoTcp { get; set; }
+    
+    [Option("log-tcp", Default = "./tcp.log", HelpText = "Path to the log file for TCP messages")]
+    public string TcpLogFile { get; set; } =  "./tcp.log";
 }
         

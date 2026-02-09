@@ -17,17 +17,6 @@ public class Arduino : Component {
 
     public Arduino(string definitionPath) : base(definitionPath) { }
 
-    public override void OnInitialized() {
-        if (TcpPort == 0) {
-            // TODO: Log uninitialzed port
-            return;
-        }
-
-        _tcpClient = new TcpClient<TestMessageHandler>(TcpPort);
-        _tcpHandler!.StateChangedEvent += UpdateCircuit;
-        Task.Run(RunClient);
-    }
-
     public override void OnPinStateChanged(Pin pin) {
         uint idx = GetPinIndex(pin.Name!);
         _state.DigitalPins[idx] = pin.IsHigh;
@@ -37,21 +26,26 @@ public class Arduino : Component {
         }
     }
 
+    public void ConnectToSimulator(TcpClient<TestMessageHandler> tcpClient) {
+        _tcpClient = tcpClient;
+        _tcpHandler!.StateChangedEvent += UpdateCircuit;
+        
+        Task.Run(async () => {
+            await _tcpClient!.ConnectAsync();
+            _clientRunning = true;
+
+            while (_clientRunning) {
+                _tcpHandler!.SendReadMessage();
+                await Task.Delay(POLLING_RATE_MS);
+            }
+        });
+    }
+
     private void UpdateCircuit(ArduinoState newState) {
         for (int i = 0; i < ArduinoState.DIGITAL_PIN_COUNT; i++) {
             bool pinValue = newState.DigitalPins[i];
             Pin pin = GetDigitalPin(i);
             pin.SetValue(pinValue);
-        }
-    }
-
-    private async Task RunClient() {
-        await _tcpClient!.ConnectAsync();
-        _clientRunning = true;
-
-        while (_clientRunning) {
-            _tcpHandler!.SendReadMessage();
-            await Task.Delay(POLLING_RATE_MS);
         }
     }
 
