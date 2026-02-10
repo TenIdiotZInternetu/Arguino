@@ -109,7 +109,12 @@ void ArguinoConnectionHandler<TEncoder, TLogger>::handle_read_state(const std::s
     boost::asio::async_write(_socket,
         boost::asio::buffer(_outcomingMessage),
         [me = this->shared_from_this()](auto error, size_t bytes_written) {
-            me->_logger->log(message::Read(me->_outcomingMessage));
+            if (error) {
+                me->_logger->log(message::Error("Error occured while writing to socket: ", error));
+            }
+            else {
+                me->_logger->log(message::Read(me->_outcomingMessage));
+            }
         });
 }
 

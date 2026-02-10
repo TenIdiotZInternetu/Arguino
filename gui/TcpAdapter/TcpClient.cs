@@ -46,11 +46,22 @@ public class TcpClient {
         }
 
         _logger?.Log(new InfoMessage("Connected to server."));
-        
-        _ = Task.Run(LoopReadAsync);
-        _logger?.Log(new InfoMessage("Reading loop began."));
-        _ = Task.Run(LoopWriteAsync);
-        _logger?.Log(new InfoMessage("Writing loop began."));
+
+        try {
+            _ = Task.Run(LoopReadAsync);
+            _logger?.Log(new InfoMessage("Reading loop began."));
+        }
+        catch (Exception e) {
+            _logger?.Log(new ErrorMessage($"Error while processing Read loop: {e.Message}"));
+        }
+
+        try {
+            _ = Task.Run(LoopWriteAsync);
+            _logger?.Log(new InfoMessage("Writing loop began."));
+        }
+        catch (Exception e) {
+            _logger?.Log(new ErrorMessage($"Error while processing Write loop: {e.Message}"));
+        }
     }
 
     public async Task SendMessageAsync(string message) {
