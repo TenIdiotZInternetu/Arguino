@@ -45,6 +45,7 @@ void CanonicalState::update_state(const ArduinoState& newState)
 {
     ArduinoState& writeState = s_instance->get_write_state();
     writeState.get_pin_mode() = state().get_pin_mode();
+    writeState.get_digital() = state().get_digital();
 
     for (ArduinoState::pin_t i = 0; i < ArduinoState::DIGITAL_PIN_COUNT; i++) {
         if (writeState.get_pin_mode(i) == PinMode::In) {
