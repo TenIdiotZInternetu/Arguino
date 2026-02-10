@@ -17,8 +17,11 @@ class StateEncoder {
 inline std::string StateEncoder::encode(state_t state)
 {
     std::string message;
-    for (auto&& pinOn : state.get_digital()) {
-        message += std::format(":{}", pinOn ? 1 : 0);
+    for (size_t i = 0; i < state_t::DIGITAL_PIN_COUNT; ++i) {
+        bool isPinOn = state.get_digital(i);
+        PinMode pinMode = state.get_pin_mode(i);
+        message += std::format(":{}", pinMode == PinMode::In ? 'I' : 'O');
+        message += std::format("{}", isPinOn ? 1 : 0);
     }
 
     // TODO: implement other state variables
