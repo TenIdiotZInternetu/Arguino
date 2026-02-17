@@ -7,16 +7,32 @@
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="Gui.Views.MainWindow"
         Title="Main">
-        
-    
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="9*"/>
-            <RowDefinition Height="1*"/>
-        </Grid.RowDefinitions>
 
-        <ucontrol:CircuitCanvas Grid.Row="0" x:Name="CircuitCanvas"/>
+    <Window.Styles>
+        <Style Selector="StackPanel, ListBox">
+            <Setter Property="Background" Value="#1a283d"/>
+        </Style>
+    </Window.Styles>
 
-        <ucontrol:Timer Grid.Row="1" Foreground="White" VerticalAlignment="Stretch"/>
+    <Grid RowDefinitions= "30,40,*">
+
+        <Menu Grid.Row="0">
+            <MenuItem Header="File" />
+        </Menu>
+
+        <StackPanel Grid.Row="1" Orientation= "Horizontal" Margin="5, 0" Spacing="5">
+            <Button Content="▶️" ToolTip.Tip="Run"/>
+            <Button Content="⏹️" ToolTip.Tip="Stop"/>
+            <ucontrol:Timer Foreground="White" VerticalAlignment="Center" HorizontalAlignment="Right"/>
+        </StackPanel>
+
+        <Grid Grid.Row="2" RowDefinitions="3*,4,1*" ColumnDefinitions= "1*,4,5*">
+            <StackPanel Grid.Column="0" Grid.Row="0"/>
+            <GridSplitter Grid.Column="1" Grid.Row="0" ResizeDirection="Columns"/>
+            <ucontrol:CircuitCanvas Grid.Column="2"  Grid.Row="0" x:Name="CircuitCanvas"/>
+            <GridSplitter Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="3" ResizeDirection="Rows"/>
+            <ListBox Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="3"/>
+        </Grid>
+
     </Grid>
 </Window>

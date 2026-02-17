@@ -10,7 +10,7 @@
              x:DataType="vm:CircuitCanvas">
 
     <ZoomBorder ClipToBounds="True">
-        <Canvas  Background="#202020">
+        <Canvas  Background="#021126">
             
             <ItemsControl ItemsSource="{Binding Components}">
                 <ItemsControl.ItemsPanel>
