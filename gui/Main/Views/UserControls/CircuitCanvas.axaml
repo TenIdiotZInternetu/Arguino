@@ -9,25 +9,25 @@
              x:Class="Gui.Views.UserControls.CircuitCanvas"
              x:DataType="vm:CircuitCanvas">
 
-    <ZoomBorder ClipToBounds="True">
-        <Canvas  Background="#021126">
-            
-            <ItemsControl ItemsSource="{Binding Components}">
-                <ItemsControl.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <Canvas Width="1920" Height="1080"/>
-                    </ItemsPanelTemplate>
-                </ItemsControl.ItemsPanel>
-        
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate DataType="componentManagement:Component">
-                        <tcontrol:ComponentControl 
-                            Component="{Binding}"
-                        />
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-                
-            </ItemsControl>
-        </Canvas>
-    </ZoomBorder>
+    <Panel ClipToBounds="False">
+        <ZoomBorder Stretch="None">
+            <Canvas Background="Transparent">
+
+                <ItemsControl ItemsSource="{Binding Components}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <Canvas Width="1920" Height="1080"/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate DataType="componentManagement:Component">
+                            <tcontrol:ComponentControl Component="{Binding}"/>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+
+                </ItemsControl>
+            </Canvas>
+        </ZoomBorder>
+    </Panel>
 </UserControl>
