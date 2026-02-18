@@ -9,25 +9,22 @@ namespace ComponentManagement;
 
 public abstract class Component {
     public required string Name { get; set; }
-    public string TypeName => Configuration.Name;
-    public string Description => Configuration.Description;
+    public string TypeName { get; init; }
 
+    public ComponentConfiguration Configuration => _configs[TypeName];
     public Transform Transform { get; set; } = new();
-    
-    public Dictionary<string, SKSvg> Sprites { get; private set; }
     public SKSvg CurrentSprite { get; private set; }
+    
     public event Action<SKSvg>? SpriteChangedEvent;
-    
-    // TODO: Replace ComponentConfiguration by an Interface
-    protected ComponentConfiguration Configuration;
-    protected List<Pin> Pins = [];
-    
-    public Component(string definitionPath) {
-        Configuration = YamlComponentLoader.LoadYaml(definitionPath);
 
+    private readonly List<Pin> _pins = [];
+    private static readonly Dictionary<string, ComponentConfiguration> _configs = [];
+    
+    internal Component(string typeName) {
+        TypeName = typeName;
+        
         InitPins();
-        Sprites = SkiaSvgLoader.LoadSvgs(definitionPath);
-        CurrentSprite = Sprites.First().Value;
+        CurrentSprite = Configuration.Sprites.First().Value;
     }
     
     public virtual void OnInitialized() {}
@@ -40,7 +37,7 @@ public abstract class Component {
 
     public Pin? GetPin(string name) {
         try {
-            return Pins.First(pin => pin.Name == name);
+            return _pins.First(pin => pin.Name == name);
         }
         catch (InvalidOperationException) {
             ComponentManager.LogError($"Accessing unknown pin '{name}' of the component {this}");
@@ -50,12 +47,16 @@ public abstract class Component {
 
     public Pin? GetPin(uint id) {
         try {
-            return Pins.First(pin => pin.Id == id);
+            return _pins.First(pin => pin.Id == id);
         }
         catch (InvalidOperationException) {
             ComponentManager.LogError($"Accessing unknown pin with '{id}' of the component {this}");
             return null;
         }
+    }
+
+    internal static void AddConfiguration(ComponentConfiguration config) {
+        _configs.TryAdd(config.Name, config);
     }
 
     protected void UpdateSprite(SKSvg sprite) {
@@ -67,7 +68,7 @@ public abstract class Component {
 
     protected void UpdateSprite(string spriteName) {
         try {
-            UpdateSprite(Sprites[spriteName]);
+            UpdateSprite(Configuration.Sprites[spriteName]);
         }
         catch (IndexOutOfRangeException) {
             ComponentManager.LogError($"Accessing unknown sprite '{spriteName}' of the component {this}");
@@ -75,7 +76,7 @@ public abstract class Component {
     }
 
     private void InitPins() {
-        foreach (Pin pin in Pins) {
+        foreach (Pin pin in _pins) {
             pin.StateChangedEvent += OnPinStateChanged;
             pin.PinConnectedEvent += OnPinConnected;
             pin.PinDisconnectedEvent += OnPinDisconnected;

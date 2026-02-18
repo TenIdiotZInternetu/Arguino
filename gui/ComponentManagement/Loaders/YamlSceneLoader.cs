@@ -58,14 +58,15 @@ public static class YamlSceneLoader {
         
         foreach (var (name, dto) in componentDtos) {
             string typeName = dto.Type;
+            string componentDir = componentsPath + "/" + typeName;
             Type? type;
+
 
             if (!TYPE_NAMES_MAP.TryGetValue(typeName, out type)) {
                 type = MapComponentType(typeName);
                 if (type == null) continue;
             }
 
-            string componentDir = componentsPath + "/" + typeName;
 
             if (Activator.CreateInstance(type, componentDir) is Component compInstance) {
                 compInstance.Name = name;
