@@ -8,7 +8,7 @@ using Logger;
 namespace ComponentManagement.Utils;
 
 public static class YamlUtils {
-    private static Vector2? StringToVector2(string valuePair) {
+    public static Vector2? StringToVector2(string valuePair) {
         if (valuePair == "") {
             ComponentManager.LogDebug("Encountered empty string when expected vector string; Using defualt value instead.");
             return null;
