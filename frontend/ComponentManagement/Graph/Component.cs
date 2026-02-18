@@ -23,7 +23,7 @@ public abstract class Component {
     protected List<Pin> Pins = [];
     
     public Component(string definitionPath) {
-        Configuration = YamlConfigurationLoader.LoadYaml(definitionPath);
+        Configuration = YamlComponentLoader.LoadYaml(definitionPath);
 
         InitPins();
         Sprites = SkiaSvgLoader.LoadSvgs(definitionPath);
@@ -75,16 +75,6 @@ public abstract class Component {
     }
 
     private void InitPins() {
-        uint pinId = 0;
-        foreach (var pinName in Configuration.PinNames) {
-            Pins.Add(new Pin(this, pinId, pinName));
-            pinId++;
-        }
-
-        for (; pinId < Configuration.Pins; pinId++) {
-            Pins.Add(new Pin(this, pinId));
-        }
-
         foreach (Pin pin in Pins) {
             pin.StateChangedEvent += OnPinStateChanged;
             pin.PinConnectedEvent += OnPinConnected;
