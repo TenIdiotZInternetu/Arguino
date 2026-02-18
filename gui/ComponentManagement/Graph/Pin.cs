@@ -2,6 +2,8 @@ using Logger;
 
 namespace ComponentManagement.Graph;
 
+public record struct PinPrototype(uint Id, string? Name = null);
+
 public class Pin {
     public uint Id { get; init; }
     public string? Name { get; init; }
