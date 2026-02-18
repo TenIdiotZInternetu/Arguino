@@ -3,6 +3,7 @@ using System.Numerics;
 using System.Reflection;
 using ComponentManagement.Graph;
 using ComponentManagement.Scenes;
+using ComponentManagement.Utils;
 using Logger;
 using YamlDotNet.Serialization;
 
@@ -103,9 +104,9 @@ public static class YamlSceneLoader {
 
     private static Transform ParseTransform(SceneDto.ComponentDto compDto) {
         return new Transform {
-            Position = StringToVector2(compDto.Position) ?? Vector2.Zero,
+            Position = YamlUtils.StringToVector2(compDto.Position) ?? Vector2.Zero,
             Rotation = compDto.Rotation,
-            Scale = StringToVector2(compDto.Scale) ?? Vector2.One
+            Scale = YamlUtils.StringToVector2(compDto.Scale) ?? Vector2.One
         };
     }
 
