@@ -45,7 +45,7 @@ public class Pin {
     
     public void SetValue(bool value) {
         if (_mode == PinMode.ReadOnly) {
-            ComponentManager.Logger?.Log(new WarningMessage($"Attempting to set value to a ReadOnly pin {this}"));
+            ComponentManager.LogWarning($"Attempting to set value to a ReadOnly pin {this}");
             return;
         }
         
@@ -53,14 +53,14 @@ public class Pin {
         IsDriving = value;
         if (wasDriving == IsDriving) return;
 
-        ComponentManager.Logger?.Log(new DebugMessage($"Changed the driving value of pin {this} to {value}"));
+        ComponentManager.LogDebug($"Changed the driving value of pin {this} to {value}");
         DrivingChangedEvent?.Invoke(this, value);
     }
 
     public void SetMode(PinMode mode) {
         if (mode == _mode) return;
         _mode = mode;
-        ComponentManager.Logger?.Log(new DebugMessage($"Changed the access mode of pin {this} to {mode}"));
+        ComponentManager.LogDebug($"Changed the access mode of pin {this} to {mode}");
 
         if (_node == null) return;
         _node.StateChangedEvent -= NotifyStateChange;
@@ -74,7 +74,7 @@ public class Pin {
     public void ConnectToNode(ElectricalNode node) {
         Disconnect();
         _node = node;
-        ComponentManager.Logger?.Log(new DebugMessage($"Connected pin {this} to node {_node}"));
+        ComponentManager.LogDebug($"Connected pin {this} to node {_node}");
 
         if (!IsWriteOnly) {
             _node.StateChangedEvent += NotifyStateChange;
@@ -88,7 +88,7 @@ public class Pin {
         if (_node == null) return;
 
         _node.StateChangedEvent -= NotifyStateChange;
-        ComponentManager.Logger?.Log(new DebugMessage($"Disconnected pin {this} from node {_node}"));
+        ComponentManager.LogDebug($"Disconnected pin {this} from node {_node}");
         _node = null;
         NotifyStateChange(null, State);
         PinDisconnectedEvent?.Invoke(this);
@@ -97,12 +97,12 @@ public class Pin {
 
     public void NotifyStateChange(ElectricalNode? _, DigitalState nodeState) {
         if (_mode == PinMode.WriteOnly) {
-            ComponentManager.Logger?.Log(new WarningMessage($"Attempting to read value from a WriteOnly pin {this}"));
+            ComponentManager.LogWarning($"Attempting to read value from a WriteOnly pin {this}");
             return;
         }
 
         if (IsDriving) return;
-        ComponentManager.Logger?.Log(new DebugMessage($"Reading value of the pin {this} changed to {nodeState}"));
+        ComponentManager.LogDebug($"Reading value of the pin {this} changed to {nodeState}");
         StateChangedEvent?.Invoke(this, State);
     }
 
