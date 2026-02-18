@@ -43,7 +43,7 @@ public abstract class Component {
             return Pins.First(pin => pin.Name == name);
         }
         catch (InvalidOperationException) {
-            ComponentManager.Logger?.Log(new ErrorMessage($"Accessing unknown pin '{name}' of the component {this}"));
+            ComponentManager.LogError($"Accessing unknown pin '{name}' of the component {this}");
             return null;
         }
     }
@@ -53,7 +53,7 @@ public abstract class Component {
             return Pins.First(pin => pin.Id == id);
         }
         catch (InvalidOperationException) {
-            ComponentManager.Logger?.Log(new ErrorMessage($"Accessing unknown pin with '{id}' of the component {this}"));
+            ComponentManager.LogError($"Accessing unknown pin with '{id}' of the component {this}");
             return null;
         }
     }
@@ -70,7 +70,7 @@ public abstract class Component {
             UpdateSprite(Sprites[spriteName]);
         }
         catch (IndexOutOfRangeException) {
-            ComponentManager.Logger?.Log(new ErrorMessage($"Accessing unknown sprite '{spriteName}' of the component {this}"));
+            ComponentManager.LogError($"Accessing unknown sprite '{spriteName}' of the component {this}");
         }
     }
 

@@ -71,10 +71,10 @@ public static class YamlSceneLoader {
                 compInstance.Transform = ParseTransform(dto);
                 HandleExtraProps(compInstance, dto.ExtraProps);
                 components.Add(name, compInstance);
-                ComponentManager.Logger?.Log(new InfoMessage($"Instantiated component {name} of type {typeName}"));
+                ComponentManager.LogInfo($"Instantiated component {name} of type {typeName}");
             }
             else {
-                ComponentManager.Logger?.Log(new ErrorMessage($"{typeName} instance could not be created."));
+                ComponentManager.LogError($"{typeName} instance could not be created.");
             }
         }
 
@@ -92,12 +92,12 @@ public static class YamlSceneLoader {
                 .First(t => t.Name == typeName);
         }
         catch (InvalidOperationException) {
-            ComponentManager.Logger?.Log(new ErrorMessage($"Component of type {typeName} is not defined."));
+            ComponentManager.LogError($"Component of type {typeName} is not defined.");
             return null;
         }
 
         TYPE_NAMES_MAP.Add(typeName, type);
-        ComponentManager.Logger?.Log(new InfoMessage($"Defined the component type {typeName}"));
+        ComponentManager.LogInfo($"Defined the component type {typeName}");
         return type;
     }
 
@@ -117,34 +117,14 @@ public static class YamlSceneLoader {
             var property = type.GetProperty(key);
 
             if (property == null) {
-                ComponentManager.Logger?.Log(new WarningMessage($"Unknown extra property '{key}' of {component} found in the scene's YAML"));
+                ComponentManager.LogWarning($"Unknown extra property '{key}' of {component} found in the scene's YAML");
                 continue;
             }
             
             var convertedValue = Convert.ChangeType(value, property.PropertyType);
             property.SetValue(component, convertedValue);
-            ComponentManager.Logger?.Log(new DebugMessage($"Added extra property '{key}' to {component}"));
+            ComponentManager.LogDebug($"Added extra property '{key}' to {component}");
         }
-    }
-
-    private static Vector2? StringToVector2(string valuePair) {
-        string[] values = valuePair.Split();
-        if (values.Length != 2) {
-            ComponentManager.Logger?.Log(new ErrorMessage($"Incorrect vector2 definition '{valuePair}'; Must be 2 float values separated by a space."));
-            return null;
-        }
-
-        float x = 0, y = 0;
-        bool success = true;
-        success = success && float.TryParse(values[0], out x);
-        success = success && float.TryParse(values[1], out y);
-
-        if (!success) {
-            ComponentManager.Logger?.Log(new ErrorMessage($"Incorrect vector2 definition '{valuePair}'; Float parsing failed."));
-            return null;
-        }
-        
-        return new Vector2(x, y);
     }
 
     private static List<ElectricalNode> InstantiatedNodes(NodesList nodesDto, Dictionary<string, Component> components) {
@@ -167,14 +147,14 @@ public static class YamlSceneLoader {
                     node.AddPin(pin);
                 }
                 else {
-                    ComponentManager.Logger?.Log(new ErrorMessage($"Failed to add a pin to the node '{node}'"));
+                    ComponentManager.LogError($"Failed to add a pin to the node '{node}'");
                 }
                 
                 // TODO: Transitivity through nodes
             }
 
             nodes.Add(node);
-            ComponentManager.Logger?.Log(new InfoMessage($"Instantiated node '{node}'"));
+            ComponentManager.LogInfo($"Instantiated node '{node}'");
         }
 
         return nodes;
