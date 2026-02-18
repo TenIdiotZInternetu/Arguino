@@ -8,23 +8,19 @@
         x:Class="Gui.Views.MainWindow"
         Title="Main">
 
-    <Window.Styles>
-        <Style Selector="StackPanel, ListBox">
-            <Setter Property="Background" Value="#1a283d"/>
-        </Style>
-    </Window.Styles>
-
     <Grid RowDefinitions= "30,40,*">
 
         <Menu Grid.Row="0">
             <MenuItem Header="File" />
         </Menu>
 
-        <StackPanel Grid.Row="1" Orientation= "Horizontal" Margin="5, 0" Spacing="5">
-            <Button Content="▶️" ToolTip.Tip="Run"/>
-            <Button Content="⏹️" ToolTip.Tip="Stop"/>
-            <ucontrol:Timer Foreground="White" VerticalAlignment="Center" HorizontalAlignment="Right"/>
-        </StackPanel>
+        <Border Grid.Row="1" Padding="0, 5">
+            <StackPanel Orientation= "Horizontal" Spacing="5">
+                <Button Content="▶️" ToolTip.Tip="Run"/>
+                <Button Content="⏹️" ToolTip.Tip="Stop"/>
+                <ucontrol:Timer Foreground="White" VerticalAlignment="Center" HorizontalAlignment="Right"/>
+            </StackPanel>
+        </Border>
 
         <Grid Grid.Row="2" RowDefinitions="3*,4,1*" ColumnDefinitions= "1*,4,5*">
             <StackPanel Grid.Column="0" Grid.Row="0"/>
