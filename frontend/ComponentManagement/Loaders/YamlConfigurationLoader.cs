@@ -17,7 +17,7 @@ public static class YamlComponentLoader {
         // TODO: Child components
     }
 
-    public static ComponentConfiguration? LoadYaml(string componentPath) {
+    public static ComponentConfiguration? LoadConfig(string componentPath) {
         var fileName = Path.GetFileName(componentPath) + ".yaml";     // find file with the same name as the directory
 
         try {
