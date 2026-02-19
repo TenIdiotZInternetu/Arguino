@@ -21,3 +21,7 @@ For stable implementation run with `--single-process`, other options are experim
 - `--log-tcp <path>` - Path to the log file for TCP messages [default `./frontend_tcp.log`]
 - `--log-circuit <path>` - Path to the log file for general circuitry events [default `./frontend.log`]
 
+## Gui controls
+- `Mouse wheel scroll` - Zoom and unzoom canvas
+- `Mouse wheel press` - Pan canvas
+- `Alt hold` - Hold mode. All controls clicked on will remain in a press state when clicked, until the Alt key is released. For example when holding multiple buttons is required 
