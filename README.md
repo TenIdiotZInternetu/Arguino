@@ -25,3 +25,7 @@ For stable implementation run with `--single-process`, other options are experim
 - `Mouse wheel scroll` - Zoom and unzoom canvas
 - `Mouse wheel press` - Pan canvas
 - `Alt hold` - Hold mode. All controls clicked on will remain in a press state when clicked, until the Alt key is released. For example when holding multiple buttons is required 
+
+## Examples
+### Scene with 2 buttons and 4 LEDs (WIP)
+![scene_example](./res/scene_example.png)
