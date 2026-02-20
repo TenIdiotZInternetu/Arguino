@@ -45,8 +45,9 @@ ProgramOptions parse_arguments(int argc, char** argv)
     po::options_description description("Command line options");
     description.add(create_common_options());
 
-    // #if TCP
+#ifdef ARGUINO_TCP
     description.add(create_tcp_options());
+#endif
 
     po::variables_map variables;
     po::store(po::parse_command_line(argc, argv, description), variables);
@@ -60,9 +61,10 @@ ProgramOptions parse_arguments(int argc, char** argv)
     ProgramOptions options;
     options.SimulatorLogPath = variables["log-simulator"].as<std::string>();
 
-    // #if TCP
+#ifdef ARGUINO_TCP
     options.TcpPort = variables["port"].as<int>();
     options.TcpLogPath = variables["log-tcp"].as<std::string>();
+#endif
 
     return options;
 }

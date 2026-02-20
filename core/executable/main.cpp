@@ -2,19 +2,25 @@
 #include <iostream>
 #include <thread>
 
-#include "ArguinoConnectionHandler.hpp"
+#include "ArduinoState.hpp"
 #include "FileLogger.hpp"
-#include "StateEncoder.hpp"
-#include "TcpServer.hpp"
 #include "programOptions.cpp"
 #include "sketch.cpp"
 
 using logger_t = logger::FileLogger;
+
+ProgramOptions options;
+
+#ifdef ARGUINO_TCP
+
+#include "ArguinoConnectionHandler.hpp"
+#include "StateEncoder.hpp"
+#include "TcpServer.hpp"
+
 using encoder_t = arguino::tcp::StateEncoder;
 using connection_handler_t = arguino::tcp::ArguinoConnectionHandler<encoder_t, logger_t>;
 using tcp_server_t = arguino::tcp::TcpServer<connection_handler_t, logger_t>;
 
-ProgramOptions options;
 
 void run_tcp()
 {
@@ -23,6 +29,7 @@ void run_tcp()
     logger->log("Tcp Server initialized");
     server.launch();
 }
+#endif
 
 void run_simulator()
 {
@@ -40,7 +47,15 @@ void run_simulator()
 int main(int argc, char** argv)
 {
     options = parse_arguments(argc, argv);
+
+#ifdef ARGUINO_TCP
     std::thread tcp_thread(run_tcp);
-    run_simulator();
     tcp_thread.join();
+#endif
+
+#ifdef ARGUINO_SHARED_MEMORY
+    std::cout << "Shared memory implementation" << std::endl;
+#endif
+
+    run_simulator();
 }
