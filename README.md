@@ -11,9 +11,9 @@
 
 ## Command line arguments:
 ### Core
-- `-p | --port` - Port on which to launch TCP server [default `8888`]
-- `--log-simulator` - Path to the log file for simulator events [default `./core.log`]
-- `--log-tcp` - Path to the log file for TCP events" [default `./core_tcp.log`]
+- `-p | --port <int>` - Port on which to launch TCP server [default `8888`]
+- `--log-simulator <path>` - Path to the log file for simulator events [default `./core.log`]
+- `--log-tcp <path>` - Path to the log file for TCP events" [default `./core_tcp.log`]
 
 ### Gui
 - `-s | --scene <path>` - Path to the .yaml scene defintion [default `./scene.yaml`]
