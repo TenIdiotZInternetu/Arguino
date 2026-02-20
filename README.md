@@ -11,18 +11,18 @@
 
 ## Command line arguments:
 ### Core
-- `-p | --port <int>` - Port on which to launch TCP server [default `8888`]
-- `--log-simulator <path>` - Path to the log file for simulator events [default `./core.log`]
-- `--log-tcp <path>` - Path to the log file for TCP events" [default `./core_tcp.log`]
+- `-p | --port <int>` - Port on which to launch TCP server [= `8888`]
+- `--log-simulator <path>` - Path to the log file for simulator events [= `./core.log`]
+- `--log-tcp <path>` - Path to the log file for TCP events" [= `./core_tcp.log`]
 
 ### Gui
-- `-s | --scene <path>` - Path to the .yaml scene defintion [default `./scene.yaml`]
-- `-c | --components <path>` - Path to the directory of components definitions [default `./ComponentManager/Components`]
-- `-p | --port <int>` - TCP port to listen to. Core is hard-coded to 8888 [default `8888`]
+- `-s | --scene <path>` - Path to the .yaml scene defintion [= `./scene.yaml`]
+- `-c | --components <path>` - Path to the directory of components definitions [= `./ComponentManager/Components`]
+- `-p | --port <int>` - TCP port to listen to. Core is hard-coded to 8888 [= `8888`]
 - `--no-tcp` - Skips connection to TCP server at initialization
-- `--log-tcp <path>` - Path to the log file for TCP messages [default `./frontend_tcp.log`]
-- `--log-circuit <path>` - Path to the log file for general circuitry events [default `./frontend.log`]
-
+- `--log-tcp <path>` - Path to the log file for TCP messages [= `./frontend_tcp.log`]
+- `--log-circuit <path>` - Path to the log file for general circuitry events [= `./frontend.log`]
+ 
 ## Gui controls
 - `Mouse wheel scroll` - Zoom and unzoom canvas
 - `Mouse wheel press` - Pan canvas
