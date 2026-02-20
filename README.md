@@ -5,8 +5,8 @@
 
 ## Current usage workflow:
   1. Run `preprocess.sh <test dir>`. For example `preprocess.sh tests/buttons`
-  2. Build `core/CMakeLists.txt`
-  3. Run core as `<build dir>/executable/arguino --single-process`
+  2. Build `core/CMakeLists.txt`, target either `arguino` or `arguino-tcp.exe` (they are aliases)
+  3. Run core as `<build dir>/executable/arguino`
   4. Build and run gui from the `gui` directory with specified scene. For example `<build dir>/Gui -s ./arduinoScene.yaml`
 
 ## Command line arguments:
@@ -18,7 +18,7 @@
 ### Gui
 - `-s | --scene <path>` - Path to the .yaml scene defintion [= `./scene.yaml`]
 - `-c | --components <path>` - Path to the directory of components definitions [= `./ComponentManager/Components`]
-- `-p | --port <int>` - TCP port to listen to. Core is hard-coded to 8888 [= `8888`]
+- `-p | --port <int>` - TCP port to listen to [= `8888`]
 - `--no-tcp` - Skips connection to TCP server at initialization
 - `--log-tcp <path>` - Path to the log file for TCP messages [= `./frontend_tcp.log`]
 - `--log-circuit <path>` - Path to the log file for general circuitry events [= `./frontend.log`]
