@@ -6,25 +6,27 @@
 #include "FileLogger.hpp"
 #include "StateEncoder.hpp"
 #include "TcpServer.hpp"
+#include "programOptions.cpp"
 #include "sketch.cpp"
-#include "upp_shrmem.hpp"
 
 using logger_t = logger::FileLogger;
 using encoder_t = arguino::tcp::StateEncoder;
 using connection_handler_t = arguino::tcp::ArguinoConnectionHandler<encoder_t, logger_t>;
 using tcp_server_t = arguino::tcp::TcpServer<connection_handler_t, logger_t>;
 
+ProgramOptions options;
+
 void run_tcp()
 {
-    auto logger = std::make_shared<logger_t>(std::filesystem::absolute("./core_tcp.log"));
-    tcp_server_t server(8888, logger);
+    auto logger = std::make_shared<logger_t>(std::filesystem::absolute(options.TcpLogPath));
+    tcp_server_t server(options.TcpPort, logger);
     logger->log("Tcp Server initialized");
     server.launch();
 }
 
 void run_simulator()
 {
-    auto logger = std::make_shared<logger_t>(std::filesystem::absolute("./core.log"));
+    auto logger = std::make_shared<logger_t>(std::filesystem::absolute(options.SimulatorLogPath));
     CanonicalState::init();
     CanonicalState::init_logger(logger);
     CanonicalState::state().init_timer();
@@ -37,6 +39,7 @@ void run_simulator()
 
 int main(int argc, char** argv)
 {
+    options = parse_arguments(argc, argv);
     std::thread tcp_thread(run_tcp);
     run_simulator();
     tcp_thread.join();

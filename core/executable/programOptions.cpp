@@ -1,4 +1,5 @@
 #include <boost/program_options.hpp>
+#include <iostream>
 
 namespace po = boost::program_options;
 
@@ -51,7 +52,7 @@ ProgramOptions parse_arguments(int argc, char** argv)
     po::store(po::parse_command_line(argc, argv, description), variables);
     po::notify(variables);
 
-    if (variables.contains("help")) {
+    if (variables.count("help")) {
         std::cout << description << std::endl;
         exit(1);
     }
