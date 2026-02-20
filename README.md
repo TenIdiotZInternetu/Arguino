@@ -11,7 +11,9 @@
 
 ## Command line arguments:
 ### Core
-For stable implementation run with `--single-process`, other options are experimental and subject to change
+- `-p | --port` - Port on which to launch TCP server [default `8888`]
+- `--log-simulator` - Path to the log file for simulator events [default `./core.log`]
+- `--log-tcp` - Path to the log file for TCP events" [default `./core_tcp.log`]
 
 ### Gui
 - `-s | --scene <path>` - Path to the .yaml scene defintion [default `./scene.yaml`]
