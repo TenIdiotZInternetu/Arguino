@@ -31,6 +31,21 @@ void run_tcp()
 }
 #endif
 
+#ifdef ARGUINO_SHARED_MEMORY
+#include "ShmemHandler.hpp"
+
+void setup_shared_memory()
+{
+    arguino::shmem::ShmemHandler shmem("MyMem4", 1);
+
+    for (uint8_t i = 0; i < 10; ++i) {
+        shmem.write(i, 40 + i);
+    }
+}
+
+#endif
+
+
 void run_simulator()
 {
     auto logger = std::make_shared<logger_t>(std::filesystem::absolute(options.SimulatorLogPath));
@@ -54,7 +69,7 @@ int main(int argc, char** argv)
 #endif
 
 #ifdef ARGUINO_SHARED_MEMORY
-    std::cout << "Shared memory implementation" << std::endl;
+    setup_shared_memory();
 #endif
 
     run_simulator();

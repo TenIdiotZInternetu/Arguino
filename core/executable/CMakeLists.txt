@@ -16,6 +16,7 @@ add_executable(arguino-shared-memory.exe main.cpp)
 target_compile_definitions(arguino-shared-memory.exe PRIVATE ARGUINO_SHARED_MEMORY)
 target_link_libraries(arguino-shared-memory.exe PRIVATE
     arguino.simulator
+    arguino.shmem
     Boost::program_options
 )
 
