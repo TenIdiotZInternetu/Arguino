@@ -5,5 +5,6 @@ project(arguino.core)
 
 add_subdirectory(libs)
 add_subdirectory(tcp-adapter)
+add_subdirectory(shared-memory-adapter)
 add_subdirectory(simulator)
 add_subdirectory(executable)
