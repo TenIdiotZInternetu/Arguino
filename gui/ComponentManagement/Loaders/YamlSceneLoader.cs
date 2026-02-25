@@ -61,30 +61,32 @@ public static class YamlSceneLoader {
             string componentDir = componentsPath + "/" + typeName;
             Type? type;
 
-
             if (!TYPE_NAMES_MAP.TryGetValue(typeName, out type)) {
-                type = MapComponentType(typeName);
+                type = MapComponentType(typeName, componentDir);
                 if (type == null) continue;
             }
 
+            Component compInstance;
 
-            if (Activator.CreateInstance(type, componentDir) is Component compInstance) {
+            try {
+                compInstance = (Activator.CreateInstance(type, typeName) as Component)!;
                 compInstance.Name = name;
                 compInstance.Transform = ParseTransform(dto);
                 HandleExtraProps(compInstance, dto.ExtraProps);
                 components.Add(name, compInstance);
                 ComponentManager.LogInfo($"Instantiated component {name} of type {typeName}");
             }
-            else {
-                ComponentManager.LogError($"{typeName} instance could not be created.");
+            catch {
+                ComponentManager.LogError($"Failed to create instance {name} of type {typeName}.");
             }
         }
 
         return components;
     }
 
-    private static Type? MapComponentType(string typeName) {
+    private static Type? MapComponentType(string typeName, string componentDir) {
         // TODO: Change assembly for custom added scripts
+        // TODO: Decompose Component type definition into its own class with interfaces
 
         Type type;
 
@@ -98,9 +100,15 @@ public static class YamlSceneLoader {
             return null;
         }
 
-        TYPE_NAMES_MAP.Add(typeName, type);
-        ComponentManager.LogInfo($"Defined the component type {typeName}");
-        return type;
+        ComponentConfiguration? configuration = YamlComponentLoader.LoadConfig(componentDir);
+        if (configuration is ComponentConfiguration config) {
+            config.Sprites = SkiaSvgLoader.LoadSvgs(componentDir);
+            Component.AddConfiguration(config);
+            TYPE_NAMES_MAP.Add(typeName, type);
+            ComponentManager.LogInfo($"Defined the component type {typeName}");
+            return type;
+        }
+        else return null;
     }
 
     private static Transform ParseTransform(SceneDto.ComponentDto compDto) {

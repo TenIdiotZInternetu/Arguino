@@ -32,6 +32,12 @@ public class Pin {
     public enum PinMode { General, ReadOnly, WriteOnly }
     private PinMode _mode = PinMode.General;
 
+    public Pin(Component component, PinPrototype prototype) {
+        _component = component;
+        Id = prototype.Id;
+        Name = prototype.Name;
+    }
+
     public Pin(Component component, uint id, string? name = null) {
         _component = component;
         Id = id;

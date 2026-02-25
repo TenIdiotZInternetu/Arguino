@@ -16,9 +16,9 @@ public class Led : Component {
 
     public Led(string definitionPath) : base(definitionPath) {
         UpdateSprite(SPRITE_LED_OFF);
-        _cathode = GetPin(PIN_CATHODE);
+        _cathode = GetPin(PIN_CATHODE)!;
         _cathode.MakeReadOnly();
-        _anode = GetPin(PIN_ANODE);
+        _anode = GetPin(PIN_ANODE)!;
     }
 
     public override void OnPinStateChanged(Pin pin) {
