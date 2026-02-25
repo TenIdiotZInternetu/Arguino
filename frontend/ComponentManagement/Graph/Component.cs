@@ -24,6 +24,7 @@ public abstract class Component {
         TypeName = typeName;
         
         InitPins();
+        // TODO: Check if sprites exist
         CurrentSprite = Configuration.Sprites.First().Value;
     }
     
@@ -76,7 +77,10 @@ public abstract class Component {
     }
 
     private void InitPins() {
-        foreach (Pin pin in _pins) {
+        foreach (PinPrototype prototype in Configuration.Pins) {
+            var pin = new Pin(this, prototype);
+            _pins.Add(pin);
+
             pin.StateChangedEvent += OnPinStateChanged;
             pin.PinConnectedEvent += OnPinConnected;
             pin.PinDisconnectedEvent += OnPinDisconnected;

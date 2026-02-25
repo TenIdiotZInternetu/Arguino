@@ -8,6 +8,7 @@ public static class SkiaSvgLoader {
         var loadedSvgs = new Dictionary<string, SKSvg>();
         string[] svgFileNames = Directory.GetFiles(path, "*.svg");
 
+        // TODO: Catch file exceptions
         foreach (var fileName in svgFileNames) {
             using var stream = File.OpenRead(fileName);
             var svgDocument =  SvgDocument.Open<SvgDocument>(stream);
