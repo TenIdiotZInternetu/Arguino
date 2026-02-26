@@ -5,21 +5,24 @@
 #include <boost/interprocess/shared_memory_object.hpp>
 #include <memory>
 #include <span>
+#include <vector>
 
-#include "ShmemRegion.hpp"
+#include "MemoryRegion.hpp"
 
 namespace arguino::shmem {
 
-class ShmemHandler {
+class IpcHandler {
    public:
     using shmem_t = boost::interprocess::shared_memory_object;
 
-    ShmemHandler(const std::string& shmemName, size_t sizeInPages);
-    ~ShmemHandler();
+    IpcHandler(const std::string& shmemName, size_t sizeInPages);
+    ~IpcHandler();
 
-    template <typename T>
-    void write(size_t offset, std::span<T> data);
+    void write(size_t offset, std::span<uint8_t> bytes);
     void write(size_t offset, uint8_t byte);
+
+    uint8_t read(size_t offset);
+    std::vector<uint8_t> read(size_t offset, size_t byte_count);
 
     std::string& name() { return _name; }
     size_t pages() { return _pages; }
@@ -29,7 +32,8 @@ class ShmemHandler {
     std::string _name;
     size_t _pages;
     shmem_t _shmemObject;
-    std::unique_ptr<ShmemRegion> _writer;
+    std::unique_ptr<MemoryRegion> _producer;
+    std::unique_ptr<MemoryRegion> _consumer;
 };  // namespace arguino::shmem
 
 }  // namespace arguino::shmem

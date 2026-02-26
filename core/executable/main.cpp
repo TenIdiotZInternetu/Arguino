@@ -32,11 +32,11 @@ void run_tcp()
 #endif
 
 #ifdef ARGUINO_SHARED_MEMORY
-#include "ShmemHandler.hpp"
+#include "IpcHandler.hpp"
 
 void setup_shared_memory()
 {
-    arguino::shmem::ShmemHandler shmem(options.ShmemName, options.ShmemSizePages);
+    arguino::shmem::IpcHandler shmem(options.ShmemName, options.ShmemSizePages);
 
     for (uint8_t i = 0; i < 10; ++i) {
         shmem.write(i, 0x40 + i);

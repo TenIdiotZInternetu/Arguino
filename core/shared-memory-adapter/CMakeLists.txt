@@ -6,8 +6,8 @@ if (NOT ${Boost_Found})
 endif()
 
 add_library(arguino.shmem STATIC
-    ShmemHandler.cpp
-    ShmemRegion.cpp
+    IpcHandler.cpp
+    MemoryRegion.cpp
 )
 
 target_include_directories(arguino.shmem PUBLIC
