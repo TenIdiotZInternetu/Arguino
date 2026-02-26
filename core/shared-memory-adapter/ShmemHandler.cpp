@@ -1,5 +1,7 @@
 #include "ShmemHandler.hpp"
 
+#include "ShmemRegion.hpp"
+
 namespace ipc = boost::interprocess;
 
 namespace arguino::shmem {
@@ -11,7 +13,7 @@ ShmemHandler::ShmemHandler(const std::string& shmemName, size_t sizeInPages)
 {
     size_t shmem_size = _pages * ipc::mapped_region::get_page_size();
     _shmemObject.truncate(shmem_size);
-    _writer = std::make_unique<ShmemWriter>(_shmemObject, 0, size() / 2);
+    _writer = std::make_unique<ShmemRegion>(_shmemObject, 0, size() / 2);
 }
 
 ShmemHandler::~ShmemHandler()

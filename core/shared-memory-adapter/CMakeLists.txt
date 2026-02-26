@@ -7,7 +7,7 @@ endif()
 
 add_library(arguino.shmem STATIC
     ShmemHandler.cpp
-    ShmemWriter.cpp
+    ShmemRegion.cpp
 )
 
 target_include_directories(arguino.shmem PUBLIC

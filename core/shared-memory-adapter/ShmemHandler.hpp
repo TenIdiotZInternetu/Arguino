@@ -6,7 +6,7 @@
 #include <memory>
 #include <span>
 
-#include "ShmemWriter.hpp"
+#include "ShmemRegion.hpp"
 
 namespace arguino::shmem {
 
@@ -29,7 +29,7 @@ class ShmemHandler {
     std::string _name;
     size_t _pages;
     shmem_t _shmemObject;
-    std::unique_ptr<ShmemWriter> _writer;
+    std::unique_ptr<ShmemRegion> _writer;
 };  // namespace arguino::shmem
 
 }  // namespace arguino::shmem
