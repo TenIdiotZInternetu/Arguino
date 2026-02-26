@@ -8,6 +8,7 @@ endif()
 add_library(arguino.shmem STATIC
     IpcHandler.cpp
     MemoryRegion.cpp
+    CircularBuffer.cpp
 )
 
 target_include_directories(arguino.shmem PUBLIC
