@@ -9,6 +9,10 @@ struct ProgramOptions {
     // TCP implementation
     std::string TcpLogPath;
     int TcpPort;
+
+    // Shared memory implementation
+    std::string ShmemName;
+    int ShmemSizePages;
 };
 
 static po::options_description create_common_options()
@@ -40,6 +44,21 @@ static po::options_description create_tcp_options()
     return description;
 }
 
+static po::options_description create_shmem_options()
+{
+    po::options_description description("Shared memory options");
+
+    description.add_options()                                                       //
+        ("shmem-name,n",                                                            //
+            po::value<std::string>()->default_value("Arguino-ipc"),                 //
+            "Name of the shared memory segment")                                    //
+        ("shmem-size,s",                                                            //
+            po::value<int>()->default_value(1024),                                  //
+            "Size of each of the write and read shared memory segments in pages");  //
+
+    return description;
+}
+
 ProgramOptions parse_arguments(int argc, char** argv)
 {
     po::options_description description("Command line options");
@@ -47,6 +66,9 @@ ProgramOptions parse_arguments(int argc, char** argv)
 
 #ifdef ARGUINO_TCP
     description.add(create_tcp_options());
+#endif
+#ifdef ARGUINO_SHARED_MEMORY
+    description.add(create_shmem_options());
 #endif
 
     po::variables_map variables;
@@ -64,6 +86,10 @@ ProgramOptions parse_arguments(int argc, char** argv)
 #ifdef ARGUINO_TCP
     options.TcpPort = variables["port"].as<int>();
     options.TcpLogPath = variables["log-tcp"].as<std::string>();
+#endif
+#ifdef ARGUINO_SHARED_MEMORY
+    options.ShmemName = variables["shmem-name"].as<std::string>();
+    options.ShmemSizePages = variables["shmem-size"].as<int>();
 #endif
 
     return options;

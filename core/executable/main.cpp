@@ -36,7 +36,7 @@ void run_tcp()
 
 void setup_shared_memory()
 {
-    arguino::shmem::ShmemHandler shmem("MyMem", 2);
+    arguino::shmem::ShmemHandler shmem(options.ShmemName, options.ShmemSizePages);
 
     for (uint8_t i = 0; i < 10; ++i) {
         shmem.write(i, 0x40 + i);
