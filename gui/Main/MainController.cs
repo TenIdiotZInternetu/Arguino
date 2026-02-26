@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using System.IO.MemoryMappedFiles;
 using System.Linq;
 using System.Threading.Tasks;
 using Avalonia.Controls.ApplicationLifetimes;
@@ -44,12 +45,31 @@ public static class MainController {
         InitLogger();
         Logger.Log(new InfoMessage("Starting App initialization."));
 
+        TestShmem();
         InitScene();
         InitArduino();
         
         _isInitialized = true;
         AppInitializedEvent?.Invoke();
         Logger.Log(new InfoMessage("App initialization complete."));
+    }
+
+    private static void TestShmem() {
+        using var shmem = MemoryMappedFile.CreateFromFile("/dev/shm/MyMem");
+        int shmemSize = 2 * Environment.SystemPageSize;
+        using var reader = shmem.CreateViewAccessor(0, shmemSize / 2);
+        using var writer = shmem.CreateViewAccessor(shmemSize / 2, shmemSize / 2);
+        
+        Console.WriteLine("Reading memory...");
+        for (int i = 0; i < 20; i++) {
+            reader.Read(i, out byte a);
+            Console.WriteLine(a);
+        }
+        
+        Console.WriteLine("Writing memory...");
+        for (int i = 0; i < 10; i++) {
+            writer.Write(i, (byte)(0x60 + i));
+        }
     }
 
     private static void InitLogger() {

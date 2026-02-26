@@ -36,11 +36,13 @@ void run_tcp()
 
 void setup_shared_memory()
 {
-    arguino::shmem::ShmemHandler shmem("MyMem4", 1);
+    arguino::shmem::ShmemHandler shmem("MyMem", 2);
 
     for (uint8_t i = 0; i < 10; ++i) {
-        shmem.write(i, 40 + i);
+        shmem.write(i, 0x40 + i);
     }
+
+    std::cout << "INitneded" << std::endl;
 }
 
 #endif
