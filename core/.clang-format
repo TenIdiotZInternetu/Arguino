@@ -16,7 +16,8 @@ PackConstructorInitializers: NextLineOnly
 AlignAfterOpenBracket: false
 BinPackArguments: false
 AllowShortFunctionsOnASingleLine: Inline
-AlignOperands: DontAlign
+AlignOperands: AlignAfterOperator
+BreakBeforeBinaryOperators: true
 
 PenaltyBreakAssignment: 100
 PenaltyReturnTypeOnItsOwnLine: 100
