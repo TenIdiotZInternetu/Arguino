@@ -15,19 +15,20 @@ class CircularBuffer {
 
     static constexpr size_t PRODUCER_PTR_LOCATION = 0;
     static constexpr size_t CONSUMER_PTR_LOCATION = 8;
-    static constexpr size_t OVERHEAD_SIZE =  //
-        sizeof(PRODUCER_PTR_LOCATION) +      //
-        sizeof(CONSUMER_PTR_LOCATION);       //
+    static constexpr size_t BUFFER_BEGIN = sizeof(PRODUCER_PTR_LOCATION)
+                                         + sizeof(CONSUMER_PTR_LOCATION);
 
     CircularBuffer(const shmem_t& shmemObject, size_t offset, size_t size);
 
-    uint64_t producer_ptr();
-    uint64_t consumer_ptr();
+    uint8_t* producer_ptr();
+    uint8_t* consumer_ptr();
 
-    size_t buffer_size() { return _memoryRegion->size() - OVERHEAD_SIZE; }
+    size_t buffer_size() { return _memoryRegion->size() - BUFFER_BEGIN; }
+    size_t bytes_filled();
+    size_t bytes_available() { return buffer_size() - bytes_filled(); }
 
     template <typename T>
-    bool write(T data);
+    bool write(const T& data);
 
     template <typename T>
     bool write(std::span<T> data);
@@ -41,12 +42,19 @@ class CircularBuffer {
    private:
     std::unique_ptr<MemoryRegion> _memoryRegion;
     bool _ptrsAreFlipped;
+
+    void update_producer_ptr(uint64_t shift);
 };
 
 template <typename T>
-inline bool CircularBuffer::write(T data)
+inline bool CircularBuffer::write(const T& data)
 {
-    return false;
+    if (bytes_available() <= sizeof(T)) {  // We don't want the buffer to be fully filled
+        return false;
+    }
+
+    std::memcpy(producer_ptr(), &data, sizeof(data));
+    update_producer_ptr(sizeof(T));
 }
 
 template <typename T>
