@@ -13,17 +13,13 @@ IpcHandler::IpcHandler(const std::string& shmemName, size_t sizeInPages)
 {
     size_t shmem_size = _pages * ipc::mapped_region::get_page_size();
     _shmemObject.truncate(shmem_size);
-    _producer = std::make_unique<MemoryRegion>(_shmemObject, 0, size());
+    _producer = CircularBuffer(_shmemObject, 0, size());
+    _consumer = CircularBuffer(_shmemObject, 0, size());
 }
 
 IpcHandler::~IpcHandler()
 {
     ipc::shared_memory_object::remove(_name.c_str());
-}
-
-void IpcHandler::write(size_t offset, uint8_t byte)
-{
-    *(uint8_t*)_producer->at(offset) = byte;
 }
 
 size_t IpcHandler::size()

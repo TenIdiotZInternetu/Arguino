@@ -3,10 +3,12 @@
 
 #include <boost/interprocess/mapped_region.hpp>
 #include <boost/interprocess/shared_memory_object.hpp>
+#include <iostream>
 #include <memory>
 #include <span>
 #include <vector>
 
+#include "CircularBuffer.hpp"
 #include "MemoryRegion.hpp"
 
 namespace arguino::shmem {
@@ -18,11 +20,8 @@ class IpcHandler {
     IpcHandler(const std::string& shmemName, size_t sizeInPages);
     ~IpcHandler();
 
-    void write(size_t offset, std::span<uint8_t> bytes);
-    void write(size_t offset, uint8_t byte);
-
-    uint8_t read(size_t offset);
-    std::vector<uint8_t> read(size_t offset, size_t byte_count);
+    template <typename T>
+    void write(const T& data);
 
     std::string& name() { return _name; }
     size_t pages() { return _pages; }
@@ -32,9 +31,18 @@ class IpcHandler {
     std::string _name;
     size_t _pages;
     shmem_t _shmemObject;
-    std::unique_ptr<MemoryRegion> _producer;
-    std::unique_ptr<MemoryRegion> _consumer;
+    CircularBuffer _producer;
+    CircularBuffer _consumer;
 };  // namespace arguino::shmem
+
+
+template <typename T>
+inline void IpcHandler::write(const T& data)
+{
+    if (!_producer.write(data)) {
+        std::cout << "Not enough space" << std::endl;
+    }
+}
 
 }  // namespace arguino::shmem
 
