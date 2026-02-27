@@ -3,40 +3,34 @@
 namespace arguino::shmem {
 
 CircularBuffer::CircularBuffer(const shmem_t& shmemObject, size_t offset, size_t size)
-    : _memoryRegion(std::make_unique<MemoryRegion>(shmemObject, offset, size))
+    : _memoryRegion(std::make_unique<MemoryRegion>(shmemObject, offset, size)),
+      _nextProducerOffset(0)
 {
-    *(uint64_t*)_memoryRegion->at(PRODUCER_PTR_LOCATION) = BUFFER_BEGIN;
-    *(uint64_t*)_memoryRegion->at(CONSUMER_PTR_LOCATION) = BUFFER_BEGIN;
+    _memoryRegion->at<uint64_t>(PRODUCER_PTR_LOCATION) = 0;
+    _memoryRegion->at<uint64_t>(CONSUMER_PTR_LOCATION) = 0;
 };
 
-uint8_t* CircularBuffer::producer_ptr()
+CircularBuffer::offset_t& CircularBuffer::producer_offset()
 {
-    return (uint8_t*)_memoryRegion->at(PRODUCER_PTR_LOCATION);
+    return _memoryRegion->at<offset_t>(PRODUCER_PTR_LOCATION);
 }
 
-uint8_t* CircularBuffer::consumer_ptr()
+CircularBuffer::offset_t& CircularBuffer::consumer_offset()
 {
-    return (uint8_t*)_memoryRegion->at(CONSUMER_PTR_LOCATION);
+    return _memoryRegion->at<offset_t>(CONSUMER_PTR_LOCATION);
 }
 
 size_t CircularBuffer::bytes_filled()
 {
-    return consumer_ptr() > producer_ptr()  //
-             ? consumer_ptr() - producer_ptr()
-             : producer_ptr() - consumer_ptr();
+    return consumer_offset() > producer_offset()  //
+             ? consumer_offset() - producer_offset()
+             : producer_offset() - consumer_offset();
 }
 
-void CircularBuffer::update_producer_ptr(uint64_t shift)
+CircularBuffer::offset_t CircularBuffer::next_producer_offset(size_t shift)
 {
-    uint8_t* newPtr = producer_ptr() + shift;
-    uint64_t offset = _memoryRegion->offset(newPtr);
-
-    if (offset >= buffer_size()) {
-        offset %= buffer_size();
-        offset += BUFFER_BEGIN;
-    }
-
-    *(uint64_t*)_memoryRegion->at(PRODUCER_PTR_LOCATION) = offset;
+    offset_t newOffset = producer_offset() + shift;
+    return newOffset % buffer_size();
 }
 
 }  // namespace arguino::shmem

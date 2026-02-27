@@ -38,6 +38,8 @@ void setup_shared_memory()
 {
     arguino::shmem::IpcHandler shmem(options.ShmemName, options.ShmemSizePages);
 
+    shmem.write(std::vector<uint32_t>{7, 2, 7});
+
     for (uint64_t i = 0; i < 1024; ++i) {
         shmem.write(i);
     }
