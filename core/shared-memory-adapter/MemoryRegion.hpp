@@ -17,7 +17,9 @@ class MemoryRegion {
     size_t size() { return _mappedRegion.get_size(); }
     void* begin() { return _mappedRegion.get_address(); }
     void* end() { return (uint8_t*)begin() + size(); }
+
     void* at(size_t offset) { return (uint8_t*)begin() + offset; }
+    size_t offset(void* ptr) { return (uint8_t*)ptr - (uint8_t*)begin(); }
 
    private:
     shmem_region_t _mappedRegion;
