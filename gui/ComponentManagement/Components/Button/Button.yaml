@@ -1,3 +1,4 @@
 name: Button
 description: Push button with 2 states
 pins: 2
+imageSize: 80 80

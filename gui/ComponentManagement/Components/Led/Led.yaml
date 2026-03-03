@@ -1,6 +1,6 @@
 name: Led
 description: Light emitting diode
-imageSize: 20 20
+imageSize: 50 50
 pinNames:
   - anode
   - cathode

@@ -102,7 +102,7 @@ public static class YamlSceneLoader {
 
         ComponentConfiguration? configuration = YamlComponentLoader.LoadConfig(componentDir);
         if (configuration is ComponentConfiguration config) {
-            config.Sprites = SkiaSvgLoader.LoadSvgs(componentDir);
+            config.Sprites = SkiaSvgLoader.LoadSvgs(componentDir, config);
             Component.AddConfiguration(config);
             TYPE_NAMES_MAP.Add(typeName, type);
             ComponentManager.LogInfo($"Defined the component type {typeName}");
