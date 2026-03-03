@@ -4,25 +4,25 @@ Components:
     Position: 10 10
   Led0:
     Type: Led
-    Position: 700 10
+    Position: 300 10
   Led1:
     Type: Led
-    Position: 700 110
+    Position: 300 60
   Led2:
     Type: Led
-    Position: 700 210
+    Position: 300 110
   Led3:
     Type: Led
-    Position: 700 310
+    Position: 300 160
   BtnInc:
     Type: Button
-    Position: 400 500
+    Position: 100 300
   BtnDec:
     Type: Button
-    Position: 300 500
+    Position: 200 300
   VCC:
     Type: Vcc
-    Position: 10 500
+    Position: 10 300
 Nodes:
   - [ Arduino.D6, Led3.cathode ]
   - [ Arduino.D7, Led2.cathode ]

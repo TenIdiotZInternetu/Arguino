@@ -42,8 +42,7 @@ public class ComponentControl : Control {
      }
 
      public override void Render(DrawingContext context) {
-          SKPoint skpoint = Component.Transform.Position.ToSKPoint();
-          context.Custom(new SvgDrawOp(Component.CurrentSprite, skpoint));
+          context.Custom(new SvgDrawOp(Component.CurrentSprite, Component.Transform));
      }
      
      protected override void OnPointerPressed(PointerPressedEventArgs e) {

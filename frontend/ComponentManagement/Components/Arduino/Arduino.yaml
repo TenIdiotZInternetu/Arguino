@@ -1,5 +1,6 @@
 name: Arduino
 description: The reason we are all here
+imageSize: 0 300
 pinNames:
   - D0
   - D1
