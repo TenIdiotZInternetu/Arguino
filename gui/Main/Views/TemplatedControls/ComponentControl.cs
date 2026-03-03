@@ -42,7 +42,7 @@ public class ComponentControl : Control {
      }
 
      public override void Render(DrawingContext context) {
-          context.Custom(new SvgDrawOp(Component.CurrentSprite, Component.Transform));
+          context.Custom(new SvgDrawOp(Component.CurrentSprite, Component.Transform.ToSKMatrix()));
      }
      
      protected override void OnPointerPressed(PointerPressedEventArgs e) {

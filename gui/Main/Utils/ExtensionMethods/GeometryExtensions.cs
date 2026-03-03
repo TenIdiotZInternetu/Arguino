@@ -22,8 +22,12 @@ public static class GeometryExtensions {
         return new Point(vector.X, vector.Y);
     }
 
-    // public static SKMatrix ToSKMatrix(this ComponentManagement.Scenes.Transform transform) {
-    //     var identity = SKMatrix.Identity;
+    public static SKMatrix ToSKMatrix(this ComponentManagement.Scenes.Transform transform) {
+        // TODO: Translate to coordinates origin, then translate
+        var rotation = SKMatrix.CreateRotationDegrees(transform.Rotation);
+        var scale = SKMatrix.CreateScale(transform.ScaleX, transform.ScaleY);
+        var translation = SKMatrix.CreateTranslation(transform.PositionX, transform.PositionY);
 
-    // }
+        return SKMatrix.Concat(translation, SKMatrix.Concat(rotation, scale));
+    }
 }
