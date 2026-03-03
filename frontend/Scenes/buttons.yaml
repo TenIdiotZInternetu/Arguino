@@ -5,6 +5,7 @@ Components:
   Led0:
     Type: Led
     Position: 300 10
+    Scale: 0.5 0.5
   Led1:
     Type: Led
     Position: 300 60
@@ -14,12 +15,14 @@ Components:
   Led3:
     Type: Led
     Position: 300 160
+    Scale: 1.5 1.5
   BtnInc:
     Type: Button
-    Position: 100 300
+    Position: 360 10
   BtnDec:
     Type: Button
-    Position: 200 300
+    Position: 360 100
+    Rotation: 45
   VCC:
     Type: Vcc
     Position: 10 300
