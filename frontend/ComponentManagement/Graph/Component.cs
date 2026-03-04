@@ -5,6 +5,8 @@ using Svg.Skia;
 
 namespace ComponentManagement.Graph;
 
+// For full Component initialization check ComponentManagement.Factory.SceneFactory
+
 public abstract class Component {
     public required string Name { get; set; }
     public string TypeName { get; init; }
@@ -76,7 +78,7 @@ public abstract class Component {
         }
     }
 
-    private void InitPins() {
+    internal void InitPins() {
         foreach (PinPrototype prototype in Configuration.Pins) {
             var pin = new Pin(this, prototype);
             _pins.Add(pin);

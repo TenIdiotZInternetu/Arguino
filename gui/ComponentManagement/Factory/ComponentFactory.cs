@@ -10,8 +10,6 @@ public class SceneFactory {
     private string _scenePath;
     private string _componentsDirPath;
 
-    private Dictionary<string, Component> _componentInstances; 
-
     public SceneFactory(string scenePath, string componentsDirPath){
         _scenePath = scenePath;
         _componentsDirPath = componentsDirPath;
@@ -20,31 +18,46 @@ public class SceneFactory {
     public void LoadResources() {
         // TODO: Determine for different file formats
         ISceneLoader sceneLoader = new YamlSceneLoader();
-        ISvgLoader svgLoader = new SkiaSvgLoader();
 
-        sceneLoader.LoadScene(_scenePath);
+        sceneLoader.LoadFile(_scenePath);
         var componentTypeNames = sceneLoader.GetComponentTypeNames();
-        _componentInstances = sceneLoader.InstantiateComponents();
+        var componentInstances = sceneLoader.InstantiateComponents(); // TODO: I hate this
 
         foreach (string typeName in componentTypeNames) {
-            var componentConfig = CreateConfig(typeName);
-            if (componentConfig == null) continue;
-            componentConfig.ComponentPath = GetComponentTypePath(typeName);
-            Component.AddConfiguration(componentConfig);
-
-            svgLoader.LoadDocuments(componentConfig.ComponentPath);
-            svgLoader.ResizeDocuments(componentConfig.ImageSize);
+            CompleteComponentType(typeName);
             
-            // TODO: Create proxy object to add SVG documents before compilation
-            // foreach (var (spriteName, svgDoc) in svgLoader.GetDocuments()) {
-            //     Component firstInstance = _componentInstances.First(entry => entry.Key == typeName).Value;
-            //     firstInstance.OnLoadSvgDocument(spriteName, svgDoc);
-            // }
-            
-            foreach (var (_, instance) in _componentInstances) {
-                instance.Transform.BaseSize = componentConfig.ImageSize;
+            foreach (Component instance in sceneLoader.GetComponentsOfType(typeName)) {
+                CompleteComponentInstance(instance);
             }
         }
+
+        Scene = new Scene {
+            ComponentsMap = componentInstances,
+            Nodes = sceneLoader.InstantiateNodes()
+        };
+    }
+
+    private void CompleteComponentType(string typeName) {
+        var componentConfig = CreateConfig(typeName);
+        componentConfig.ComponentPath = GetComponentTypePath(typeName);
+
+        ISvgLoader svgLoader = new SkiaSvgLoader();
+        svgLoader.LoadDocuments(componentConfig.ComponentPath);
+        svgLoader.ResizeDocuments(componentConfig.ImageSize);
+        
+        // TODO: Create proxy object to add SVG documents before compilation
+        // foreach (var (spriteName, svgDoc) in svgLoader.GetDocuments()) {
+        //     Component firstInstance = _componentInstances.First(entry => entry.Key == typeName).Value;
+        //     firstInstance.OnLoadSvgDocument(spriteName, svgDoc);
+        // }
+
+        componentConfig.Sprites = svgLoader.CompileSvgs();
+        Component.AddConfiguration(componentConfig);
+    }
+
+    private void CompleteComponentInstance(Component instance) {
+        instance.Transform.BaseSize = instance.Configuration.ImageSize;
+        instance.InitPins();
     }
 
     private ComponentConfiguration? CreateConfig(string typeName) {
