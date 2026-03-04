@@ -1,5 +1,6 @@
 using System.Numerics;
 using ComponentManagement.Scenes;
+using Svg;
 using Svg.Skia;
 
 namespace ComponentManagement.Graph;
@@ -25,13 +26,15 @@ public abstract class Component {
         CurrentSprite = Configuration.Sprites.First().Value;
     }
     
-    public virtual void OnInitialized() {}
     public virtual void OnPinConnected(Pin pin) {}
     public virtual void OnPinDisconnected(Pin pin) {}
     public virtual void OnPinStateChanged(Pin pin) {}
     public virtual void OnControlPress(Vector2 cursorPosition) {}
     public virtual void OnControlRelease() {}
     // TODO: OnInspect()
+
+    internal virtual void OnInitialized() {}
+    internal virtual SvgDocument? OnLoadSvgDocument(string SpriteName, SvgDocument svgDocument) => null;
 
     public Pin? GetPin(string name) {
         try {

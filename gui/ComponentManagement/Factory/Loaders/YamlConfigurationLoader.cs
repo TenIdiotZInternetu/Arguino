@@ -6,7 +6,7 @@ using YamlDotNet.Serialization;
 
 namespace ComponentManagement.Factory.Loaders;
 
-public static class YamlComponentLoader {
+public static class YamlConfigurationLoader {
     public record struct ConfigDto() {
         public required string Name;
         public string Description = "";

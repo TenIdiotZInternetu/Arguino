@@ -98,7 +98,7 @@ public static class YamlSceneLoader {
             return null;
         }
 
-        ComponentConfiguration? configuration = YamlComponentLoader.LoadConfig(componentDir);
+        ComponentConfiguration? configuration = YamlConfigurationLoader.LoadConfig(componentDir);
         if (configuration is ComponentConfiguration config) {
             config.Sprites = SkiaSvgLoader.LoadSvgs(componentDir, config);
             Component.AddConfiguration(config);

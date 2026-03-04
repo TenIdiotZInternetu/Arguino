@@ -7,6 +7,7 @@ public record Transform {
     private Vector2 _scale = 400 * Vector2.One;         // 100x100 pixels, chosen arbitrarily
     
     public float Rotation { get; set; }
+    public Vector2 BaseSize { get; internal set; }
 
     public Vector2 Position {
         get =>  _position;
