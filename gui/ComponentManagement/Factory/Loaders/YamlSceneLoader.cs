@@ -1,13 +1,11 @@
-using System.Diagnostics;
 using System.Numerics;
 using System.Reflection;
 using ComponentManagement.Graph;
 using ComponentManagement.Scenes;
 using ComponentManagement.Utils;
-using Logger;
 using YamlDotNet.Serialization;
 
-namespace ComponentManagement.Loaders;
+namespace ComponentManagement.Factory.Loaders;
 
 using ComponentsMap = Dictionary<string, YamlSceneLoader.SceneDto.ComponentDto>;
 using NodesList = List<List<string>>;

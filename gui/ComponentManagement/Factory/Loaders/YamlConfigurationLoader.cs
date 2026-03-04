@@ -4,7 +4,7 @@ using ComponentManagement.Utils;
 using YamlDotNet.Core;
 using YamlDotNet.Serialization;
 
-namespace ComponentManagement.Loaders;
+namespace ComponentManagement.Factory.Loaders;
 
 public static class YamlComponentLoader {
     public record struct ConfigDto() {

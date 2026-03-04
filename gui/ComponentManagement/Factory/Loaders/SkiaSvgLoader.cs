@@ -4,7 +4,7 @@ using SkiaSharp;
 using Svg;
 using Svg.Skia;
 
-namespace ComponentManagement.Loaders;
+namespace ComponentManagement.Factory.Loaders;
 
 public static class SkiaSvgLoader {
     public static Dictionary<string, SKSvg> LoadSvgs(string path, ComponentConfiguration component) {
