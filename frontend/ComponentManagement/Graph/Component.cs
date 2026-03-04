@@ -1,11 +1,8 @@
 using System.Numerics;
-using ComponentManagement.Graph;
-using ComponentManagement.Loaders;
 using ComponentManagement.Scenes;
-using Logger;
 using Svg.Skia;
 
-namespace ComponentManagement;
+namespace ComponentManagement.Graph;
 
 public abstract class Component {
     public required string Name { get; set; }

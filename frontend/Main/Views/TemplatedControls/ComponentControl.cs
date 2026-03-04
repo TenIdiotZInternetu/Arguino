@@ -2,9 +2,8 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Media;
-using ComponentManagement;
+using ComponentManagement.Graph;
 using Gui.Utils.ExtensionMethods;
-using SkiaSharp;
 using Svg.Skia;
 
 namespace Gui.Views.TemplatedControls;
