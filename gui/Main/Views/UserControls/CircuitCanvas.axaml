@@ -3,7 +3,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="clr-namespace:Gui.ViewModels"
-             xmlns:componentManagement="clr-namespace:ComponentManagement;assembly=ComponentManagement"
+             xmlns:cmgraph="clr-namespace:ComponentManagement.Graph;assembly=ComponentManagement"
              xmlns:tcontrol="clr-namespace:Gui.Views.TemplatedControls"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="Gui.Views.UserControls.CircuitCanvas"
@@ -21,7 +21,7 @@
                     </ItemsControl.ItemsPanel>
 
                     <ItemsControl.ItemTemplate>
-                        <DataTemplate DataType="componentManagement:Component">
+                        <DataTemplate DataType="cmgraph:Component">
                             <tcontrol:ComponentControl Component="{Binding}"/>
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
