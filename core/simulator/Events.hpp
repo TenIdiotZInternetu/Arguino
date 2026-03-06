@@ -15,23 +15,23 @@ struct Event {
 
 namespace event {
 
-Event write(size_t localVirtualTime, pin_t pin, digital_t value)
+// TODO: Reset timer for reverse actions
+
+Event write(pin_t pin, digital_t value)
 {
     return {
-        .localVirtualTime = localVirtualTime,                                         //
         .action = [=]() { CanonicalState::state().set_digital(pin, value); },         //
         .reverseAction = [=]() { CanonicalState::state().set_digital(pin, !value); }  //
     };
 }
 
-Event set_pinmode(size_t localVirtualTime, pin_t pin, PinMode mode)
+Event set_pinmode(pin_t pin, PinMode mode)
 {
     PinMode oppositeMode = mode == PinMode::In  //
         ? PinMode::Out
         : PinMode::In;
 
     return {
-        .localVirtualTime = localVirtualTime,                                                //
         .action = [=]() { CanonicalState::state().set_pin_mode(pin, mode); },                //
         .reverseAction = [=]() { CanonicalState::state().set_pin_mode(pin, oppositeMode); }  //
     };
