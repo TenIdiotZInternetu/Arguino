@@ -15,12 +15,12 @@
 
 enum class PinMode { In, Out };
 
+using pin_t = uint8_t;
+using digital_t = bool;
+using analog_t = float;
+
 class ArduinoState {
    public:
-    using pin_t = uint8_t;
-    using digital_t = bool;
-    using analog_t = float;
-
     static constexpr uint8_t ANALOG_PIN_COUNT = 6;
     static constexpr uint8_t DIGITAL_PIN_COUNT = 14;
     static constexpr uint8_t PIN_COUNT = ANALOG_PIN_COUNT + DIGITAL_PIN_COUNT;
