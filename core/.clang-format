@@ -17,6 +17,7 @@ AlignAfterOpenBracket: false
 BinPackArguments: false
 AllowShortFunctionsOnASingleLine: Inline
 AlignOperands: DontAlign
+Cpp11BracedListStyle: false
 
 PenaltyBreakAssignment: 100
 PenaltyReturnTypeOnItsOwnLine: 100
