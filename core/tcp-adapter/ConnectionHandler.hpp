@@ -14,23 +14,14 @@
 
 namespace arguino::tcp {
 
-template <typename T>
-concept IEncoder = requires(T encoder, std::string msg, simulator::ArduinoState state) {
-    { encoder.encode(state) } -> std::convertible_to<std::string>;
-    { encoder.decode(msg) } -> std::same_as<simulator::ArduinoState>;
-};
-
-template <IEncoder TEncoder, logger::ILogger TLogger>
-class ArguinoConnectionHandler
-    : public std::enable_shared_from_this<ArguinoConnectionHandler<TEncoder, TLogger>> {
+template <logger::ILogger TLogger>
+class ConnectionHandler : public std::enable_shared_from_this<ConnectionHandler<TLogger>> {
    public:
     static constexpr char MESSAGE_DELIMITER = ';';
-    static constexpr char READ_FLAG = 'R';
-    static constexpr char WRITE_FLAG = 'W';
 
-    using pointer_t = std::shared_ptr<ArguinoConnectionHandler<TEncoder, TLogger>>;
+    using pointer_t = std::shared_ptr<ConnectionHandler<TLogger>>;
 
-    ArguinoConnectionHandler(boost::asio::io_context& ioContext, std::shared_ptr<TLogger> logger);
+    ConnectionHandler(boost::asio::io_context& ioContext, std::shared_ptr<TLogger> logger);
     static pointer_t create(boost::asio::io_context& ioContext, std::shared_ptr<TLogger> logger);
 
     void handle();
@@ -48,32 +39,33 @@ class ArguinoConnectionHandler
     void handle_write_state(const std::string& message);
 };
 
-template <IEncoder TEncoder, logger::ILogger TLogger>
-ArguinoConnectionHandler<TEncoder, TLogger>::ArguinoConnectionHandler(
+template <logger::ILogger TLogger>
+ConnectionHandler<TLogger>::ConnectionHandler(
     boost::asio::io_context& ioContext, std::shared_ptr<TLogger> logger)
     : _socket(ioContext), _logger(logger)
 {}
 
-template <IEncoder TEncoder, logger::ILogger TLogger>
-ArguinoConnectionHandler<TEncoder, TLogger>::pointer_t
-ArguinoConnectionHandler<TEncoder, TLogger>::create(
+template <logger::ILogger TLogger>
+ConnectionHandler<TLogger>::pointer_t ConnectionHandler<TLogger>::create(
     boost::asio::io_context& ioContext, std::shared_ptr<TLogger> logger)
 {
-    return std::make_shared<ArguinoConnectionHandler>(ioContext, logger);
+    return std::make_shared<ConnectionHandler>(ioContext, logger);
 }
 
-template <IEncoder TEncoder, logger::ILogger TLogger>
-void ArguinoConnectionHandler<TEncoder, TLogger>::handle()
+template <logger::ILogger TLogger>
+void ConnectionHandler<TLogger>::handle()
 {
     boost::asio::async_read_until(_socket,
         boost::asio::dynamic_buffer(_buffer),
         MESSAGE_DELIMITER,
-        [me = this->shared_from_this()](
-            auto error, size_t messageSize) { me->on_read_message(error, messageSize); });
+        [me = this->shared_from_this()](auto error, size_t messageSize) {  //
+            me->on_read_message(error, messageSize);
+        }  //
+    );
 }
 
-template <IEncoder TEncoder, logger::ILogger TLogger>
-void ArguinoConnectionHandler<TEncoder, TLogger>::on_read_message(
+template <logger::ILogger TLogger>
+void ConnectionHandler<TLogger>::on_read_message(
     boost::system::error_code error, size_t messageSize)
 {
     if (error) {
@@ -83,7 +75,7 @@ void ArguinoConnectionHandler<TEncoder, TLogger>::on_read_message(
 
     if (_buffer.empty()) return;
 
-    // TODO: expect timestamp in the message41
+    // TODO: expect timestamp in the message
 
     const std::string message = _buffer.substr(0, messageSize);
 
@@ -98,14 +90,9 @@ void ArguinoConnectionHandler<TEncoder, TLogger>::on_read_message(
     handle();
 }
 
-template <IEncoder TEncoder, logger::ILogger TLogger>
-void ArguinoConnectionHandler<TEncoder, TLogger>::handle_read_state(const std::string& message)
+template <logger::ILogger TLogger>
+void ConnectionHandler<TLogger>::handle_read_state(const std::string& message)
 {
-    TEncoder encoder;
-
-    // TODO get rid of this global reference
-    _outcomingMessage = encoder.encode(simulator::CanonicalState::state()) + MESSAGE_DELIMITER;
-
     boost::asio::async_write(_socket,
         boost::asio::buffer(_outcomingMessage),
         [me = this->shared_from_this()](auto error, size_t bytes_written) {
@@ -115,13 +102,13 @@ void ArguinoConnectionHandler<TEncoder, TLogger>::handle_read_state(const std::s
             else {
                 me->_logger->log(message::Read(me->_outcomingMessage));
             }
-        });
+        }  //
+    );
 }
 
-template <IEncoder TEncoder, logger::ILogger TLogger>
-void ArguinoConnectionHandler<TEncoder, TLogger>::handle_write_state(const std::string& message)
+template <logger::ILogger TLogger>
+void ConnectionHandler<TLogger>::handle_write_state(const std::string& message)
 {
-    TEncoder encoder;
     simulator::ArduinoState newState = encoder.decode(message.substr(1));  // skip write flag
     simulator::CanonicalState::update_state(newState);
     _logger->log(message::Write(message));
