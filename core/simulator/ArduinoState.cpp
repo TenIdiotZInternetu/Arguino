@@ -4,6 +4,8 @@
 
 #include "ArduinoState.hpp"
 
+namespace arguino::simulator {
+
 CanonicalState* CanonicalState::s_instance;
 std::function<void(const std::string&)> CanonicalState::s_log_func = [](const std::string&) {};
 
@@ -47,11 +49,13 @@ void CanonicalState::update_state(const ArduinoState& newState)
     writeState.get_pin_mode() = state().get_pin_mode();
     writeState.get_digital() = state().get_digital();
 
-    for (ArduinoState::pin_t i = 0; i < ArduinoState::DIGITAL_PIN_COUNT; i++) {
+    for (pin_t i = 0; i < ArduinoState::DIGITAL_PIN_COUNT; i++) {
         if (writeState.get_pin_mode(i) == PinMode::In) {
             writeState.set_digital(i, newState.get_digital(i));
         }
     }
 
     s_instance->flip_states();
+}
+
 }

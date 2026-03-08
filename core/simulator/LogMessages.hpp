@@ -8,7 +8,7 @@ namespace arguino::simulator::message {
 
 class Read {
    public:
-    Read(ArduinoState::pin_t pin, ArduinoState::digital_t value)
+    Read(pin_t pin, digital_t value)
         : _pin(pin), _value(value)
     {}
 
@@ -16,13 +16,13 @@ class Read {
     std::string what() { return std::format("Reading value {} from pin {}", _pin, _value); }
 
    private:
-    ArduinoState::pin_t _pin;
-    ArduinoState::digital_t _value;
+    pin_t _pin;
+    digital_t _value;
 };
 
 class Write {
    public:
-    Write(ArduinoState::pin_t pin, ArduinoState::digital_t value)
+    Write(pin_t pin, digital_t value)
         : _pin(pin), _value(value)
     {}
 
@@ -30,7 +30,7 @@ class Write {
     std::string what() { return std::format("Writing value {} to pin {}", _pin, _value); }
 
    private:
-    ArduinoState::pin_t _pin;
-    ArduinoState::digital_t _value;
+    pin_t _pin;
+    digital_t _value;
 };
 }  // namespace arguino::simulator::message

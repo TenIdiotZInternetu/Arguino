@@ -33,10 +33,12 @@ void run_tcp()
 
 void run_simulator()
 {
+    using state_t = arguino::simulator::CanonicalState;
     auto logger = std::make_shared<logger_t>(std::filesystem::absolute(options.SimulatorLogPath));
-    CanonicalState::init();
-    CanonicalState::init_logger(logger);
-    CanonicalState::state().init_timer();
+
+    state_t::init();
+    state_t::init_logger(logger);
+    state_t::state().init_timer();
 
     setup();
     while (true) {
