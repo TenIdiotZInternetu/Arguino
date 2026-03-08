@@ -12,15 +12,10 @@
 
 #include "EventQueue.hpp"
 #include "ILogger.hpp"
+#include "SimulatorTypes.hpp"
 #include "Timer.hpp"
 
 namespace arguino::simulator {
-
-enum class PinMode { In, Out };
-
-using pin_t = uint8_t;
-using digital_t = bool;
-using analog_t = float;
 
 class ArduinoState {
    public:

@@ -7,6 +7,8 @@
 
 namespace arguino::tcp {
 
+using namespace arguino::simulator;
+
 class StateEncoder {
    public:
     using state_t = ArduinoState;

@@ -6,6 +6,7 @@
 #define ARGUINO_ARDUINO_HPP
 
 #include "ArduinoState.hpp"
+#include "Events.hpp"
 
 // Arduino.h must be the last included header because it defines macros like INPUT and OUTPUT that
 // spoil windows.h
@@ -18,9 +19,10 @@ void digitalWrite(uint8_t pin, uint8_t val)
 {
     if (CanonicalState::state().get_digital(pin) != val) {
         CanonicalState::queue().enqueue_local(  //
-            event::write(pin, val == HIGH)      //
+            Event::write(pin, val == HIGH)      //
         );
         CanonicalState::log(std::format("Written value {} to pin {}", val, pin));
+        CanonicalState::queue().execute_next_event();
     }
 }
 
