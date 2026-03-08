@@ -15,9 +15,9 @@
 namespace arguino::tcp {
 
 template <typename T>
-concept IEncoder = requires(T encoder, std::string msg, ArduinoState state) {
+concept IEncoder = requires(T encoder, std::string msg, simulator::ArduinoState state) {
     { encoder.encode(state) } -> std::convertible_to<std::string>;
-    { encoder.decode(msg) } -> std::same_as<ArduinoState>;
+    { encoder.decode(msg) } -> std::same_as<simulator::ArduinoState>;
 };
 
 template <IEncoder TEncoder, logger::ILogger TLogger>
@@ -104,7 +104,7 @@ void ArguinoConnectionHandler<TEncoder, TLogger>::handle_read_state(const std::s
     TEncoder encoder;
 
     // TODO get rid of this global reference
-    _outcomingMessage = encoder.encode(CanonicalState::state()) + MESSAGE_DELIMITER;
+    _outcomingMessage = encoder.encode(simulator::CanonicalState::state()) + MESSAGE_DELIMITER;
 
     boost::asio::async_write(_socket,
         boost::asio::buffer(_outcomingMessage),
@@ -122,8 +122,8 @@ template <IEncoder TEncoder, logger::ILogger TLogger>
 void ArguinoConnectionHandler<TEncoder, TLogger>::handle_write_state(const std::string& message)
 {
     TEncoder encoder;
-    ArduinoState newState = encoder.decode(message.substr(1));  // skip write flag
-    CanonicalState::update_state(newState);
+    simulator::ArduinoState newState = encoder.decode(message.substr(1));  // skip write flag
+    simulator::CanonicalState::update_state(newState);
     _logger->log(message::Write(message));
 }
 
