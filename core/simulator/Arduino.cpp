@@ -12,6 +12,8 @@
 
 #include "Arduino.h"
 
+using namespace arguino::simulator;
+
 void digitalWrite(uint8_t pin, uint8_t val)
 {
     CanonicalState::state().set_digital(pin, val == HIGH);

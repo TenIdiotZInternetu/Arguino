@@ -13,6 +13,8 @@
 #include "ILogger.hpp"
 #include "Timer.hpp"
 
+namespace arguino::simulator {
+
 enum class PinMode { In, Out };
 
 using pin_t = uint8_t;
@@ -72,6 +74,7 @@ class CanonicalState {
     ArduinoState _states[2];  // one for reading, one for writing
     std::atomic<uint8_t> _readStateIdx = 0;
 
+
     ArduinoState& get_write_state() { return _states[1 - _readStateIdx]; }
     void flip_states() { _readStateIdx = 1 - _readStateIdx; }
 
@@ -89,5 +92,7 @@ inline void CanonicalState::init_logger(std::shared_ptr<TLogger> logger_ptr)
         logger_ptr->log(str);
     };
 }
+
+}  // namespace arguino::simulator
 
 #endif  // ARGUINO_PINOUTSTATE_HPP
