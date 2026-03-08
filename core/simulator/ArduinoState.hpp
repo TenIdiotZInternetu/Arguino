@@ -10,6 +10,7 @@
 #include <functional>
 #include <mutex>
 
+#include "EventQueue.hpp"
 #include "ILogger.hpp"
 #include "Timer.hpp"
 
@@ -65,6 +66,8 @@ class CanonicalState {
     static ArduinoState& state() { return s_instance->_states[s_instance->_readStateIdx]; }
     static void update_state(const ArduinoState& newState);
 
+    static EventQueue& queue() { return s_instance->_eventQueue; }
+
     template <logger::ILogger TLogger>
     static void init_logger(std::shared_ptr<TLogger> logger_ptr);
     static void log(const std::string& str) { s_log_func(str); }
@@ -74,6 +77,7 @@ class CanonicalState {
     ArduinoState _states[2];  // one for reading, one for writing
     std::atomic<uint8_t> _readStateIdx = 0;
 
+    EventQueue _eventQueue;
 
     ArduinoState& get_write_state() { return _states[1 - _readStateIdx]; }
     void flip_states() { _readStateIdx = 1 - _readStateIdx; }

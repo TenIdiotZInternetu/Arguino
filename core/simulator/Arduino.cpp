@@ -16,8 +16,12 @@ using namespace arguino::simulator;
 
 void digitalWrite(uint8_t pin, uint8_t val)
 {
-    CanonicalState::state().set_digital(pin, val == HIGH);
-    // CanonicalState::log("Writing stuff");
+    if (CanonicalState::state().get_digital(pin) != val) {
+        CanonicalState::queue().enqueue_local(  //
+            event::write(pin, val == HIGH)      //
+        );
+        CanonicalState::log(std::format("Written value {} to pin {}", val, pin));
+    }
 }
 
 int digitalRead(uint8_t pin)
