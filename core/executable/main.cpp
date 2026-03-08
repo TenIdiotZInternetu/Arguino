@@ -13,12 +13,12 @@ ProgramOptions options;
 
 #ifdef ARGUINO_TCP
 
-#include "ArguinoConnectionHandler.hpp"
+#include "ConnectionHandler.hpp"
 #include "StateEncoder.hpp"
 #include "TcpServer.hpp"
 
 using encoder_t = arguino::tcp::StateEncoder;
-using connection_handler_t = arguino::tcp::ArguinoConnectionHandler<encoder_t, logger_t>;
+using connection_handler_t = arguino::tcp::ConnectionHandler<logger_t>;
 using tcp_server_t = arguino::tcp::TcpServer<connection_handler_t, logger_t>;
 
 
