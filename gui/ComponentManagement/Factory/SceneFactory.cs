@@ -25,7 +25,8 @@ public class SceneFactory {
         var componentInstances = sceneLoader.InstantiateComponents();
 
         foreach (string typeName in componentTypeNames) {
-            CompleteComponentType(typeName);
+            bool typeSuccess = CompleteComponentType(typeName);
+            if (!typeSuccess) continue;
             
             foreach (Component instance in sceneLoader.GetComponentsOfType(typeName)) {
                 CompleteComponentInstance(instance);
@@ -40,8 +41,13 @@ public class SceneFactory {
         return Scene;
     }
 
-    private void CompleteComponentType(string typeName) {
+    private bool CompleteComponentType(string typeName) {
         var componentConfig = CreateConfig(typeName);
+        if (componentConfig == null) {
+            ComponentManager.LogWarning($"Configuration of component type {typeName} could not be created. Skipping instances of this type.");
+            return false;
+        }
+
         componentConfig.ComponentPath = GetComponentTypePath(typeName);
 
         ISvgLoader svgLoader = new SkiaSvgLoader();
@@ -55,20 +61,25 @@ public class SceneFactory {
         // }
 
         componentConfig.Sprites = svgLoader.CompileSvgs();
+
+        if (componentConfig.Sprites.Count == 0) {
+            ComponentManager.LogWarning($"No SVGs for type {typeName} were found. Components will be present but not rendered.");
+        }
+
         Component.AddConfiguration(componentConfig);
         ComponentManager.LogInfo($"Defined the component type {typeName}");
+        return true;
     }
 
     private void CompleteComponentInstance(Component instance) {
         instance.Transform.BaseSize = instance.Configuration.ImageSize;
         instance.InitPins();
 
-        try {
+        if (instance.Configuration.Sprites.Count != 0) {
             instance.CurrentSprite = instance.Configuration.Sprites.First().Value;
         }
-        catch (InvalidOperationException) {
+        else {
             instance.CurrentSprite = new SKSvg();
-            ComponentManager.LogWarning("No Svgs were loade")
         }
 
         instance.OnInitialized();

@@ -8,7 +8,6 @@ public class Arduino : Component {
     
     private ArduinoState _state = new();
     
-    // TODO: Replace by interface
     private bool _clientRunning;
     private TcpClient? _tcpClient;
     private MessageHandler? _tcpHandler => _tcpClient?.Handler;
