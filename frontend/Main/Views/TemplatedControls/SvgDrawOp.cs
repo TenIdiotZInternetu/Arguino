@@ -11,11 +11,18 @@ namespace Gui.Views.TemplatedControls;
 
 public class SvgDrawOp(SKSvg Svg, SKMatrix Transform) : ICustomDrawOperation {
 
-    public Rect Bounds => Transform.MapRect(Svg.Picture!.CullRect).ToAvaloniaRect();
+    public Rect Bounds => Transform.MapRect(_hitBox).ToAvaloniaRect();
+
+    private SKRect _hitBox => Svg.Picture!.CullRect;
 
     public void Dispose() { }
-    public bool HitTest(Point p) => Bounds.Contains(p);
     public bool Equals(ICustomDrawOperation? other) => false;
+
+    public bool HitTest(Point p) {
+        SKPoint point = p.ToSKPoint();
+        SKPoint localSpacePoint = Transform.Invert().MapPoint(point);
+        return _hitBox.Contains(localSpacePoint);
+    }
           
     public void Render(ImmediateDrawingContext context) {
         var leaseFeature = context.TryGetFeature<ISkiaSharpApiLeaseFeature>();
