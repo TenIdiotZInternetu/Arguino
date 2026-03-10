@@ -9,7 +9,9 @@ public class Button : Component {
     
     private bool _isPushed = false;
 
-    public Button(string definitionPath) : base(definitionPath) {
+    public Button(string definitionPath) : base(definitionPath) {}
+
+    internal override void OnInitialized() {
         UpdateSprite(SPRITE_BUTTON_UP);
     }
 

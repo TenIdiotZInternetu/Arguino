@@ -11,10 +11,12 @@ public class Led : Component {
     private const string PIN_CATHODE = "cathode";
     private const string PIN_ANODE = "anode";
 
-    private Pin _cathode;
-    private Pin _anode;
+    private Pin _cathode = null!;
+    private Pin _anode = null!;
 
-    public Led(string definitionPath) : base(definitionPath) {
+    public Led(string typeName) : base(typeName) {}
+
+    internal override void OnInitialized() {
         UpdateSprite(SPRITE_LED_OFF);
         _cathode = GetPin(PIN_CATHODE)!;
         _cathode.MakeReadOnly();
