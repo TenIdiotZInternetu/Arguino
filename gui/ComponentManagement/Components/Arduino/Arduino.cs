@@ -63,7 +63,7 @@ public class Arduino : Component {
         }
     }
 
-    private Pin GetDigitalPin(int index) => GetPin("D" + index);
-    private Pin GetAnalogPin(int index) => GetPin("A" + index);
+    private Pin GetDigitalPin(int index) => GetPin("D" + index)!;
+    private Pin GetAnalogPin(int index) => GetPin("A" + index)!;
     private uint GetPinIndex(string pinName) => uint.Parse(pinName[1..]);
 }

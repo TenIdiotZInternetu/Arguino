@@ -5,6 +5,7 @@ using Avalonia.Controls.ApplicationLifetimes;
 using CommandLine;
 using ComponentManagement;
 using ComponentManagement.Components;
+using ComponentManagement.Factory;
 using ComponentManagement.Factory.Loaders;
 using ComponentManagement.Scenes;
 using Gui.ViewModels;
@@ -59,15 +60,12 @@ public static class MainController {
     }
 
     private static void InitScene() {
-        Scene = YamlSceneLoader.LoadScene(
-            Arguments.ScenePath,
-            Arguments.ComponentsPath
-        );
+        var SceneFactory = new SceneFactory(Arguments.ScenePath, Arguments.ComponentsPath);
+        Scene = SceneFactory.LoadResources();
 
         var canvas = new CircuitCanvas();
         foreach (var comp in Scene.ComponentsMap.Values) {
             canvas.Components.Add(comp);
-            comp.OnInitialized();
         }
         
         MainWindow.CircuitCanvas.DataContext = canvas;
