@@ -6,7 +6,7 @@ using YamlDotNet.Serialization;
 
 namespace ComponentManagement.Factory.Loaders;
 
-public static class YamlConfigurationLoader {
+public class YamlConfigurationLoader : IConfigurationLoader {
     public record struct ConfigDto() {
         public required string Name;
         public string Description = "";
@@ -17,11 +17,9 @@ public static class YamlConfigurationLoader {
         // TODO: Child components
     }
 
-    public static ComponentConfiguration? LoadConfig(string componentPath) {
-        var fileName = Path.GetFileName(componentPath) + ".yaml";     // find file with the same name as the directory
-
+    public ComponentConfiguration? LoadConfig(string configPath) {
         try {
-            using var file = File.OpenRead(componentPath + "/" + fileName);
+            using var file = File.OpenRead(configPath);
             using var fileStream = new StreamReader(file);
 
             var deserializer = new DeserializerBuilder()
@@ -29,32 +27,29 @@ public static class YamlConfigurationLoader {
                 .Build();
                 
             var configDto = deserializer.Deserialize<ConfigDto>(fileStream);
-            return CreateConfig(configDto);
-        }
-        catch (FileNotFoundException e) {
-            ComponentManager.LogError($"Component Configuration: Could not find .yaml file at {componentPath}. Exception: {e.Message}");
-            return null;
+            return CreateConfig(configDto, configPath);
         }
         catch (YamlException e) {
-            ComponentManager.LogError($"Component Configuration: Could not deserialize {fileName}. Exception: {e.Message}");
+            ComponentManager.LogError($"Component Configuration: Could not deserialize {configPath}. Exception: {e.Message}");
             return null;
         }
         catch (Exception e) {
-            ComponentManager.LogError($"Component Configuration: Could not deserialize {fileName}. Exception: {e.Message}");
+            ComponentManager.LogError($"Component Configuration: Could not deserialize {configPath}. Exception: {e.Message}");
             return null;
         }
     }
 
-    private static ComponentConfiguration CreateConfig(ConfigDto configDto) {
+    private ComponentConfiguration CreateConfig(ConfigDto configDto, string configPath) {
         return new ComponentConfiguration {
             Name = configDto.Name,
+            ComponentPath = Path.GetDirectoryName(configPath)!,
             Description = configDto.Description,
             ImageSize = YamlUtils.StringToVector2(configDto.ImageSize) ?? ComponentConfiguration.DEFAULT_IMAGE_SIZE,
             Pins = CreatePins(configDto)
         };
     }
 
-    private static List<PinPrototype> CreatePins(ConfigDto configDto) {
+    private List<PinPrototype> CreatePins(ConfigDto configDto) {
         List<PinPrototype> pins = [];
 
         uint pinId = 0;

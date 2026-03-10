@@ -1,45 +1,52 @@
 using System.Numerics;
-using ComponentManagement.Scenes;
-using SkiaSharp;
 using Svg;
 using Svg.Skia;
 
 namespace ComponentManagement.Factory.Loaders;
 
-public static class SkiaSvgLoader {
-    public static Dictionary<string, SKSvg> LoadSvgs(string path, ComponentConfiguration component) {
-        var loadedSvgs = new Dictionary<string, SKSvg>();
-        string[] svgFileNames = Directory.GetFiles(path, "*.svg");
+public class SkiaSvgLoader : ISvgLoader {
+    private readonly Dictionary<string, SvgDocument> _loadedDocuments = [];
 
-        // TODO: Catch file exceptions
+    public void LoadDocuments(string componentPath) {
+        string[] svgFileNames = Directory.GetFiles(componentPath, "*.svg");
+
         foreach (var fileName in svgFileNames) {
             using var stream = File.OpenRead(fileName);
 
             var svgDocument = SvgDocument.Open<SvgDocument>(stream);
-            ScaleToDesiredSize(svgDocument, component.ImageSize);
-            var svg = SKSvg.CreateFromSvgDocument(svgDocument);
-
             string svgName = Path.GetFileNameWithoutExtension(fileName);
-            loadedSvgs.Add(svgName, svg);
-            ComponentManager.LogInfo($"Loaded SVG {svgName} of component type {component.Name}.");
+            _loadedDocuments.Add(svgName, svgDocument);
         }
-        
-        return loadedSvgs;
+    }
+    
+    public Dictionary<string, SvgDocument> GetDocuments() => _loadedDocuments;
+
+    public Dictionary<string, SKSvg> CompileSvgs() {
+        Dictionary<string, SKSvg> compiledSvgs = [];
+
+        foreach (var (svgName, svgDoc) in _loadedDocuments) {
+            var svg = SKSvg.CreateFromSvgDocument(svgDoc);
+            compiledSvgs.Add(svgName, svg);
+        }
+
+        return compiledSvgs;
     }
 
-    private static void ScaleToDesiredSize(SvgDocument svgDocument, Vector2 desiredSize) {
-        if (desiredSize.X != 0 && desiredSize.Y != 0) {
-            svgDocument.AspectRatio = new(SvgPreserveAspectRatio.none);
-        }
-        else {
-            svgDocument.AspectRatio = new(SvgPreserveAspectRatio.xMinYMin);
-        }
+    public void ResizeDocuments(Vector2 desiredSize) {
+        foreach (SvgDocument doc in _loadedDocuments.Values) {
+            if (desiredSize.X != 0 && desiredSize.Y != 0) {
+                doc.AspectRatio = new(SvgPreserveAspectRatio.none);
+            }
+            else {
+                doc.AspectRatio = new(SvgPreserveAspectRatio.xMinYMin);
+            }
 
-        if (desiredSize.X != 0) {
-            svgDocument.Width = new(SvgUnitType.Pixel, desiredSize.X);
-        }
-        if (desiredSize.Y != 0) {
-            svgDocument.Height = new(SvgUnitType.Pixel, desiredSize.Y);
+            if (desiredSize.X != 0) {
+                doc.Width = new(SvgUnitType.Pixel, desiredSize.X);
+            }
+            if (desiredSize.Y != 0) {
+                doc.Height = new(SvgUnitType.Pixel, desiredSize.Y);
+            }
         }
     }
 }
