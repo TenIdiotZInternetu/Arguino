@@ -1,36 +1,32 @@
 Components:
   Arduino:
-    Type: Arduino
-    Position: 10 10
-  Led0:
-    Type: Led
-    Position: 300 10
-    Scale: 0.5 0.5
-  Led1:
-    Type: Led
-    Position: 300 60
-  Led2:
-    Type: Led
-    Position: 300 110
-  Led3:
-    Type: Led
-    Position: 300 160
-    Scale: 1.5 1.5
-  BtnInc:
-    Type: Button
-    Position: 360 10
-  BtnDec:
-    Type: Button
-    Position: 360 100
-    Rotation: 45
-  VCC:
-    Type: Vcc
-    Position: 10 300
+    Arduino1:
+      Position: 10 10
+  Led:
+    Led0:
+      Position: 300 10
+      Scale: 0.5 0.5
+    Led1:
+      Position: 300 60
+    Led2:
+      Position: 300 110
+    Led3:
+      Position: 300 160
+      Scale: 1.5 1.5
+  Button:
+    BtnInc:
+      Position: 360 10
+    BtnDec:
+      Position: 360 100
+      Rotation: 45
+  Vcc:
+    VCC:
+      Position: 10 300
 Nodes:
-  - [ Arduino.D6, Led3.cathode ]
-  - [ Arduino.D7, Led2.cathode ]
-  - [ Arduino.D8, Led1.cathode ]
-  - [ Arduino.D9, Led0.cathode ]
-  - [ Arduino.D2, BtnDec.1 ]
-  - [ Arduino.D3, BtnInc.1 ]
+  - [ Arduino1.D6, Led3.cathode ]
+  - [ Arduino1.D7, Led2.cathode ]
+  - [ Arduino1.D8, Led1.cathode ]
+  - [ Arduino1.D9, Led0.cathode ]
+  - [ Arduino1.D2, BtnDec.1 ]
+  - [ Arduino1.D3, BtnInc.1 ]
   - [ VCC.0, BtnDec.0, BtnInc.0 ]
