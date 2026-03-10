@@ -1,11 +1,12 @@
 using ComponentManagement.Factory.Loaders;
 using ComponentManagement.Graph;
 using ComponentManagement.Scenes;
+using Svg.Skia;
 
 namespace ComponentManagement.Factory;
 
 public class SceneFactory {
-    public Scene Scene { get; private set; }
+    public Scene Scene { get; private set; } = new();
 
     private string _scenePath;
     private string _componentsDirPath;
@@ -15,13 +16,13 @@ public class SceneFactory {
         _componentsDirPath = componentsDirPath;
     }
 
-    public void LoadResources() {
+    public Scene LoadResources() {
         // TODO: Determine for different file formats
         ISceneLoader sceneLoader = new YamlSceneLoader();
 
         sceneLoader.LoadFile(_scenePath);
         var componentTypeNames = sceneLoader.GetComponentTypeNames();
-        var componentInstances = sceneLoader.InstantiateComponents(); // TODO: I hate this
+        var componentInstances = sceneLoader.InstantiateComponents();
 
         foreach (string typeName in componentTypeNames) {
             CompleteComponentType(typeName);
@@ -35,6 +36,8 @@ public class SceneFactory {
             ComponentsMap = componentInstances,
             Nodes = sceneLoader.InstantiateNodes()
         };
+
+        return Scene;
     }
 
     private void CompleteComponentType(string typeName) {
@@ -53,11 +56,22 @@ public class SceneFactory {
 
         componentConfig.Sprites = svgLoader.CompileSvgs();
         Component.AddConfiguration(componentConfig);
+        ComponentManager.LogInfo($"Defined the component type {typeName}");
     }
 
     private void CompleteComponentInstance(Component instance) {
         instance.Transform.BaseSize = instance.Configuration.ImageSize;
         instance.InitPins();
+
+        try {
+            instance.CurrentSprite = instance.Configuration.Sprites.First().Value;
+        }
+        catch (InvalidOperationException) {
+            instance.CurrentSprite = new SKSvg();
+            ComponentManager.LogWarning("No Svgs were loade")
+        }
+
+        instance.OnInitialized();
     }
 
     private ComponentConfiguration? CreateConfig(string typeName) {
@@ -74,7 +88,7 @@ public class SceneFactory {
             return configLoader.LoadConfig(yamlPath);
         }
         else {
-            ComponentManager.LogError($"A file with path {yamlPath} was expected but not found. Skipping definition of component type {typeName}");
+            ComponentManager.LogError($"A file at path {yamlPath} was expected but not found. Skipping definition of component type {typeName}");
             return null;
         }
     }

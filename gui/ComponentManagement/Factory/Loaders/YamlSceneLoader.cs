@@ -7,16 +7,18 @@ using YamlDotNet.Serialization;
 
 namespace ComponentManagement.Factory.Loaders;
 
-using ComponentsMap = Dictionary<string, YamlSceneLoader.SceneDto.ComponentDto>;
-using NodesList = List<List<string>>;
+// TODO: Too many responsibilities
 
-public static class YamlSceneLoader {
+public class YamlSceneLoader : ISceneLoader {
+    public class ComponentsMap : Dictionary<string, SceneDto.ComponentDto>;
+    public class TypesMap : Dictionary<string, ComponentsMap>;
+    public class NodesList : List<List<string>>;
+
     public record SceneDto {
-        public required ComponentsMap Components { get; init; } = [];
+        public required TypesMap Components { get; init; } = [];
         public required NodesList Nodes { get; init; } = [];
 
         public record ComponentDto {
-            public required string Type;
             public string Position = "0 0";
             public float Rotation = 0;
             public string Scale = "1 1";
@@ -26,90 +28,51 @@ public static class YamlSceneLoader {
         }
     }
 
-    private static readonly Dictionary<string, Type> TYPE_NAMES_MAP = [];
+    private SceneDto? _sceneDto;
+    private readonly Dictionary<string, Type> _typesByName = [];
+    private readonly Dictionary<string, Component> _instancesByName = [];
+    private readonly Dictionary<string, List<Component>> _instancesByType = [];
 
-    public static Scene LoadScene(string scenePath, string componentsPath) {
-        var sceneDto = DeserializeYaml(scenePath);
+    public Dictionary<string, Component> InstantiateComponents() {
+        if (_sceneDto?.Nodes == null) {
+            throw new InvalidOperationException("Instantiating components before loading them from file");
+        }
 
-        var instantiatedComponents = InstantiateComponents(sceneDto.Components, componentsPath);
-        var instantiatedNodes = InstantiatedNodes(sceneDto.Nodes, instantiatedComponents);
-
-        return new Scene {
-            ComponentsMap = instantiatedComponents,
-            Nodes = instantiatedNodes
-        };
-    }
-
-    private static SceneDto DeserializeYaml(string scenePath) {
-        using var file = File.OpenRead(scenePath);
-        var fileStream = new StreamReader(file);
-
-        var deserializer = new DeserializerBuilder()
-            .WithCaseInsensitivePropertyMatching()
-            .Build();
-            
-        return deserializer.Deserialize<SceneDto>(fileStream);
-    }
-
-    private static Dictionary<string, Component> InstantiateComponents(ComponentsMap componentDtos, string componentsPath) {
-        Dictionary<string, Component> components = [];
-        
-        foreach (var (name, dto) in componentDtos) {
-            string typeName = dto.Type;
-            string componentDir = componentsPath + "/" + typeName;
+        foreach (var (typeName, componentDtos) in _sceneDto.Components) {
             Type? type;
 
-            if (!TYPE_NAMES_MAP.TryGetValue(typeName, out type)) {
-                type = MapComponentType(typeName, componentDir);
+            if (!_typesByName.TryGetValue(typeName, out type)) {
+                type = MapComponentType(typeName);
                 if (type == null) continue;
             }
 
-            Component compInstance;
-
-            try {
-                compInstance = (Activator.CreateInstance(type, typeName) as Component)!;
-                compInstance.Name = name;
-                compInstance.Transform = ParseTransform(dto);
-                HandleExtraProps(compInstance, dto.ExtraProps);
-                components.Add(name, compInstance);
-                ComponentManager.LogInfo($"Instantiated component {name} of type {typeName}");
-            }
-            catch {
-                ComponentManager.LogError($"Failed to create instance {name} of type {typeName}.");
+            foreach (var (compName, compDto) in componentDtos) {
+                CreateComponentInstance(typeName, compName, compDto);
             }
         }
 
-        return components;
+        return _instancesByName;
     }
 
-    private static Type? MapComponentType(string typeName, string componentDir) {
+    private Type? MapComponentType(string typeName) {
         // TODO: Change assembly for custom added scripts
-        // TODO: Decompose Component type definition into its own class with interfaces
-
-        Type type;
 
         try {
-            type = Assembly.GetExecutingAssembly()
+            Type type = Assembly.GetExecutingAssembly()
                 .GetTypes()
                 .First(t => t.Name == typeName);
+
+            _typesByName.Add(typeName, type);
+            _instancesByType.Add(typeName, []);
+            return type;
         }
         catch (InvalidOperationException) {
             ComponentManager.LogError($"Component of type {typeName} is not defined.");
             return null;
         }
-
-        ComponentConfiguration? configuration = YamlConfigurationLoader.LoadConfig(componentDir);
-        if (configuration is ComponentConfiguration config) {
-            config.Sprites = SkiaSvgLoader.LoadSvgs(componentDir, config);
-            Component.AddConfiguration(config);
-            TYPE_NAMES_MAP.Add(typeName, type);
-            ComponentManager.LogInfo($"Defined the component type {typeName}");
-            return type;
-        }
-        else return null;
     }
 
-    private static Transform ParseTransform(SceneDto.ComponentDto compDto) {
+    private Transform ParseTransform(SceneDto.ComponentDto compDto) {
         return new Transform {
             Position = YamlUtils.StringToVector2(compDto.Position) ?? Vector2.Zero,
             Rotation = compDto.Rotation,
@@ -117,7 +80,25 @@ public static class YamlSceneLoader {
         };
     }
 
-    private static void HandleExtraProps(Component component, Dictionary<string, object>? properties) {
+    private void CreateComponentInstance(string typeName, string componentName, SceneDto.ComponentDto componentDto) {
+        try {
+            Type type = _typesByName[typeName];
+            Component compInstance = (Activator.CreateInstance(type, typeName) as Component)!;
+
+            compInstance.Name = componentName;
+            compInstance.Transform = ParseTransform(componentDto);
+            HandleExtraProps(compInstance, componentDto.ExtraProps);
+
+            _instancesByType[typeName].Add(compInstance);
+            _instancesByName[componentName] = compInstance;
+            ComponentManager.LogInfo($"Instantiated component {componentName} of type {typeName}");
+        }
+        catch {
+            ComponentManager.LogError($"Failed to create instance {componentName} of type {typeName}.");
+        }
+    }
+
+    private void HandleExtraProps(Component component, Dictionary<string, object>? properties) {
         if (properties == null) return;        
         
         foreach (var (key, value) in properties) {
@@ -135,10 +116,14 @@ public static class YamlSceneLoader {
         }
     }
 
-    private static List<ElectricalNode> InstantiatedNodes(NodesList nodesDto, Dictionary<string, Component> components) {
+    public List<ElectricalNode> InstantiateNodes() {
+        if (_sceneDto?.Nodes == null) {
+            throw new InvalidOperationException("Instantiating nodes before loading them from file");
+        }
+
         List<ElectricalNode> nodes = [];
 
-        foreach (List<string> nodeDto in nodesDto) {
+        foreach (List<string> nodeDto in _sceneDto.Nodes) {
             ElectricalNode node = new();
 
             foreach (string pinDto in nodeDto) {
@@ -146,7 +131,11 @@ public static class YamlSceneLoader {
                 string compName = pinDtoElements[0];
                 string compPinName = pinDtoElements[1];
 
-                Component component = components[compName];
+                if (!_instancesByName.TryGetValue(compName, out Component? component)) {
+                    ComponentManager.LogError($"Component instance {compName} in node definition {nodeDto} could not be found.");
+                    continue;
+                }
+                
                 Pin? pin = uint.TryParse(compPinName, out uint pinId) ?
                     component.GetPin(pinId) :
                     component.GetPin(compPinName);
@@ -155,7 +144,7 @@ public static class YamlSceneLoader {
                     node.AddPin(pin);
                 }
                 else {
-                    ComponentManager.LogError($"Failed to add a pin to the node '{node}'");
+                    ComponentManager.LogError($"Failed to add a pin {pin} to the node '{node}'");
                 }
                 
                 // TODO: Transitivity through nodes
@@ -166,5 +155,31 @@ public static class YamlSceneLoader {
         }
 
         return nodes;
+    }
+
+    public void LoadFile(string scenePath) {
+        using var fileStream = new StreamReader(scenePath);
+
+        var deserializer = new DeserializerBuilder()
+            .WithCaseInsensitivePropertyMatching()
+            .Build();
+            
+        _sceneDto = deserializer.Deserialize<SceneDto>(fileStream);
+    }
+
+    public List<string> GetComponentTypeNames() {
+        if (_sceneDto?.Components == null) {
+            throw new InvalidOperationException("Getting component types before loading them from file");
+        }
+
+        return [.. _sceneDto.Components.Keys];
+    }
+
+    public List<Component> GetComponentsOfType(string typeName) {
+        if (_sceneDto?.Components == null) {
+            throw new InvalidOperationException("Getting component instances before loading them from file");
+        }
+
+        return _instancesByType[typeName];
     }
 }

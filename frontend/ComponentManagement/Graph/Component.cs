@@ -13,7 +13,7 @@ public abstract class Component {
 
     public ComponentConfiguration Configuration => _configs[TypeName];
     public Transform Transform { get; set; } = new();
-    public SKSvg CurrentSprite { get; private set; }
+    public SKSvg CurrentSprite { get; internal set; } = null!;
     
     public event Action<SKSvg>? SpriteChangedEvent;
 
@@ -22,10 +22,6 @@ public abstract class Component {
     
     internal Component(string typeName) {
         TypeName = typeName;
-        
-        InitPins();
-        // TODO: Check if sprites exist
-        CurrentSprite = Configuration.Sprites.First().Value;
     }
     
     public virtual void OnPinConnected(Pin pin) {}
