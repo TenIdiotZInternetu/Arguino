@@ -34,7 +34,7 @@ public class SvgDrawOp(SKSvg Svg, SKMatrix Transform) : ICustomDrawOperation {
         var canvas = lease.SkCanvas;
         canvas.Save();
  
-        canvas.Concat(ref Transform);
+        // canvas.Concat(ref Transform);
         canvas.DrawPicture(Svg.Picture);
         canvas.Restore();
     }

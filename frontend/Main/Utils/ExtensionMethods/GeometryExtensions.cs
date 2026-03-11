@@ -18,12 +18,11 @@ public static class GeometryExtensions {
         return new SKPoint(vector.X, vector.Y);
     }
 
-    public static Point ToAvaPoint(this Vector2 vector) {
+    public static Avalonia.Point ToAvaPoint(this Vector2 vector) {
         return new Point(vector.X, vector.Y);
     }
 
     public static SKMatrix ToSKMatrix(this ComponentManagement.Scenes.Transform transform) {
-        // TODO: Translate to coordinates origin, then translate
         var originShift = SKMatrix.CreateTranslation(-transform.BaseSize.X / 2, -transform.BaseSize.Y / 2);
         var inverseShift = SKMatrix.CreateTranslation(transform.BaseSize.X / 2, transform.BaseSize.Y / 2);
 
@@ -34,8 +33,21 @@ public static class GeometryExtensions {
         return originShift
             .MulitplyLeft(rotation)
             .MulitplyLeft(scale)
-            .MulitplyLeft(translation)
+            // .MulitplyLeft(translation)
             .MulitplyLeft(inverseShift);
+    }
+
+    public static Avalonia.Matrix ToAvaMatrix(this ComponentManagement.Scenes.Transform transform) {
+        
+        var originShift = Matrix.CreateTranslation(-transform.BaseSize.X / 2, -transform.BaseSize.Y / 2);
+        var inverseShift = Matrix.CreateTranslation(transform.BaseSize.X / 2, transform.BaseSize.Y / 2);
+
+        var rotation = Matrix.CreateRotation(Matrix.ToRadians(transform.Rotation));
+        var scale = Matrix.CreateScale(transform.ScaleX, transform.ScaleY);
+        var translation = Matrix.CreateTranslation(transform.PositionX, transform.PositionY);
+
+        // return originShift * rotation * scale * translation * inverseShift;
+        return originShift;
     }
 
     public static SKMatrix MulitplyLeft(this SKMatrix self, SKMatrix other) {

@@ -1,0 +1,26 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:tcontrol="clr-namespace:Gui.Views.TemplatedControls">
+
+    <Styles.Resources>
+
+        <ControlTheme x:Key= "{x:Type tcontrol:ComponentControl}" TargetType= "tcontrol:ComponentControl">
+            <Setter Property="Template">
+                <ControlTemplate>
+
+                    <Border BorderThickness="3" BorderBrush="Orange" Background="Transparent">
+                        <tcontrol:ComponentPresenter Component="{TemplateBinding Component}"/>
+
+                        <Border.RenderTransform>
+                            <MatrixTransform Matrix="{Binding TransformMatrix, RelativeSource={RelativeSource TemplatedParent}}"/>
+                        </Border.RenderTransform>
+                    </Border>
+
+                </ControlTemplate>
+            </Setter>
+
+        </ControlTheme>
+
+    </Styles.Resources>
+
+</Styles>
