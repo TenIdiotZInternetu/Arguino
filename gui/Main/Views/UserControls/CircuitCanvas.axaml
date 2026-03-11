@@ -5,29 +5,32 @@
              xmlns:vm="clr-namespace:Gui.ViewModels"
              xmlns:cmgraph="clr-namespace:ComponentManagement.Graph;assembly=ComponentManagement"
              xmlns:tcontrol="clr-namespace:Gui.Views.TemplatedControls"
-             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="Gui.Views.UserControls.CircuitCanvas"
              x:DataType="vm:CircuitCanvas">
 
+    <UserControl.Styles>
+        <Style Selector="Panel">
+            <Setter Property="Background" Value="{DynamicResource CanvasBackground}"/>
+        </Style>
+    </UserControl.Styles>
+
     <Panel ClipToBounds="False">
-        <ZoomBorder Stretch="None">
-            <Canvas Background="Transparent">
+        <ZoomBorder Stretch="Fill" />
 
-                <ItemsControl ItemsSource="{Binding Components}">
-                    <ItemsControl.ItemsPanel>
-                        <ItemsPanelTemplate>
-                            <Canvas Width="1920" Height="1080"/>
-                        </ItemsPanelTemplate>
-                    </ItemsControl.ItemsPanel>
+        <ItemsControl ItemsSource="{Binding Components}">
 
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate DataType="cmgraph:Component">
-                            <tcontrol:ComponentControl Component="{Binding}"/>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <Canvas ClipToBounds="False"/>
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
 
-                </ItemsControl>
-            </Canvas>
-        </ZoomBorder>
+            <ItemsControl.ItemTemplate>
+                <DataTemplate DataType="cmgraph:Component" >
+                    <tcontrol:ComponentControl Component="{Binding}"/>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+
+        </ItemsControl>
     </Panel>
 </UserControl>

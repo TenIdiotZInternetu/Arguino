@@ -5,34 +5,9 @@
              RequestedThemeVariant="Default">
     <!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->
 
-    <Application.Resources>
-        <ResourceDictionary>
-            <ResourceDictionary.ThemeDictionaries>
-                <ResourceDictionary x:Key="Default">
-                    <SolidColorBrush x:Key="PanelBackground">#FF111A26</SolidColorBrush>
-                    <SolidColorBrush x:Key="CanvasBackground">#FF223242</SolidColorBrush>
-                    <SolidColorBrush x:Key="BorderBackground">#0d0f12</SolidColorBrush>
-                </ResourceDictionary>
-            </ResourceDictionary.ThemeDictionaries>
-        </ResourceDictionary>
-    </Application.Resources>
-
     <Application.Styles>
         <FluentTheme />
-        <Style Selector="StackPanel">
-            <Setter Property="Background" Value="{DynamicResource PanelBackground}"/>
-        </Style>
-        <Style Selector="ListBox">
-            <Setter Property="Background" Value="{DynamicResource PanelBackground}"/>
-        </Style>
-        <Style Selector="usercontrols|CircuitCanvas Panel">
-            <Setter Property="Background" Value="{DynamicResource CanvasBackground}"/>
-        </Style>
-        <Style Selector="Border">
-            <Setter Property="Background" Value="{DynamicResource BorderBackground}"/>
-        </Style>
-        <Style Selector="GridSplitter">
-            <Setter Property="Background" Value="{DynamicResource BorderBackground}"/>
-        </Style>
+        <StyleInclude Source="avares://Gui/Views/Styles/General.axaml"/>
+        <StyleInclude Source="avares://Gui/Views/Styles/ComponentStyle1.axaml"/>
     </Application.Styles>
 </Application>
