@@ -1,0 +1,29 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <Styles.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.ThemeDictionaries>
+                <ResourceDictionary x:Key="Default">
+                    <SolidColorBrush x:Key="PanelBackground">#FF111A26</SolidColorBrush>
+                    <SolidColorBrush x:Key="CanvasBackground">#FF223242</SolidColorBrush>
+                    <SolidColorBrush x:Key="BorderBackground">#0d0f12</SolidColorBrush>
+                </ResourceDictionary>
+            </ResourceDictionary.ThemeDictionaries>
+        </ResourceDictionary>
+    </Styles.Resources>
+
+    <Style Selector="StackPanel">
+        <Setter Property="Background" Value="{DynamicResource PanelBackground}"/>
+    </Style>
+    <Style Selector="ListBox">
+        <Setter Property="Background" Value="{DynamicResource PanelBackground}"/>
+    </Style>
+    <Style Selector="Border">
+        <Setter Property="Background" Value="{DynamicResource BorderBackground}"/>
+    </Style>
+    <Style Selector="GridSplitter">
+        <Setter Property="Background" Value="{DynamicResource BorderBackground}"/>
+    </Style>
+
+</Styles>
