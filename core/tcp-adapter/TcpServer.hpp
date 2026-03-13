@@ -25,6 +25,7 @@ template <IConnectionHandler THandler, logger::ILogger TLogger>
 class TcpServer {
    public:
     TcpServer(uint16_t port, std::shared_ptr<TLogger> logger);
+
     void launch();
 
    private:
@@ -70,6 +71,7 @@ void TcpServer<THandler, TLogger>::start_accepting()
         start_accepting();
     });
 }
+
 }  // namespace arguino::tcp
 // arguino
 

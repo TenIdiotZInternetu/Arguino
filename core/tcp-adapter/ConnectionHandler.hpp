@@ -19,35 +19,38 @@ class ConnectionHandler : public std::enable_shared_from_this<ConnectionHandler<
    public:
     static constexpr char MESSAGE_DELIMITER = ';';
 
-    using pointer_t = std::shared_ptr<ConnectionHandler<TLogger>>;
+    using self_ptr = std::shared_ptr<ConnectionHandler<TLogger>>;
+    using logger_ptr = std::shared_ptr<TLogger>;
+    using message_funct = std::function<void(const std::string&)>;
 
-    ConnectionHandler(boost::asio::io_context& ioContext, std::shared_ptr<TLogger> logger);
-    static pointer_t create(boost::asio::io_context& ioContext, std::shared_ptr<TLogger> logger);
+    ConnectionHandler(boost::asio::io_context& ioContext, logger_ptr logger);
+    static self_ptr create(boost::asio::io_context& ioContext, logger_ptr logger);
 
     void handle();
+    void post(const std::string& message);
     boost::asio::ip::tcp::socket& socket() { return _socket; }
 
    private:
+    boost::asio::io_context::executor_type _executor;
     boost::asio::ip::tcp::socket _socket;
     std::string _buffer;
     std::string _outcomingMessage;
 
-    std::shared_ptr<TLogger> _logger;
+    message_funct _onReadMessage;
+
+    logger_ptr _logger;
 
     void on_read_message(boost::system::error_code error, size_t messageSize);
-    void handle_read_state(const std::string& message);
-    void handle_write_state(const std::string& message);
 };
 
 template <logger::ILogger TLogger>
-ConnectionHandler<TLogger>::ConnectionHandler(
-    boost::asio::io_context& ioContext, std::shared_ptr<TLogger> logger)
-    : _socket(ioContext), _logger(logger)
+ConnectionHandler<TLogger>::ConnectionHandler(boost::asio::io_context& ioContext, logger_ptr logger)
+    : _executor(ioContext.get_executor()), _socket(ioContext), _logger(logger)
 {}
 
 template <logger::ILogger TLogger>
-ConnectionHandler<TLogger>::pointer_t ConnectionHandler<TLogger>::create(
-    boost::asio::io_context& ioContext, std::shared_ptr<TLogger> logger)
+ConnectionHandler<TLogger>::self_ptr ConnectionHandler<TLogger>::create(
+    boost::asio::io_context& ioContext, logger_ptr logger)
 {
     return std::make_shared<ConnectionHandler>(ioContext, logger);
 }
