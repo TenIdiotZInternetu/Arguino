@@ -20,6 +20,6 @@ target_link_libraries(arguino-shared-memory.exe PRIVATE
 )
 
 # DEFAULT EXE
-set(DEFAULT_IMPL arguino-shared-memory.exe)
+set(DEFAULT_IMPL arguino-tcp.exe)
 set_target_properties(${DEFAULT_IMPL} PROPERTIES OUTPUT_NAME arguino)
 add_executable(arguino ALIAS ${DEFAULT_IMPL})
