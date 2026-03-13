@@ -50,12 +50,12 @@ int main(int argc, char** argv)
 
 #ifdef ARGUINO_TCP
     std::thread tcp_thread(run_tcp);
+    run_simulator();
     tcp_thread.join();
 #endif
 
 #ifdef ARGUINO_SHARED_MEMORY
     std::cout << "Shared memory implementation" << std::endl;
-#endif
-
     run_simulator();
+#endif
 }
