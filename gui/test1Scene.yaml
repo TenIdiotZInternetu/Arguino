@@ -1,0 +1,21 @@
+Components:
+  Arduino:
+    Type: Arduino
+    Position: 10 10
+  Led0:
+    Type: Led
+    Position: 700 10
+  Led1:
+    Type: Led
+    Position: 700 110
+  Btn:
+    Type: Button
+    Position: 400 500
+  VCC:
+    Type: Vcc
+    Position: 10 500
+Nodes:
+  - [ Arduino.D3, Led0.cathode ]
+  - [ Arduino.D1, Led1.cathode ]
+  - [ Arduino.D8, Btn.0 ]
+  - [ VCC.0, Btn.1 ]
