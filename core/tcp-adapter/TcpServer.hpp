@@ -32,8 +32,10 @@ class TcpServer {
     boost::asio::io_context _ioContext;
     boost::asio::ip::tcp::endpoint _endpoint;
     boost::asio::ip::tcp::acceptor _acceptor;
-
     uint16_t _port;
+
+    std::shared_ptr<THandler> _handler;
+
     std::shared_ptr<TLogger> _logger;
 
     void start_accepting();
@@ -58,7 +60,13 @@ void TcpServer<THandler, TLogger>::launch()
 template <IConnectionHandler THandler, logger::ILogger TLogger>
 void TcpServer<THandler, TLogger>::start_accepting()
 {
-    std::shared_ptr<THandler> handler = THandler::create(_ioContext, _logger);
+    // TODO: Deny connection gracefully, or consider multiple clients to be able to connect
+    if (_handler != nullptr && _handler->is_connected()) {
+        _logger->log("Cannot connect to more than one client at a time; aboring.");
+        return;
+    }
+
+    _handler = THandler::create(_ioContext, _logger);
 
     _acceptor.async_accept(handler->socket(), [this, handler](auto error) {
         if (!error) {

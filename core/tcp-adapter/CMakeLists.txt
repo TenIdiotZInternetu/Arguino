@@ -7,7 +7,7 @@ endif()
 
 add_library(arguino.tcp STATIC
     TcpServer.hpp
-    ArguinoConnectionHandler.hpp
+    ConnectionHandler.hpp
     StateEncoder.hpp
 )
 

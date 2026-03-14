@@ -23,12 +23,16 @@ class ConnectionHandler : public std::enable_shared_from_this<ConnectionHandler<
     using logger_ptr = std::shared_ptr<TLogger>;
     using message_funct = std::function<void(const std::string&)>;
 
-    ConnectionHandler(boost::asio::io_context& ioContext, logger_ptr logger);
-    static self_ptr create(boost::asio::io_context& ioContext, logger_ptr logger);
+    ConnectionHandler(
+        boost::asio::io_context& ioContext, message_funct messageHandler, logger_ptr logger);
+    static self_ptr create(
+        boost::asio::io_context& ioContext, message_funct messageHandler, logger_ptr logger);
 
     void handle();
     void post(const std::string& message);
     boost::asio::ip::tcp::socket& socket() { return _socket; }
+
+    bool is_connected() { return _isConnected; }
 
    private:
     boost::asio::io_context::executor_type _executor;
@@ -36,21 +40,30 @@ class ConnectionHandler : public std::enable_shared_from_this<ConnectionHandler<
     std::string _buffer;
     std::string _outcomingMessage;
 
-    message_funct _onReadMessage;
+    size_t _connectionId;
+    static size_t _nextConnectionId = 1;
+    bool _isConnected;
+
+    message_funct _messageHandler;
 
     logger_ptr _logger;
 
-    void on_read_message(boost::system::error_code error, size_t messageSize);
+    void handle_message(boost::system::error_code error, size_t messageSize);
+    void disconnect();
 };
 
 template <logger::ILogger TLogger>
-ConnectionHandler<TLogger>::ConnectionHandler(boost::asio::io_context& ioContext, logger_ptr logger)
-    : _executor(ioContext.get_executor()), _socket(ioContext), _logger(logger)
+ConnectionHandler<TLogger>::ConnectionHandler(
+    boost::asio::io_context& ioContext, message_funct messageHandler, logger_ptr logger)
+    : _executor(ioContext.get_executor()),
+      _socket(ioContext),
+      _messageHandler(messageHandler),
+      _logger(logger)
 {}
 
 template <logger::ILogger TLogger>
 ConnectionHandler<TLogger>::self_ptr ConnectionHandler<TLogger>::create(
-    boost::asio::io_context& ioContext, logger_ptr logger)
+    boost::asio::io_context& ioContext, message_funct messageHandler, logger_ptr logger)
 {
     return std::make_shared<ConnectionHandler>(ioContext, logger);
 }
@@ -58,18 +71,28 @@ ConnectionHandler<TLogger>::self_ptr ConnectionHandler<TLogger>::create(
 template <logger::ILogger TLogger>
 void ConnectionHandler<TLogger>::handle()
 {
-    boost::asio::async_read_until(_socket,
-        boost::asio::dynamic_buffer(_buffer),
-        MESSAGE_DELIMITER,
+    _isConnected = true;
+    _connectionId = _nextConnectionId;
+    ++_nextConnectionId;
+
+    boost::asio::async_read_until(                                         //
+        _socket,                                                           //
+        boost::asio::dynamic_buffer(_buffer),                              //
+        MESSAGE_DELIMITER,                                                 //
         [me = this->shared_from_this()](auto error, size_t messageSize) {  //
-            me->on_read_message(error, messageSize);
+            if (error == boost::asio::error::eof) {
+                me->disconnect();
+            }
+            else {
+                me->handle_message(error, messageSize);
+                // me->handle();
+            }
         }  //
     );
 }
 
 template <logger::ILogger TLogger>
-void ConnectionHandler<TLogger>::on_read_message(
-    boost::system::error_code error, size_t messageSize)
+void ConnectionHandler<TLogger>::handle_message(boost::system::error_code error, size_t messageSize)
 {
     if (error) {
         _logger->log(message::Error("Error occured while reading from socket: ", error));
@@ -78,23 +101,22 @@ void ConnectionHandler<TLogger>::on_read_message(
 
     if (_buffer.empty()) return;
 
-    // TODO: expect timestamp in the message
-
     const std::string message = _buffer.substr(0, messageSize);
-
-    if (message[0] == READ_FLAG) {
-        handle_read_state(message);
-    }
-    if (message[0] == WRITE_FLAG) {
-        handle_write_state(message);
-    }
+    _messageHandler(message);
 
     _buffer.erase(0, messageSize);
     handle();
 }
 
 template <logger::ILogger TLogger>
-void ConnectionHandler<TLogger>::handle_read_state(const std::string& message)
+inline void ConnectionHandler<TLogger>::disconnect()
+{
+    _isConnected = false;
+    _logger->log("The client has disconnected")
+}
+
+template <logger::ILogger TLogger>
+void ConnectionHandler<TLogger>::post(const std::string& message)
 {
     boost::asio::async_write(_socket,
         boost::asio::buffer(_outcomingMessage),
@@ -107,14 +129,6 @@ void ConnectionHandler<TLogger>::handle_read_state(const std::string& message)
             }
         }  //
     );
-}
-
-template <logger::ILogger TLogger>
-void ConnectionHandler<TLogger>::handle_write_state(const std::string& message)
-{
-    simulator::ArduinoState newState = encoder.decode(message.substr(1));  // skip write flag
-    simulator::CanonicalState::update_state(newState);
-    _logger->log(message::Write(message));
 }
 
 }  // namespace arguino::tcp
