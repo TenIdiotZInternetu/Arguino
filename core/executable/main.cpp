@@ -18,14 +18,18 @@ ProgramOptions options;
 #include "TcpServer.hpp"
 
 using encoder_t = arguino::tcp::StateEncoder;
-using connection_handler_t = arguino::tcp::ConnectionHandler<logger_t>;
-using tcp_server_t = arguino::tcp::TcpServer<connection_handler_t, logger_t>;
+using tcp_server_t = arguino::tcp::TcpServer<logger_t>;
 
+
+void test(const std::string msg)
+{
+    arguino::simulator::CanonicalState::log("Message recieved " + msg);
+}
 
 void run_tcp()
 {
     auto logger = std::make_shared<logger_t>(std::filesystem::absolute(options.TcpLogPath));
-    tcp_server_t server(options.TcpPort, logger);
+    tcp_server_t server(options.TcpPort, test, logger);
     logger->log("Tcp Server initialized");
     server.launch();
 }

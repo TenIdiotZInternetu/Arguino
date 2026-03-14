@@ -41,7 +41,7 @@ class ConnectionHandler : public std::enable_shared_from_this<ConnectionHandler<
     std::string _outcomingMessage;
 
     size_t _connectionId;
-    static size_t _nextConnectionId = 1;
+    static size_t _nextConnectionId;
     bool _isConnected;
 
     message_funct _messageHandler;
@@ -51,6 +51,9 @@ class ConnectionHandler : public std::enable_shared_from_this<ConnectionHandler<
     void handle_message(boost::system::error_code error, size_t messageSize);
     void disconnect();
 };
+
+template <logger::ILogger TLogger>
+size_t ConnectionHandler<TLogger>::_nextConnectionId = 1;
 
 template <logger::ILogger TLogger>
 ConnectionHandler<TLogger>::ConnectionHandler(
@@ -65,7 +68,7 @@ template <logger::ILogger TLogger>
 ConnectionHandler<TLogger>::self_ptr ConnectionHandler<TLogger>::create(
     boost::asio::io_context& ioContext, message_funct messageHandler, logger_ptr logger)
 {
-    return std::make_shared<ConnectionHandler>(ioContext, logger);
+    return std::make_shared<ConnectionHandler>(ioContext, messageHandler, logger);
 }
 
 template <logger::ILogger TLogger>
@@ -85,7 +88,7 @@ void ConnectionHandler<TLogger>::handle()
             }
             else {
                 me->handle_message(error, messageSize);
-                // me->handle();
+                me->handle();
             }
         }  //
     );
@@ -102,17 +105,17 @@ void ConnectionHandler<TLogger>::handle_message(boost::system::error_code error,
     if (_buffer.empty()) return;
 
     const std::string message = _buffer.substr(0, messageSize);
+    me->_logger->log(message::Write(me->_outcomingMessage));
     _messageHandler(message);
 
     _buffer.erase(0, messageSize);
-    handle();
 }
 
 template <logger::ILogger TLogger>
 inline void ConnectionHandler<TLogger>::disconnect()
 {
     _isConnected = false;
-    _logger->log("The client has disconnected")
+    _logger->log("The client has disconnected");
 }
 
 template <logger::ILogger TLogger>
@@ -125,7 +128,7 @@ void ConnectionHandler<TLogger>::post(const std::string& message)
                 me->_logger->log(message::Error("Error occured while writing to socket: ", error));
             }
             else {
-                me->_logger->log(message::Read(me->_outcomingMessage));
+                me->_logger->log(message::Write(me->_outcomingMessage));
             }
         }  //
     );
