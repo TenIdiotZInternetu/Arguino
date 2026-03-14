@@ -13,15 +13,8 @@
 #include "LogMessages.hpp"
 
 namespace arguino::tcp {
-template <typename T>
-concept IConnectionHandler = std::derived_from<T, std::enable_shared_from_this<T>> &&
-    requires(T handler, boost::asio::io_context& ioc) {
-        // { T::create(ioc, logger) } -> std::convertible_to<std::shared_ptr<T>>;
-        { handler.handle() } -> std::same_as<void>;
-        { handler.socket() } -> std::same_as<boost::asio::ip::tcp::socket&>;
-    };
 
-template <IConnectionHandler THandler, logger::ILogger TLogger>
+template <logger::ILogger TLogger>
 class TcpServer {
    public:
     TcpServer(uint16_t port, std::shared_ptr<TLogger> logger);
@@ -29,36 +22,38 @@ class TcpServer {
     void launch();
 
    private:
+    using handler_t = ConnectionHandler;
+
     boost::asio::io_context _ioContext;
     boost::asio::ip::tcp::endpoint _endpoint;
     boost::asio::ip::tcp::acceptor _acceptor;
     uint16_t _port;
 
-    std::shared_ptr<THandler> _handler;
+    std::shared_ptr<handler_t> _handler;
 
     std::shared_ptr<TLogger> _logger;
 
     void start_accepting();
 };
 
-template <IConnectionHandler THandler, logger::ILogger TLogger>
-TcpServer<THandler, TLogger>::TcpServer(uint16_t port, std::shared_ptr<TLogger> logger)
+template <logger::ILogger TLogger>
+TcpServer<TLogger>::TcpServer(uint16_t port, std::shared_ptr<TLogger> logger)
     : _endpoint(boost::asio::ip::tcp::v4(), port),
       _acceptor(_ioContext, _endpoint),
       _port(port),
       _logger(logger)
 {}
 
-template <IConnectionHandler THandler, logger::ILogger TLogger>
-void TcpServer<THandler, TLogger>::launch()
+template <logger::ILogger TLogger>
+void TcpServer<TLogger>::launch()
 {
     _acceptor.listen();
     start_accepting();
     _ioContext.run();
 }
 
-template <IConnectionHandler THandler, logger::ILogger TLogger>
-void TcpServer<THandler, TLogger>::start_accepting()
+template <logger::ILogger TLogger>
+void TcpServer<TLogger>::start_accepting()
 {
     // TODO: Deny connection gracefully, or consider multiple clients to be able to connect
     if (_handler != nullptr && _handler->is_connected()) {
@@ -66,7 +61,7 @@ void TcpServer<THandler, TLogger>::start_accepting()
         return;
     }
 
-    _handler = THandler::create(_ioContext, _logger);
+    _handler = handler_t::create(_ioContext, _logger);
 
     _acceptor.async_accept(handler->socket(), [this, handler](auto error) {
         if (!error) {
