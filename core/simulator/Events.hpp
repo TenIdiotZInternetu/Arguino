@@ -7,8 +7,6 @@
 
 namespace arguino::simulator {
 
-class CanonicalState;
-
 struct Event {
     size_t localVirtualTime;
     std::function<void()> action;

@@ -105,7 +105,7 @@ void ConnectionHandler<TLogger>::handle_message(boost::system::error_code error,
     if (_buffer.empty()) return;
 
     const std::string message = _buffer.substr(0, messageSize);
-    me->_logger->log(message::Write(me->_outcomingMessage));
+    _logger->log(message::Write(_outcomingMessage));
     _messageHandler(message);
 
     _buffer.erase(0, messageSize);

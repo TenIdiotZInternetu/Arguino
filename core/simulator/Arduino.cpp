@@ -5,8 +5,8 @@
 #ifndef ARGUINO_ARDUINO_HPP
 #define ARGUINO_ARDUINO_HPP
 
-#include "ArduinoState.hpp"
 #include "Events.hpp"
+#include "Simulator.hpp"
 
 // Arduino.h must be the last included header because it defines macros like INPUT and OUTPUT that
 // spoil windows.h
@@ -17,32 +17,32 @@ using namespace arguino::simulator;
 
 void digitalWrite(uint8_t pin, uint8_t val)
 {
-    if (CanonicalState::state().get_digital(pin) != val) {
-        CanonicalState::queue().enqueue_local(  //
-            Event::write(pin, val == HIGH)      //
+    if (Simulator::state().get_digital(pin) != val) {
+        Simulator::queue().enqueue_local(   //
+            Event::write(pin, val == HIGH)  //
         );
-        CanonicalState::log(std::format("Written value {} to pin {}", val, pin));
-        CanonicalState::queue().execute_next_event();
+        Simulator::log(std::format("Written value {} to pin {}", val, pin));
+        Simulator::queue().execute_next_event();
     }
 }
 
 int digitalRead(uint8_t pin)
 {
-    return CanonicalState::state().get_digital(pin);
+    return Simulator::state().get_digital(pin);
 }
 
 unsigned long millis()
 {
-    return std::floor(CanonicalState::state().get_time() / 1000);
+    return std::floor(Simulator::state().get_time() / 1000);
 }
 
 void pinMode(uint8_t pin, uint8_t mode)
 {
     if (mode == OUTPUT) {
-        CanonicalState::state().set_pin_mode(pin, PinMode::Out);
+        Simulator::state().set_pin_mode(pin, PinMode::Out);
     }
     if (mode == INPUT) {
-        CanonicalState::state().set_pin_mode(pin, PinMode::In);
+        Simulator::state().set_pin_mode(pin, PinMode::In);
     }
 }
 #endif  // ARGUINO_ARDUINO_HPP

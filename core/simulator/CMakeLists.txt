@@ -5,6 +5,7 @@ add_library(arguino.simulator STATIC
         ArduinoState.cpp
         EventQueue.cpp
         Events.cpp
+        Simulator.cpp
 )
 
 target_link_libraries(arguino.simulator PUBLIC

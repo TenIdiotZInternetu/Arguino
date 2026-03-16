@@ -2,8 +2,8 @@
 #include <iostream>
 #include <thread>
 
-#include "ArduinoState.hpp"
 #include "FileLogger.hpp"
+#include "Simulator.hpp"
 #include "programOptions.cpp"
 #include "sketch.cpp"
 
@@ -23,7 +23,7 @@ using tcp_server_t = arguino::tcp::TcpServer<logger_t>;
 
 void test(const std::string msg)
 {
-    arguino::simulator::CanonicalState::log("Message recieved " + msg);
+    arguino::simulator::Simulator::log("Message recieved " + msg);
 }
 
 void run_tcp()
@@ -37,7 +37,7 @@ void run_tcp()
 
 void run_simulator()
 {
-    using state_t = arguino::simulator::CanonicalState;
+    using state_t = arguino::simulator::Simulator;
     auto logger = std::make_shared<logger_t>(std::filesystem::absolute(options.SimulatorLogPath));
 
     state_t::init();

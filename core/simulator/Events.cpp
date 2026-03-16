@@ -1,6 +1,6 @@
 #include "Events.hpp"
 
-#include "ArduinoState.hpp"
+#include "Simulator.hpp"
 
 namespace arguino::simulator {
 
@@ -9,8 +9,8 @@ namespace arguino::simulator {
 Event Event::write(pin_t pin, digital_t value)
 {
     return {
-        .action = [=]() { CanonicalState::state().set_digital(pin, value); },         //
-        .reverseAction = [=]() { CanonicalState::state().set_digital(pin, !value); }  //
+        .action = [=]() { Simulator::state().set_digital(pin, value); },         //
+        .reverseAction = [=]() { Simulator::state().set_digital(pin, !value); }  //
     };
 }
 
@@ -21,8 +21,8 @@ Event Event::set_pinmode(pin_t pin, PinMode mode)
         : PinMode::In;
 
     return {
-        .action = [=]() { CanonicalState::state().set_pin_mode(pin, mode); },                //
-        .reverseAction = [=]() { CanonicalState::state().set_pin_mode(pin, oppositeMode); }  //
+        .action = [=]() { Simulator::state().set_pin_mode(pin, mode); },                //
+        .reverseAction = [=]() { Simulator::state().set_pin_mode(pin, oppositeMode); }  //
     };
 }
 
