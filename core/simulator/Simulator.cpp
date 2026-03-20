@@ -3,32 +3,23 @@
 namespace arguino::simulator {
 
 Simulator* Simulator::s_instance;
-std::function<void(const std::string&)> Simulator::s_log_func = [](const std::string&) {};
 
 void Simulator::init()
 {
     s_instance = new Simulator();
 }
 
-void Simulator::init(void* address)
+void Simulator::handle_event(Event event)
 {
-    s_instance = new (address) Simulator();
+    auto& queue = s_instance->_eventQueue;
+    queue.enqueue_local(event);
+
+    do {
+        queue.execute_next_event();
+    } while (event.id() != queue.last_executed_event().id());
+
+    s_instance->f_ipcPostEvent(event);
 }
 
-// update_start is expected to be called from a single thread
-void Simulator::update_state(const ArduinoState& newState)
-{
-    ArduinoState& writeState = s_instance->get_write_state();
-    writeState.get_pin_mode() = state().get_pin_mode();
-    writeState.get_digital() = state().get_digital();
 
-    for (pin_t i = 0; i < ArduinoState::DIGITAL_PIN_COUNT; i++) {
-        if (writeState.get_pin_mode(i) == PinMode::In) {
-            writeState.set_digital(i, newState.get_digital(i));
-        }
-    }
-
-    s_instance->flip_states();
-}
-
-};
+};  // namespace arguino::simulator
