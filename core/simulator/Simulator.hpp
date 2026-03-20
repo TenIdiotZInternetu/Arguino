@@ -13,7 +13,7 @@ namespace arguino::simulator {
 
 class Simulator {
    public:
-    static void init();
+    static void init(std::function<void(const Event&)> eventCallback);
 
     static ArduinoState& state() { return s_instance->_state; }
     static EventQueue& queue() { return s_instance->_eventQueue; }
@@ -28,7 +28,7 @@ class Simulator {
     static Simulator* s_instance;
 
     std::function<void(const std::string&)> f_log;
-    std::function<void(const Event&)> f_ipcPostEvent;
+    std::function<void(const Event&)> f_eventCallback;
 
     ArduinoState _state;
     EventQueue _eventQueue;

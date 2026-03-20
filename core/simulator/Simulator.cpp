@@ -4,9 +4,10 @@ namespace arguino::simulator {
 
 Simulator* Simulator::s_instance;
 
-void Simulator::init()
+void Simulator::init(std::function<void(const Event&)> eventCallback)
 {
     s_instance = new Simulator();
+    s_instance->f_eventCallback = eventCallback;
 }
 
 void Simulator::handle_event(Event event)
@@ -18,7 +19,7 @@ void Simulator::handle_event(Event event)
         queue.execute_next_event();
     } while (event.id() != queue.last_executed_event().id());
 
-    s_instance->f_ipcPostEvent(event);
+    s_instance->f_eventCallback(event);
 }
 
 
