@@ -13,7 +13,8 @@ namespace arguino::simulator {
 
 class Simulator {
    public:
-    static void init(std::function<void(const Event&)> eventCallback);
+    using event_callback_fnct = std::function<void(const Event&)>;
+    static void init(event_callback_fnct eventCallback);
 
     static ArduinoState& state() { return s_instance->_state; }
     static EventQueue& queue() { return s_instance->_eventQueue; }
@@ -27,8 +28,8 @@ class Simulator {
    private:
     static Simulator* s_instance;
 
+    event_callback_fnct f_eventCallback;
     std::function<void(const std::string&)> f_log;
-    std::function<void(const Event&)> f_eventCallback;
 
     ArduinoState _state;
     EventQueue _eventQueue;

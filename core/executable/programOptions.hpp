@@ -1,3 +1,6 @@
+#ifndef ARGUINO_PROGRAMOPTIONS_HPP
+#define ARGUINO_PROGRAMOPTIONS_HPP
+
 #include <boost/program_options.hpp>
 #include <iostream>
 
@@ -40,7 +43,7 @@ static po::options_description create_tcp_options()
     return description;
 }
 
-ProgramOptions parse_arguments(int argc, char** argv)
+inline ProgramOptions parse_arguments(int argc, char** argv)
 {
     po::options_description description("Command line options");
     description.add(create_common_options());
@@ -68,3 +71,5 @@ ProgramOptions parse_arguments(int argc, char** argv)
 
     return options;
 }
+
+#endif

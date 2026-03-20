@@ -3,7 +3,10 @@ project(arguino.executable)
 find_package(Boost REQUIRED COMPONENTS program_options REQUIRED)
 
 # TCP IMPLEMENTATION
-add_executable(arguino-tcp.exe main.cpp)
+add_executable(arguino-tcp.exe main.cpp
+    tcpAdapter.cpp
+)
+
 target_compile_definitions(arguino-tcp.exe PRIVATE ARGUINO_TCP)
 target_link_libraries(arguino-tcp.exe PRIVATE
     arguino.simulator
