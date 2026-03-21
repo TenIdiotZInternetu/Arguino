@@ -84,18 +84,17 @@ inline bool TcpServer<TLogger>::is_connected() const
 template <logger::ILogger TLogger>
 void TcpServer<TLogger>::start_accepting()
 {
-    // TODO: Deny connection gracefully, or consider multiple clients to be able to connect
-    if (is_connected()) {
-        _logger->log("Cannot connect to more than one client at a time; aboring.");
-        return;
-    }
-
     // TODO: Handle reconnects to the same client
-    _connectionHandler = handler_t::create(_ioContext, _messageHandler, _logger);
+    auto newConnection = handler_t::create(_ioContext, _messageHandler, _logger);
 
-    _acceptor.async_accept(_connectionHandler->socket(), [this](auto error) {
-        if (!error) {
+    _acceptor.async_accept(newConnection->socket(), [=, this](auto error) {
+        // TODO: Consider multiple clients to be able to connect
+        if (is_connected()) {
+            _logger->log("Connection denied: Cannot connect to more than one client at a time.");
+        }
+        else if (!error) {
             _logger->log("Connection accepted!");
+            _connectionHandler = newConnection;
             _connectionHandler->handle();
         }
         else {

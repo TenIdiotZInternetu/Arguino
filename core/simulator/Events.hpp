@@ -15,7 +15,7 @@ struct Event {
 
     Event();
 
-    size_t id() { return _id; }
+    size_t id() const { return _id; }
 
     static Event write(pin_t pin, digital_t value);
     static Event set_pinmode(pin_t pin, PinMode mode);
