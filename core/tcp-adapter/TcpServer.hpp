@@ -7,8 +7,10 @@
 
 #include <boost/asio/io_context.hpp>
 #include <boost/asio/ip/tcp.hpp>
+#include <condition_variable>
 #include <cstdint>
 #include <memory>
+#include <mutex>
 
 #include "LogMessages.hpp"
 
@@ -23,6 +25,9 @@ class TcpServer {
         uint16_t port, handler_t::message_funct messageHandler, std::shared_ptr<TLogger> logger);
 
     void launch();
+    void post_message(const std::string& message);  // TODO: Decouple from connection handler
+
+    bool is_connected() const;
 
    private:
     boost::asio::io_context _ioContext;
@@ -30,7 +35,11 @@ class TcpServer {
     boost::asio::ip::tcp::acceptor _acceptor;
     uint16_t _port;
 
+    // TODO: Decouple from server, and return each handler in a callback
     std::shared_ptr<handler_t> _connectionHandler;
+    std::mutex _connectionMutex;
+    std::condition_variable _connectionCv;
+
     handler_t::message_funct _messageHandler;
 
     std::shared_ptr<TLogger> _logger;
@@ -57,14 +66,31 @@ void TcpServer<TLogger>::launch()
 }
 
 template <logger::ILogger TLogger>
+inline void TcpServer<TLogger>::post_message(const std::string& message)
+{
+    {
+        std::unique_lock lock(_connectionMutex);
+        _connectionCv.wait(lock, [this]() { return is_connected(); });
+    }
+    _connectionHandler->post_message(message);
+}
+
+template <logger::ILogger TLogger>
+inline bool TcpServer<TLogger>::is_connected() const
+{
+    return _connectionHandler != nullptr && _connectionHandler->is_connected();
+}
+
+template <logger::ILogger TLogger>
 void TcpServer<TLogger>::start_accepting()
 {
     // TODO: Deny connection gracefully, or consider multiple clients to be able to connect
-    if (_connectionHandler != nullptr && _connectionHandler->is_connected()) {
+    if (is_connected()) {
         _logger->log("Cannot connect to more than one client at a time; aboring.");
         return;
     }
 
+    // TODO: Handle reconnects to the same client
     _connectionHandler = handler_t::create(_ioContext, _messageHandler, _logger);
 
     _acceptor.async_accept(_connectionHandler->socket(), [this](auto error) {

@@ -8,6 +8,9 @@
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/asio/read_until.hpp>
 #include <boost/asio/write.hpp>
+#include <condition_variable>
+#include <mutex>
+#include <queue>
 
 #include "ArduinoState.hpp"
 #include "LogMessages.hpp"
@@ -18,6 +21,7 @@ template <logger::ILogger TLogger>
 class ConnectionHandler : public std::enable_shared_from_this<ConnectionHandler<TLogger>> {
    public:
     static constexpr char MESSAGE_DELIMITER = ';';
+    static constexpr size_t MAX_QUEUE_SIZE = 100;
 
     using self_ptr = std::shared_ptr<ConnectionHandler<TLogger>>;
     using logger_ptr = std::shared_ptr<TLogger>;
@@ -29,16 +33,20 @@ class ConnectionHandler : public std::enable_shared_from_this<ConnectionHandler<
         boost::asio::io_context& ioContext, message_funct messageHandler, logger_ptr logger);
 
     void handle();
-    void post(const std::string& message);
+    void post_message(const std::string& message);
     boost::asio::ip::tcp::socket& socket() { return _socket; }
 
-    bool is_connected() { return _isConnected; }
+    bool is_connected() const { return _isConnected; }
 
    private:
     boost::asio::io_context::executor_type _executor;
     boost::asio::ip::tcp::socket _socket;
-    std::string _buffer;
-    std::string _outcomingMessage;
+
+    std::string _incomingBuffer;
+
+    std::queue<std::string> _outboxQueue;
+    std::mutex _queueMutex;
+    std::condition_variable _queueCv;
 
     size_t _connectionId;
     static size_t _nextConnectionId;
@@ -49,6 +57,7 @@ class ConnectionHandler : public std::enable_shared_from_this<ConnectionHandler<
     logger_ptr _logger;
 
     void handle_message(boost::system::error_code error, size_t messageSize);
+    void write_from_queue();
     void disconnect();
 };
 
@@ -80,7 +89,7 @@ void ConnectionHandler<TLogger>::handle()
 
     boost::asio::async_read_until(                                         //
         _socket,                                                           //
-        boost::asio::dynamic_buffer(_buffer),                              //
+        boost::asio::dynamic_buffer(_incomingBuffer),                      //
         MESSAGE_DELIMITER,                                                 //
         [me = this->shared_from_this()](auto error, size_t messageSize) {  //
             if (error == boost::asio::error::eof) {
@@ -95,6 +104,23 @@ void ConnectionHandler<TLogger>::handle()
 }
 
 template <logger::ILogger TLogger>
+void ConnectionHandler<TLogger>::post_message(const std::string& message)
+{
+    {
+        std::unique_lock lock(_queueMutex);
+        _queueCv.wait(lock, [this]() {  //
+            return _outboxQueue.size() <= MAX_QUEUE_SIZE;
+        });
+
+        _outboxQueue.push(message);
+    }
+
+    boost::asio::post(_executor, [me = this->shared_from_this()] {  //
+        me->write_from_queue();
+    });
+}
+
+template <logger::ILogger TLogger>
 void ConnectionHandler<TLogger>::handle_message(boost::system::error_code error, size_t messageSize)
 {
     if (error) {
@@ -102,13 +128,31 @@ void ConnectionHandler<TLogger>::handle_message(boost::system::error_code error,
         return;
     }
 
-    if (_buffer.empty()) return;
+    if (_incomingBuffer.empty()) return;
 
-    const std::string message = _buffer.substr(0, messageSize);
-    _logger->log(message::Write(_outcomingMessage));
+    const std::string message = _incomingBuffer.substr(0, messageSize);
+    _logger->log(message::Write(message));
     _messageHandler(message);
 
-    _buffer.erase(0, messageSize);
+    _incomingBuffer.erase(0, messageSize);
+}
+
+template <logger::ILogger TLogger>
+inline void ConnectionHandler<TLogger>::write_from_queue()
+{
+    boost::asio::async_write(_socket,
+        boost::asio::buffer(_outboxQueue.front()),
+        [me = this->shared_from_this()](auto error, size_t bytes_written) {
+            if (error) {
+                me->_logger->log(message::Error("Error occured while writing to socket: ", error));
+            }
+            else {
+                me->_logger->log(message::Write(me->_outboxQueue.front()));
+                me->_outboxQueue.pop();
+                me->_queueCv.notify_one();
+            }
+        }  //
+    );
 }
 
 template <logger::ILogger TLogger>
@@ -116,22 +160,6 @@ inline void ConnectionHandler<TLogger>::disconnect()
 {
     _isConnected = false;
     _logger->log("The client has disconnected");
-}
-
-template <logger::ILogger TLogger>
-void ConnectionHandler<TLogger>::post(const std::string& message)
-{
-    boost::asio::async_write(_socket,
-        boost::asio::buffer(_outcomingMessage),
-        [me = this->shared_from_this()](auto error, size_t bytes_written) {
-            if (error) {
-                me->_logger->log(message::Error("Error occured while writing to socket: ", error));
-            }
-            else {
-                me->_logger->log(message::Write(me->_outcomingMessage));
-            }
-        }  //
-    );
 }
 
 }  // namespace arguino::tcp
