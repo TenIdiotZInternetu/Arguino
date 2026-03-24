@@ -95,6 +95,7 @@ void TcpServer<TLogger>::start_accepting()
         else if (!error) {
             _logger->log("Connection accepted!");
             _connectionHandler = newConnection;
+            _connectionCv.notify_one();
             _connectionHandler->handle();
         }
         else {

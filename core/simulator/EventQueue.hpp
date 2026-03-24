@@ -26,6 +26,8 @@ class EventQueue {
     void clear_events_before(size_t lvt);
     void clear_events_after(size_t lvt);
     void rollback_to(size_t lvt);
+
+    size_t earliest_queue_lvt(const std::queue<Event>& queue);
 };
 
 }  // namespace arguino::simulator

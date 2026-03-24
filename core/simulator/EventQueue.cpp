@@ -16,15 +16,15 @@ void EventQueue::enqueue_remote(Event event)
 
 void EventQueue::execute_next_event()
 {
-    auto queueAhead = std::min(_localEvents, _remoteEvents, [](auto lq, auto rq) {
-        return lq.front().localVirtualTime < rq.front().localVirtualTime;
-    });
+    auto& queueAhead = (earliest_queue_lvt(_localEvents) < earliest_queue_lvt(_remoteEvents))
+        ? _localEvents
+        : _remoteEvents;
 
     Event processedEvent = queueAhead.front();
     queueAhead.pop();
 
     processedEvent.action();
-    _nextLvt = std::min(_nextLvt, processedEvent.localVirtualTime);
+    _nextLvt = std::max(_nextLvt, processedEvent.localVirtualTime + 1);
     _processedEvents.push(processedEvent);
 }
 
@@ -44,5 +44,14 @@ void EventQueue::clear_events_before(size_t lvt)
 void EventQueue::clear_events_after(size_t lvt) {}
 
 void EventQueue::rollback_to(size_t lvt) {}
+
+size_t EventQueue::earliest_queue_lvt(const std::queue<Event>& queue)
+{
+    if (queue.empty()) {
+        return SIZE_MAX;
+    }
+
+    return queue.front().localVirtualTime;
+}
 
 }  // namespace arguino::simulator

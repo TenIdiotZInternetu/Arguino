@@ -18,11 +18,10 @@ using namespace arguino::simulator;
 void digitalWrite(uint8_t pin, uint8_t val)
 {
     if (Simulator::state().get_digital(pin) != val) {
-        Simulator::queue().enqueue_local(   //
+        Simulator::handle_event(            //
             Event::write(pin, val == HIGH)  //
         );
         Simulator::log(std::format("Written value {} to pin {}", val, pin));
-        Simulator::queue().execute_next_event();
     }
 }
 
