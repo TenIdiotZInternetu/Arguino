@@ -2,12 +2,13 @@
 
 #include <thread>
 
+#include "../encoder.hpp"
+#include "../ipcAdapter.hpp"
 #include "ConnectionHandler.hpp"
 #include "Events.hpp"
 #include "FileLogger.hpp"
 #include "StateEncoder.hpp"
 #include "TcpServer.hpp"
-#include "ipcAdapter.hpp"
 
 using namespace arguino::simulator;
 
@@ -19,12 +20,6 @@ static const ProgramOptions* _options;
 static std::shared_ptr<logger_t> _tcpLogger;
 static std::unique_ptr<tcp_server_t> _tcpServer;
 
-static std::string encode_event(const Event& event)
-{
-    return std::format("Sending event {}", event.id());
-}
-
-static Event decode_event(const std::string& message) {}
 
 static void on_send_event(const Event& event)
 {
