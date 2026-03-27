@@ -85,6 +85,7 @@ public class TcpClient {
             
             _logger?.Log(new DebugMessage($"Reading {bytesRead} bytes..."));
             
+            // TODO: Move to MessageHandler?
             var chunk = Encoding.UTF8.GetString(_buffer, 0, bytesRead);
             chunkBuilder.Append(chunk);
             messageBuilder.Clear();
@@ -101,7 +102,7 @@ public class TcpClient {
             }
 
             foreach (var message in messages) {
-                Handler.OnReadMessage(message);
+                Handler.HandleMessage(message);
             }
             
             messages.Clear();

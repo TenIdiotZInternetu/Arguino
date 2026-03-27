@@ -1,4 +1,4 @@
-namespace TcpAdapter;
+namespace ComponentManagement.Components;
 
 public struct ArduinoState {
     public const uint ANALOG_PIN_COUNT = 6;

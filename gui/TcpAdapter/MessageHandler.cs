@@ -10,9 +10,7 @@ public class MessageHandler {
     public char Delimeter => ';';
     
     public event Action<string>? ReadEvent;
-    public event Action<ArduinoState>? StateChangedEvent;
 
-    private StateEncoder _stateEncoder = new();
     private TcpClient _client;
     
     private ILogger? _logger;
@@ -21,23 +19,9 @@ public class MessageHandler {
         _client = client;
     }
 
-    public void OnReadMessage(string message) {
+    public void HandleMessage(string message) {
         _logger?.Log(new LogMessage.Read(message));
-        ArduinoState state = _stateEncoder.Decode(message);
         ReadEvent?.Invoke(message);
-        StateChangedEvent?.Invoke(state);
-    }
-
-    public void SendReadMessage() {
-        SendMessage(READ_FLAG.ToString());
-    }
-    
-    public void SendWriteMessage(ArduinoState state) {
-        StringBuilder messageBuilder = new StringBuilder()
-            .Append(WRITE_FLAG)
-            .Append(_stateEncoder.Encode(state));
-
-        SendMessage(messageBuilder.ToString());
     }
 
     public void SetLogger(ILogger logger) {

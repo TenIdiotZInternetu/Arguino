@@ -2,6 +2,7 @@ using Logger;
 
 namespace TcpAdapter;
 
+// TODO: Ew
 public struct LogMessage {
     public record struct Read(string TcpMessage) : IMessage {
         public string AsString() => $"Received message from the server: {TcpMessage}";
