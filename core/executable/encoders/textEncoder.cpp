@@ -9,7 +9,7 @@ static std::string encode_write(const Event& event)
 
 static std::string encode_pinmode(const Event& event)
 {
-    return std::format("{:07}:W:{:02}:{}", event.localVirtualTime, event.args[0], event.args[1]);
+    return std::format("{:07}:P:{:02}:{:c}", event.localVirtualTime, event.args[0], event.args[1]);
 }
 
 std::string encode_event(const Event& event)

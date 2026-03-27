@@ -141,7 +141,7 @@ template <logger::ILogger TLogger>
 inline void ConnectionHandler<TLogger>::write_from_queue()
 {
     boost::asio::async_write(_socket,
-        boost::asio::buffer(_outboxQueue.front()),
+        boost::asio::buffer(_outboxQueue.front() + ';'),
         [me = this->shared_from_this()](auto error, size_t bytes_written) {
             if (error) {
                 me->_logger->log(message::Error("Error occured while writing to socket: ", error));

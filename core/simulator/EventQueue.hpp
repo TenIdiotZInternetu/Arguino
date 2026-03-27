@@ -9,7 +9,7 @@ namespace arguino::simulator {
 
 class EventQueue {
    public:
-    void enqueue_local(Event event);
+    void enqueue_local(Event& event);
     void enqueue_remote(Event event);
     void execute_next_event();
     Event& last_executed_event() { return _processedEvents.back(); }

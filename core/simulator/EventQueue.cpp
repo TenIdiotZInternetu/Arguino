@@ -2,7 +2,7 @@
 
 namespace arguino::simulator {
 
-void EventQueue::enqueue_local(Event event)
+void EventQueue::enqueue_local(Event& event)
 {
     event.localVirtualTime = _nextLvt;
     ++_nextLvt;
