@@ -8,15 +8,18 @@ size_t Event::s_nextEventId = 1;
 
 // TODO: Reset timer for reverse actions
 
-Event::Event()
-    : _id(s_nextEventId)
+template <typename... Args>
+Event::Event(Type type, Args... arguments)
+    : type(type), timestamp(Simulator::state().get_time()), _id(s_nextEventId)
 {
+    static_assert(sizeof...(arguments) <= MAX_ARGS);
+    args = { static_cast<int>(arguments)... };
     ++s_nextEventId;
 }
 
 Event Event::write(pin_t pin, digital_t value)
 {
-    Event event;
+    Event event(Type::Write, pin, value);
     event.action = [=]() { Simulator::state().set_digital(pin, value); };
     event.reverseAction = [=]() { Simulator::state().set_digital(pin, !value); };
     return event;
@@ -28,7 +31,7 @@ Event Event::set_pinmode(pin_t pin, PinMode mode)
         ? PinMode::Out
         : PinMode::In;
 
-    Event event;
+    Event event(Type::PinMode, pin, mode);
     event.action = [=]() { Simulator::state().set_pin_mode(pin, mode); };
     event.reverseAction = [=]() { Simulator::state().set_pin_mode(pin, oppositeMode); };
     return event;

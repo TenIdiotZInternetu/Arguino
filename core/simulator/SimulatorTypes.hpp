@@ -4,7 +4,8 @@
 
 namespace arguino::simulator {
 
-enum class PinMode { In, Out };
+// TODO: ????
+enum class PinMode { In = 'I', Out = 'O' };
 
 using pin_t = uint8_t;
 using digital_t = bool;

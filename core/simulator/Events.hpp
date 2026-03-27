@@ -1,7 +1,9 @@
 #ifndef ARGUINO_EVENTS_HPP
 #define ARGUINO_EVENTS_HPP
 
+#include <chrono>
 #include <functional>
+#include <variant>
 
 #include "SimulatorTypes.hpp"
 
@@ -9,11 +11,20 @@ namespace arguino::simulator {
 
 struct Event {
    public:
+    enum class Type { Write, PinMode };
+
+    Type type;
+    float timestamp;
     size_t localVirtualTime;
     std::function<void()> action;
     std::function<void()> reverseAction;
 
-    Event();
+    // TODO: Use std::variant instead
+    static constexpr int MAX_ARGS = 3;
+    std::array<int, MAX_ARGS> args;
+
+    template <typename... Args>
+    Event(Type type, Args... arguments);
 
     size_t id() const { return _id; }
 

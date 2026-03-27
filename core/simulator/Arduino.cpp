@@ -17,12 +17,13 @@ using namespace arguino::simulator;
 
 void digitalWrite(uint8_t pin, uint8_t val)
 {
-    if (Simulator::state().get_digital(pin) != val) {
-        Simulator::handle_event(            //
-            Event::write(pin, val == HIGH)  //
-        );
-        Simulator::log(std::format("Written value {} to pin {}", val, pin));
-    }
+    if (Simulator::state().get_digital(pin) == val) return;
+
+    Simulator::handle_event(            //
+        Event::write(pin, val == HIGH)  //
+    );
+
+    Simulator::log(std::format("Written value {} to pin {}", val, pin));
 }
 
 int digitalRead(uint8_t pin)
@@ -37,11 +38,13 @@ unsigned long millis()
 
 void pinMode(uint8_t pin, uint8_t mode)
 {
-    if (mode == OUTPUT) {
-        Simulator::state().set_pin_mode(pin, PinMode::Out);
-    }
-    if (mode == INPUT) {
-        Simulator::state().set_pin_mode(pin, PinMode::In);
-    }
+    PinMode pinMode = mode == OUTPUT ? PinMode::Out : PinMode::In;
+    if (Simulator::state().get_pin_mode(pin) == pinMode) return;
+
+    Simulator::handle_event(              //
+        Event::set_pinmode(pin, pinMode)  //
+    );
+
+    Simulator::log(std::format("Set pin mode to {} on pin {}", (char)pinMode, pin));
 }
 #endif  // ARGUINO_ARDUINO_HPP
