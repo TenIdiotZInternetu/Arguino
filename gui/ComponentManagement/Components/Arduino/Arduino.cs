@@ -1,17 +1,14 @@
 using ComponentManagement.Graph;
 using TcpAdapter;
+using IpcAdapter;
 
 namespace ComponentManagement.Components;
 
 public class Arduino : Component {
-    public const int POLLING_RATE_MS = 10;
-    
     private ArduinoState _state = new();
     
     // TODO: Replace by interface
-    private bool _clientRunning;
-    private TcpClient? _tcpClient;
-    private MessageHandler? _tcpHandler => _tcpClient?.Handler;
+    private IIpcAdapter? _ipc;
     
     private readonly SynchronizationContext _uiContext;
 
@@ -23,27 +20,17 @@ public class Arduino : Component {
         uint idx = GetPinIndex(pin.Name!);
         _state.DigitalPins[idx] = pin.IsHigh;
 
-        if (_clientRunning) {
-            _tcpHandler!.SendWriteMessage(_state);
+        if (_ipc?.IsConnected ?? false) {
+            // TODO: _ipc.SendEvent();
         }
     }
 
-    public void ConnectToSimulator(TcpClient tcpClient) {
-        _tcpClient = tcpClient;
+    public void ConnectToSimulator(IIpcAdapter ipc) {
+        _ipc = ipc;
         
-        _tcpHandler!.StateChangedEvent += state => {
-            _uiContext.Post(_ => UpdateCircuit(state), null);    
+        _ipc.ReceivedEventEvent += e => {
+            // TODO: _uiContext.Post(_ => , null);    
         };
-        
-        Task.Run(async () => {
-            await _tcpClient!.ConnectAsync();
-            _clientRunning = true;
-        
-            while (_clientRunning) {
-                _tcpHandler!.SendReadMessage();
-                await Task.Delay(POLLING_RATE_MS);
-            }
-        });
     }
 
     private void UpdateCircuit(ArduinoState newState) {
@@ -63,7 +50,7 @@ public class Arduino : Component {
         }
     }
 
-    private Pin GetDigitalPin(int index) => GetPin("D" + index);
-    private Pin GetAnalogPin(int index) => GetPin("A" + index);
+    private Pin GetDigitalPin(int index) => GetPin("D" + index)!;
+    private Pin GetAnalogPin(int index) => GetPin("A" + index)!;
     private uint GetPinIndex(string pinName) => uint.Parse(pinName[1..]);
 }
