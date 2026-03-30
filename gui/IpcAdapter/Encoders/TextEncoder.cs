@@ -2,12 +2,12 @@ using IpcAdapter.Events;
 
 namespace IpcAdapter.Encoders;
 
-public class TextEncoder : IEncoder{
+public class TextEncoder : IEncoder {
     public string EncodeEvent(Event @event) {
-        throw new NotImplementedException();
+        return "encoded";
     }
     
     public Event DecodeEvent(string message) {
-        throw new NotImplementedException();
+        return new Event();
     }
 }

@@ -10,6 +10,8 @@ using ComponentManagement.Loaders;
 using ComponentManagement.Scenes;
 using Gui.ViewModels;
 using Gui.Views;
+using IpcAdapter;
+using IpcAdapter.Encoders;
 using Logger;
 using TcpAdapter;
 
@@ -19,7 +21,7 @@ public static class MainController {
     public static CommandLineArguments Arguments { get; private set; } = null!;
     public static MainWindow MainWindow { get; private set; } = null!;
     public static Scene Scene { get; private set; } = null!;
-    public static MessageHandler Adapter { get; private set; } = null!;
+    public static TcpMessageHandler Adapter { get; private set; } = null!;
     public static Stopwatch GlobalTimer { get; private set; } = null!;
     
     public static ILogger Logger { get; private set; } = null!;
@@ -93,10 +95,12 @@ public static class MainController {
         
         var fileLogger = new FileLogger(Arguments.TcpLogFile);
         fileLogger.Timer = GlobalTimer;
-
-        var tcpClient = new TcpClient(Arguments.TcpPort)
-            .SetLogger(new CompositeLogger(fileLogger));
+        var logger = new CompositeLogger(fileLogger);
         
-        arduino?.ConnectToSimulator(tcpClient);
+        var tcpClient = new TcpClient(Arguments.TcpPort);
+        IEncoder encoder = new TextEncoder();
+        IIpcAdapter ipc = new TcpMessageHandler(tcpClient, encoder, logger);
+
+        arduino?.ConnectToSimulator(ipc);
     }
 }

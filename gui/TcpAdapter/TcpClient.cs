@@ -8,8 +8,6 @@ using Logger;
 namespace TcpAdapter;
 
 public class TcpClient {
-    public MessageHandler Handler { get; init; }
-    
     public bool Connected => _client.Connected;
     public readonly IPEndPoint Endpoint;
     
@@ -23,16 +21,16 @@ public class TcpClient {
     
     private CancellationTokenSource _cts = new();
 
+    public event Action<string> ReadBytesEvent;
+
     private ILogger? _logger;
 
     public TcpClient(int port) {
         Endpoint = new IPEndPoint(IPAddress.Parse(LOCAL_HOST), port);
-        Handler = new MessageHandler(this);
     }
 
     public TcpClient(string ip, int port) {
         Endpoint = new IPEndPoint(IPAddress.Parse(ip), port);
-        Handler = new MessageHandler(this);
     }
 
     public async Task ConnectAsync() {
@@ -68,17 +66,12 @@ public class TcpClient {
         await _sendQueue.Writer.WriteAsync(message);
     }
 
-    public TcpClient SetLogger(ILogger logger) {
+    public TcpClient SetLogger(ILogger? logger) {
         _logger = logger;
-        Handler.SetLogger(logger);
         return this;
     }
 
     private async Task LoopReadAsync() {
-        StringBuilder chunkBuilder = new();
-        StringBuilder messageBuilder = new();
-        List<string> messages = new();
-
         while (!_cts.IsCancellationRequested) {
             int bytesRead = await _stream!.ReadAsync(_buffer,  0, _buffer.Length, _cts.Token);
             if (bytesRead == 0) break; // Disconnected
@@ -86,33 +79,15 @@ public class TcpClient {
             _logger?.Log(new DebugMessage($"Reading {bytesRead} bytes..."));
             
             // TODO: Move to MessageHandler?
-            var chunk = Encoding.UTF8.GetString(_buffer, 0, bytesRead);
-            chunkBuilder.Append(chunk);
-            messageBuilder.Clear();
-
-            foreach (char c in chunkBuilder.ToString()) {
-                if (c == Handler.Delimeter) {
-                    messages.Add(messageBuilder.ToString());
-                    chunkBuilder.Remove(0, messageBuilder.Length + 1);
-                    messageBuilder.Clear();
-                }
-                else {
-                    messageBuilder.Append(c);
-                }
-            }
-
-            foreach (var message in messages) {
-                Handler.HandleMessage(message);
-            }
-            
-            messages.Clear();
+            var byteChunk = Encoding.UTF8.GetString(_buffer, 0, bytesRead);
+            ReadBytesEvent?.Invoke(byteChunk);
         }
     }
 
     private async Task LoopWriteAsync() {
         while (await _sendQueue.Reader.WaitToReadAsync()) {
             while (_sendQueue.Reader.TryRead(out var message)) {
-                var data = Encoding.UTF8.GetBytes(message + Handler.Delimeter);
+                var data = Encoding.UTF8.GetBytes(message);
                 await _stream!.WriteAsync(data, 0, data.Length);
                 _logger?.Log(new DebugMessage($"Sent {data.Length} bytes..."));
             }

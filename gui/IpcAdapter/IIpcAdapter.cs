@@ -4,7 +4,7 @@ using IpcAdapter.Events;
 namespace IpcAdapter;
 
 public interface IIpcAdapter {
-    public bool IsConnected { get; protected set; }
+    public bool IsConnected { get; }
     public event Action<Event> ReceivedEventEvent;
 
     public void SendEvent(Event @event);
