@@ -6,14 +6,14 @@ constexpr char COMMON_PART_FORMAT[] = "{:012}:{:07}:";
 constexpr char WRITE_FORMAT[] = "W:{:02}:{}";
 constexpr char PINMODE_FORMAT[] = "P:{:02}:{:c}";
 
-static std::string encode_write(const Event& event)
+static std::string encode_write(const Event& e)
 {
-    return std::format(WRITE_FORMAT, event.args[0], event.args[1]);
+    return std::format(WRITE_FORMAT, e.args[0], e.args[1]);
 }
 
-static std::string encode_pinmode(const Event& event)
+static std::string encode_pinmode(const Event& e)
 {
-    return std::format(PINMODE_FORMAT, event.args[0], event.args[1]);
+    return std::format(PINMODE_FORMAT, e.args[0], e.args[1]);
 }
 
 std::string encode_event(const Event& event)

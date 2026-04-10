@@ -57,7 +57,8 @@ public class TcpMessageHandler : IIpcAdapter {
     
     private void HandleMessage(string message) {
         _logger?.Log(new LogMessage.Read(message));
-        Event @event = _encoder.DecodeEvent(message);
-        ReceivedEventEvent?.Invoke(@event);
+        if (_encoder.TryDecodeEvent(message, out Event @event)) {
+            ReceivedEventEvent?.Invoke(@event);
+        };
     }
 }
