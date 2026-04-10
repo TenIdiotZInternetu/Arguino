@@ -8,18 +8,20 @@ using Logger;
 namespace TcpAdapter;
 
 public class TcpClient {
+    private const int RECONNECT_DELAY = 3000;
+    
     public bool Connected => _client.Connected;
     public readonly IPEndPoint Endpoint;
     
     private const string LOCAL_HOST = "127.0.0.1";
     private const uint BUFFER_SIZE = 256;
     
-    private readonly System.Net.Sockets.TcpClient _client = new();
+    private System.Net.Sockets.TcpClient _client = new();
     private NetworkStream? _stream = null;
     private byte[] _buffer = new byte[BUFFER_SIZE];
     private Channel<string> _sendQueue = Channel.CreateUnbounded<string>();
     
-    private CancellationTokenSource _cts = new();
+    private CancellationTokenSource _cts;
 
     public event Action<string> ReadBytesEvent;
 
@@ -34,32 +36,43 @@ public class TcpClient {
     }
 
     public async Task ConnectAsync() {
+        while (!await TryConnectAsync()) {
+            await Task.Delay(RECONNECT_DELAY);
+        }
+    }
+
+    public async Task<bool> TryConnectAsync() {
         try {
             await _client.ConnectAsync(Endpoint);
             _stream = _client.GetStream();
-        }
-        catch (Exception e) {
-            _logger?.Log(new ErrorMessage($"Error while connecting to server: {e.Message}"));
-            return;
-        }
-
-        _logger?.Log(new InfoMessage("Connected to server."));
-
-        try {
+            _logger?.Log(new InfoMessage($"Connected to server at {Endpoint}."));
+            
             _ = Task.Run(LoopReadAsync);
-            _logger?.Log(new InfoMessage("Reading loop began."));
-        }
-        catch (Exception e) {
-            _logger?.Log(new ErrorMessage($"Error while processing Read loop: {e.Message}"));
-        }
-
-        try {
+            _logger?.Log(new InfoMessage("Reading loop initiated."));
+            
             _ = Task.Run(LoopWriteAsync);
-            _logger?.Log(new InfoMessage("Writing loop began."));
+            _logger?.Log(new InfoMessage("Writing loop initiated."));
         }
         catch (Exception e) {
-            _logger?.Log(new ErrorMessage($"Error while processing Write loop: {e.Message}"));
+            _logger?.Log(new ErrorMessage($"Failed to initiate TCP Client: {e.Message}"));
+            return false;
         }
+        
+        _logger?.Log(new InfoMessage("TCP Client successfully initiated."));
+        _cts = new();
+        return true;
+    }
+
+    public void Disconnect() {
+        _client.Close();
+        _client = new System.Net.Sockets.TcpClient();
+        _logger?.Log(new WarningMessage("Server disconnected."));
+    }
+
+    public void Reconnect() {
+        Disconnect();
+        _logger?.Log(new InfoMessage($"Attempting to reconnect at {Endpoint}."));
+        Task.Run(ConnectAsync);
     }
 
     public async Task SendMessageAsync(string message) {
@@ -74,7 +87,10 @@ public class TcpClient {
     private async Task LoopReadAsync() {
         while (!_cts.IsCancellationRequested) {
             int bytesRead = await _stream!.ReadAsync(_buffer,  0, _buffer.Length, _cts.Token);
-            if (bytesRead == 0) break; // Disconnected
+            if (bytesRead == 0) {   // Disconnected
+                Reconnect();
+                return;
+            }
             
             _logger?.Log(new DebugMessage($"Reading {bytesRead} bytes..."));
             

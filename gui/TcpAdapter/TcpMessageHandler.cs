@@ -7,6 +7,7 @@ using Logger;
 namespace TcpAdapter;
 
 public class TcpMessageHandler : IIpcAdapter {
+    
     public char Delimeter => ';';
     public bool IsConnected => _client.Connected;
     
