@@ -14,7 +14,7 @@ struct Event {
     enum class Type { Write, PinMode };
 
     Type type;
-    float timestamp;
+    int64_t timestampMicros;
     size_t localVirtualTime;
     std::function<void()> action;
     std::function<void()> reverseAction;

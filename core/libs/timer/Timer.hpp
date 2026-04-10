@@ -11,7 +11,7 @@
  * @brief Class for encapsulating std::chrono clock. Tracks time steps and waits for time to pass.
  */
 struct Timer {
-public:
+   public:
     /**
      * @brief Type for clock used by the timer
      */
@@ -27,7 +27,7 @@ public:
      */
     using time_point_t = std::chrono::time_point<clock_t>;
 
-private:
+   private:
     /**
      * @brief Time when the timer was created
      */
@@ -48,11 +48,13 @@ private:
      */
     float cycleDuration_;
 
-public:
+   public:
     /**
      * @brief Initializes the timer with a cycle duration of 0
      */
-    Timer() : cycleDuration_(0) {
+    Timer()
+        : cycleDuration_(0)
+    {
         update();
     }
 
@@ -60,7 +62,9 @@ public:
      * @brief Initializes the timer with a given cycle duration
      * @param duration Duration of the timer's waiting cycle in milliseconds
      */
-    Timer(float duration) : cycleDuration_(duration) {
+    Timer(float duration)
+        : cycleDuration_(duration)
+    {
         update();
     }
 
@@ -94,14 +98,14 @@ public:
     bool timePassed(float time);
 
     /**
-     * @return Time passed since the last step in milliseconds
+     * @return Time passed since the last step in duration_t
      */
-    [[nodiscard]] float deltaTime();
+    [[nodiscard]] int64_t deltaTime();
 
     /**
-     * @return Time passed since the timer was created in milliseconds
+     * @return Time passed since the timer was created in duration_t
      */
-    [[nodiscard]] float lifetime();
+    [[nodiscard]] int64_t lifetime();
 };
 
-#endif //SRC_TIMER_HPP
+#endif  // SRC_TIMER_HPP

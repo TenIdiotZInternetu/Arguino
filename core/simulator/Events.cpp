@@ -10,7 +10,7 @@ size_t Event::s_nextEventId = 1;
 
 template <typename... Args>
 Event::Event(Type type, Args... arguments)
-    : type(type), timestamp(Simulator::state().get_time()), _id(s_nextEventId)
+    : type(type), timestampMicros(Simulator::state().get_time()), _id(s_nextEventId)
 {
     static_assert(sizeof...(arguments) <= MAX_ARGS);
     args = { static_cast<int>(arguments)... };
