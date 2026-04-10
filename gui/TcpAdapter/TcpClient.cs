@@ -45,20 +45,20 @@ public class TcpClient {
         try {
             await _client.ConnectAsync(Endpoint);
             _stream = _client.GetStream();
-            _logger?.Log(new InfoMessage($"Connected to server at {Endpoint}."));
+            _logger?.LogInfo($"Connected to server at {Endpoint}.");
             
             _ = Task.Run(LoopReadAsync);
-            _logger?.Log(new InfoMessage("Reading loop initiated."));
+            _logger?.LogInfo("Reading loop initiated.");
             
             _ = Task.Run(LoopWriteAsync);
-            _logger?.Log(new InfoMessage("Writing loop initiated."));
+            _logger?.LogInfo("Writing loop initiated.");
         }
         catch (Exception e) {
-            _logger?.Log(new ErrorMessage($"Failed to initiate TCP Client: {e.Message}"));
+            _logger?.LogError($"Failed to initiate TCP Client: {e.Message}");
             return false;
         }
         
-        _logger?.Log(new InfoMessage("TCP Client successfully initiated."));
+        _logger?.LogInfo("TCP Client successfully initiated.");
         _cts = new();
         return true;
     }
@@ -66,12 +66,12 @@ public class TcpClient {
     public void Disconnect() {
         _client.Close();
         _client = new System.Net.Sockets.TcpClient();
-        _logger?.Log(new WarningMessage("Server disconnected."));
+        _logger?.LogWarning("Server disconnected.");
     }
 
     public void Reconnect() {
         Disconnect();
-        _logger?.Log(new InfoMessage($"Attempting to reconnect at {Endpoint}."));
+        _logger?.LogInfo($"Attempting to reconnect at {Endpoint}.");
         Task.Run(ConnectAsync);
     }
 
@@ -92,7 +92,7 @@ public class TcpClient {
                 return;
             }
             
-            _logger?.Log(new DebugMessage($"Reading {bytesRead} bytes..."));
+            _logger?.LogDebug($"Reading {bytesRead} bytes...");
             
             // TODO: Move to MessageHandler?
             var byteChunk = Encoding.UTF8.GetString(_buffer, 0, bytesRead);
@@ -105,7 +105,7 @@ public class TcpClient {
             while (_sendQueue.Reader.TryRead(out var message)) {
                 var data = Encoding.UTF8.GetBytes(message);
                 await _stream!.WriteAsync(data, 0, data.Length);
-                _logger?.Log(new DebugMessage($"Sent {data.Length} bytes..."));
+                _logger?.LogDebug($"Sent {data.Length} bytes...");
             }
         }
     }

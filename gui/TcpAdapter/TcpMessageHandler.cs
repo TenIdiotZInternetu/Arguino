@@ -35,10 +35,10 @@ public class TcpMessageHandler : IIpcAdapter {
         Task.Run(async () => {
             try {
                 await _client.SendMessageAsync(message);
-                _logger?.Log(new LogMessage.Send(message));
+                _logger?.LogDebug($"TCP Message sent: '{message}'");
             }
             catch (Exception e) {
-                _logger?.Log(new ErrorMessage($"Error while sending message: {e.Message}"));
+                _logger?.LogError($"Error while sending message: {e.Message}");
             }
         });
     }
@@ -56,7 +56,8 @@ public class TcpMessageHandler : IIpcAdapter {
     }
     
     private void HandleMessage(string message) {
-        _logger?.Log(new LogMessage.Read(message));
+        _logger?.LogDebug($"TCP Message received: '{message}'");
+
         if (_encoder.TryDecodeEvent(message, out Event @event)) {
             ReceivedEventEvent?.Invoke(@event);
         };

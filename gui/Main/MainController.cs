@@ -44,14 +44,14 @@ public static class MainController {
         Arguments = Parser.Default.ParseArguments<CommandLineArguments>(desktop.Args).Value;
         GlobalTimer = Stopwatch.StartNew();
         InitLogger();
-        Logger.Log(new InfoMessage("Starting App initialization."));
+        Logger.LogInfo("Starting App initialization.");
 
         InitScene();
         InitArduino();
         
         _isInitialized = true;
         AppInitializedEvent?.Invoke();
-        Logger.Log(new InfoMessage("App initialization complete."));
+        Logger.LogInfo("App initialization complete.");
     }
 
     private static void InitLogger() {
@@ -84,12 +84,12 @@ public static class MainController {
             arduino = Scene.ComponentsMap.First(c => c.Value.TypeName == nameof(Arduino)).Value as Arduino;
         }
         catch (InvalidOperationException) {
-            Logger.Log(new WarningMessage("Arduino not found in the scene. Skipping TCP initialization."));
+            Logger.LogWarning("Arduino not found in the scene. Skipping IPC initialization.");
             return;
         }
 
         if (Arguments.NoTcp) {
-            Logger.Log(new InfoMessage("--no-tcp flag is set. Skipping TCP initialization."));
+            Logger.LogInfo("--no-tcp flag is set. Skipping TCP initialization.");
             return;
         }
         
