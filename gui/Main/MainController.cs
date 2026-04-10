@@ -93,7 +93,7 @@ public static class MainController {
             return;
         }
         
-        var fileLogger = new FileLogger(Arguments.TcpLogFile);
+        var fileLogger = new FileLogger(Arguments.TcpLogFile, Arguments.Verbosity);
         fileLogger.Timer = GlobalTimer;
         var logger = new CompositeLogger(fileLogger);
         
