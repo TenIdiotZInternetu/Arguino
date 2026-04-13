@@ -13,8 +13,8 @@ public class Pin {
     public bool IsHigh => State == DigitalState.High;
     public bool IsLow => State == DigitalState.Low;
 
-    public bool IsWriteOnly => _mode == PinMode.WriteOnly;
-    public bool IsReadOnly => _mode == PinMode.ReadOnly;
+    public bool IsWriteOnly => _mode == Mode.WriteOnly;
+    public bool IsReadOnly => _mode == Mode.ReadOnly;
 
     public bool IsConnected => _node != null;
     
@@ -27,8 +27,8 @@ public class Pin {
     private Component _component;
     private ElectricalNode? _node;
     
-    public enum PinMode { General, ReadOnly, WriteOnly }
-    private PinMode _mode = PinMode.General;
+    public enum Mode { General, ReadOnly, WriteOnly }
+    private Mode _mode = Mode.General;
 
     public Pin(Component component, uint id, string? name = null) {
         _component = component;
@@ -36,15 +36,17 @@ public class Pin {
         Name = name;
     }
     
-    public void MakeReadOnly() => _mode = PinMode.ReadOnly;
-    public void MakeWriteOnly() => _mode = PinMode.WriteOnly;
-    public void MakeGeneral() => _mode = PinMode.General;
-
+    public void MakeReadOnly() => _mode = Mode.ReadOnly;
+    public void MakeWriteOnly() => _mode = Mode.WriteOnly;
+    public void MakeGeneral() => _mode = Mode.General;
+    
     public void SetHigh() => SetValue(true);
     public void SetLow() => SetValue(false);
+
+    public void SetValue(DigitalState value) => SetValue(value == DigitalState.High);
     
     public void SetValue(bool value) {
-        if (_mode == PinMode.ReadOnly) {
+        if (_mode == Mode.ReadOnly) {
             ComponentManager.Logger?.Log(new WarningMessage($"Attempting to set value to a ReadOnly pin {this}"));
             return;
         }
@@ -57,7 +59,7 @@ public class Pin {
         DrivingChangedEvent?.Invoke(this, value);
     }
 
-    public void SetMode(PinMode mode) {
+    public void SetMode(Mode mode) {
         if (mode == _mode) return;
         _mode = mode;
         ComponentManager.Logger?.Log(new DebugMessage($"Changed the access mode of pin {this} to {mode}"));
@@ -69,7 +71,6 @@ public class Pin {
             _node.StateChangedEvent += NotifyStateChange;
         }
     }
-
 
     public void ConnectToNode(ElectricalNode node) {
         Disconnect();
@@ -96,7 +97,7 @@ public class Pin {
 
 
     public void NotifyStateChange(ElectricalNode? _, DigitalState nodeState) {
-        if (_mode == PinMode.WriteOnly) {
+        if (_mode == Mode.WriteOnly) {
             ComponentManager.Logger?.Log(new WarningMessage($"Attempting to read value from a WriteOnly pin {this}"));
             return;
         }

@@ -5,7 +5,7 @@ using IpcAdapter.Events;
 
 namespace ComponentManagement.Components;
 
-public class Arduino : Component {
+public partial class Arduino : Component {
     private IIpcAdapter? _ipc;
     private readonly SynchronizationContext _uiContext;
 
