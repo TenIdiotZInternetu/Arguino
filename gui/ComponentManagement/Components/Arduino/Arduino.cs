@@ -14,10 +14,10 @@ public partial class Arduino : Component {
     }
 
     public override void OnPinStateChanged(Pin pin) {
-        uint idx = GetPinIndex(pin.Name!);
+        int idx = GetPinIndex(pin.Name!);
         
         if (_ipc?.IsConnected ?? false) {
-            // TODO: _ipc.SendEvent();
+            InvokeWriteEvent(idx, pin.State);
         }
     }
 
@@ -25,11 +25,22 @@ public partial class Arduino : Component {
         _ipc = ipc;
         
         _ipc.ReceivedEventEvent += e => {
-            // TODO: _uiContext.Post(_ => , null);    
+            _uiContext.Post(_ => ProcessRemoteEvent(e), null);    
         };
+    }
+    
+    private void WriteToPin(int pinId, DigitalState value) {
+        GetDigitalPin(pinId).SetValue(value);
+    }
+    
+    private void SetPinMode(int pinId, PinMode mode) {
+        GetDigitalPin(pinId).SetMode(mode switch {
+            PinMode.In => Pin.Mode.ReadOnly,
+            PinMode.Out => Pin.Mode.WriteOnly,
+        });
     }
 
     private Pin GetDigitalPin(int index) => GetPin("D" + index)!;
     private Pin GetAnalogPin(int index) => GetPin("A" + index)!;
-    private uint GetPinIndex(string pinName) => uint.Parse(pinName[1..]);
+    private int GetPinIndex(string pinName) => int.Parse(pinName[1..]);
 }

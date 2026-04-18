@@ -10,7 +10,5 @@ public struct Event {
     public long LocalVirtualTime;
     public int[] Args = new int[MAX_ARGS];
     
-    public Action? Action;
-
     public Event() { }
 }

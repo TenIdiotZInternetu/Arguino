@@ -28,6 +28,9 @@ void digitalWrite(uint8_t pin, uint8_t val)
 
 int digitalRead(uint8_t pin)
 {
+    // TODO: Create a synchronization barrier before read.
+    // This is the only reasonable place where can the code branch.
+    // Implement confirmation event produced by remote process, that will unblock this call.
     return Simulator::state().get_digital(pin);
 }
 

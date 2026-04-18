@@ -4,36 +4,42 @@ using IpcAdapter.Events;
 namespace ComponentManagement.Components;
 
 public partial class Arduino {
-    private EventQueue _queue = new();
+    private long _lastSeenLvt;
 
-    internal Event CreateWriteEvent(int pinId, DigitalState value) =>
+    private void ProcessRemoteEvent(Event @event) {
+        switch (@event.Type) {
+            case EventType.Write: 
+                WriteToPin(@event.Args[0], (DigitalState)@event.Args[1]); break;
+            case EventType.PinMode:
+                SetPinMode(@event.Args[0], (PinMode)@event.Args[1]); break;
+            case EventType.Unknown:
+                ComponentManager.LogError("Encountered unknown event type");
+                return;
+        }
+
+        _lastSeenLvt = @event.LocalVirtualTime;
+    }
+    
+    private Event CreateWriteEvent(int pinId, DigitalState value) =>
         new() {
             Type = EventType.Write,
-            Args = [ pinId, (int)value ],
-            Action = () => GetDigitalPin(pinId).SetValue(value)
+            Args = [ pinId, (int)value ]
+        };
+
+    private Event CreatePinModeEvent(int pinId, PinMode mode) =>
+        new() {
+            Type = EventType.PinMode,
+            Args = [ pinId, (int)mode ]
         };
 
     private void InvokeWriteEvent(int pinId, DigitalState value) => 
-        HandleEvent(CreateWriteEvent(pinId, value));
-
-    internal Event CreatePinModeEvent(int pinId, PinMode mode) =>
-        new() {
-            Type = EventType.Write,
-            Args = [ pinId, (int)mode ],
-            Action = () => GetDigitalPin(pinId).SetMode(mode switch {
-                PinMode.In => Pin.Mode.ReadOnly,
-                PinMode.Out => Pin.Mode.WriteOnly,
-            })
-        };
-
-    private void InvokePinModeEvent(int pinId, PinMode mode) =>
-        HandleEvent(CreatePinModeEvent(pinId, mode));
-
-    private void ProcessRemoteEvent() {
-        
-    }
+        SendLocalEvent(CreateWriteEvent(pinId, value));
     
-    private void HandleEvent(Event @event) {
-        
+    private void InvokePinModeEvent(int pinId, PinMode mode) =>
+        SendLocalEvent(CreatePinModeEvent(pinId, mode));
+    
+    private void SendLocalEvent(Event @event) {
+        @event.LocalVirtualTime = _lastSeenLvt;
+        _ipc?.SendEvent(@event);
     }
 }

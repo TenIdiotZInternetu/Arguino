@@ -3,6 +3,7 @@ using IpcAdapter.Events;
 namespace IpcAdapter.Encoders;
 
 public class TextEncoder : IEncoder {
+    private const int COMMON_PARTS = 3;
     private const string COMMON_PART_FORMAT = "{0:D12}:{1:D7}";
     private const string WRITE_FORMAT = "{0:D12}:{1:D7}";
     private const string PINMODE_FORMAT = "{0:D12}:{1:D7}";
@@ -30,12 +31,9 @@ public class TextEncoder : IEncoder {
         @event = new Event();
         string[] parts = message.Split(':');
         
-        if (!long.TryParse(parts[0], out @event.TimestampMicros)) {
-            
-        };
-
-        if (!long.TryParse(parts[1], out @event.LocalVirtualTime)) {
-            
+        if (!long.TryParse(parts[0], out @event.TimestampMicros) ||
+            !long.TryParse(parts[1], out @event.LocalVirtualTime)) {
+            return false;
         };
 
         @event.Type = parts[2] switch {
@@ -43,6 +41,12 @@ public class TextEncoder : IEncoder {
             "P" => EventType.PinMode,
             _ => EventType.Unknown
         };
+
+        if (parts.Length > COMMON_PARTS) {
+            @event.Args = parts.Skip(COMMON_PARTS)
+                .Take(Event.MAX_ARGS)
+                .Select(int.Parse).ToArray();
+        }
         
         return true;
     }

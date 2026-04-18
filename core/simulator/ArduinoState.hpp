@@ -46,6 +46,7 @@ class ArduinoState {
     bool set_pin_mode(pin_t pin, PinMode mode);
 
    private:
+    // TODO: Implement changing clock speed
     Timer _timer;
 
     analog_arr_t _analogPins = {};
