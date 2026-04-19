@@ -4,6 +4,7 @@ namespace IpcAdapter.Encoders;
 
 public class TextEncoder : IEncoder {
     private const int COMMON_PARTS = 3;
+    private const char PART_DELIMETER = ':';
     private const string COMMON_PART_FORMAT = "{0:D12}:{1:D7}";
     private const string WRITE_FORMAT = "{0:D12}:{1:D7}";
     private const string PINMODE_FORMAT = "{0:D12}:{1:D7}";
@@ -29,7 +30,7 @@ public class TextEncoder : IEncoder {
     
     public bool TryDecodeEvent(string message, out Event @event) {
         @event = new Event();
-        string[] parts = message.Split(':');
+        string[] parts = message.Split(PART_DELIMETER);
         
         if (!long.TryParse(parts[0], out @event.TimestampMicros) ||
             !long.TryParse(parts[1], out @event.LocalVirtualTime)) {

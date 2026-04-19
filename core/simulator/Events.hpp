@@ -14,14 +14,16 @@ struct Event {
     enum class Type { Write, PinMode };
 
     Type type;
-    int64_t timestampMicros;
-    size_t localVirtualTime;
+    int64_t timestampMicros;  // TODO: size_t
+    int64_t localVirtualTime;
     std::function<void()> action;
     std::function<void()> reverseAction;
 
     // TODO: Use std::variant instead
     static constexpr int MAX_ARGS = 3;
     std::array<int, MAX_ARGS> args;
+
+    Event() {}
 
     template <typename... Args>
     Event(Type type, Args... arguments);

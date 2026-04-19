@@ -19,8 +19,8 @@ class EventQueue {
     std::queue<Event> _remoteEvents;
     std::queue<Event> _processedEvents;
 
-    size_t _nextLvt;
-    size_t _maxGvtFallback;
+    int64_t _nextLvt;
+    int64_t _maxGvtFallback;
 
     void clear();
     void clear_events_before(size_t lvt);
