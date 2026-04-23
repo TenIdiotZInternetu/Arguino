@@ -5,6 +5,7 @@
 #ifndef ARGUINO_CORE_ARGUINOMESSAGEHANDLER_HPP
 #define ARGUINO_CORE_ARGUINOMESSAGEHANDLER_HPP
 
+#include <atomic>
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/asio/read_until.hpp>
 #include <boost/asio/write.hpp>
@@ -52,6 +53,7 @@ class ConnectionHandler : public std::enable_shared_from_this<ConnectionHandler<
     static size_t _nextConnectionId;
     bool _isConnected;
 
+    std::atomic<bool> _isWriting;
     message_funct _messageHandler;
 
     logger_ptr _logger;
@@ -140,6 +142,11 @@ void ConnectionHandler<TLogger>::handle_message(boost::system::error_code error,
 template <logger::ILogger TLogger>
 inline void ConnectionHandler<TLogger>::write_from_queue()
 {
+    if (_isWriting) return;
+    if (_outboxQueue.empty()) return;
+
+    _isWriting = true;
+
     boost::asio::async_write(_socket,
         boost::asio::buffer(_outboxQueue.front() + ';'),
         [me = this->shared_from_this()](auto error, size_t bytes_written) {
@@ -151,6 +158,9 @@ inline void ConnectionHandler<TLogger>::write_from_queue()
                 me->_outboxQueue.pop();
                 me->_queueCv.notify_one();
             }
+
+            me->_isWriting = false;
+            me->write_from_queue();
         }  //
     );
 }
