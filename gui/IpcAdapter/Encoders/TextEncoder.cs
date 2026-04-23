@@ -5,9 +5,10 @@ namespace IpcAdapter.Encoders;
 public class TextEncoder : IEncoder {
     private const int COMMON_PARTS = 3;
     private const char PART_DELIMETER = ':';
-    private const string COMMON_PART_FORMAT = "{0:D12}:{1:D7}";
-    private const string WRITE_FORMAT = "{0:D12}:{1:D7}";
-    private const string PINMODE_FORMAT = "{0:D12}:{1:D7}";
+    
+    private const string COMMON_PART_FORMAT = "{0:D12}:{1:D7}:";
+    private const string WRITE_FORMAT = "W:{0:D2}:{1:D1}";
+    private const string PINMODE_FORMAT = "P:{0:D2}:{1}";
     
     public static string EncodeWrite(Event e)
     {

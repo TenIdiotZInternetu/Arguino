@@ -57,6 +57,7 @@ public static class MainController {
     private static void InitLogger() {
         var fileLogger = new FileLogger(Arguments.CircuitLogFile);
         fileLogger.Timer = GlobalTimer;
+        fileLogger.Verbosity = Arguments.Verbosity;
         Logger = new CompositeLogger(fileLogger);
         ComponentManager.Logger = Logger;
     }

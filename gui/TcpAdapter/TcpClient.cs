@@ -94,7 +94,6 @@ public class TcpClient {
             
             _logger?.LogDebug($"Reading {bytesRead} bytes...");
             
-            // TODO: Move to MessageHandler?
             var byteChunk = Encoding.UTF8.GetString(_buffer, 0, bytesRead);
             ReadBytesEvent?.Invoke(byteChunk);
         }

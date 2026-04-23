@@ -130,8 +130,8 @@ void ConnectionHandler<TLogger>::handle_message(boost::system::error_code error,
 
     if (_incomingBuffer.empty()) return;
 
-    const std::string message = _incomingBuffer.substr(0, messageSize);
-    _logger->log(message::Write(message));
+    const std::string message = _incomingBuffer.substr(0, messageSize - 1);  // -1 strips delimeter
+    _logger->log(message::Read(message));
     _messageHandler(message);
 
     _incomingBuffer.erase(0, messageSize);

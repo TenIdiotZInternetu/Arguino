@@ -10,7 +10,7 @@
             "request": "launch",
             "program": "${workspaceFolder}/core/build/executable/arguino",
             "MIMode": "gdb",
-            "cwd": "${workspaceFolder}",
+            "cwd": "${workspaceFolder}/core",
             "setupCommands": [
                 {
                     "description": "Enable pretty-printing for gdb",
