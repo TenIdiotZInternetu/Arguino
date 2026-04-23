@@ -63,12 +63,13 @@ parts_array_t split(std::string_view messageView)
         if (delimIdx == -1) break;
         partStart = delimIdx + 1;
     }
+
+    return parts;
 }
 
 bool decode_event(const std::string& message, Event& event)
 {
     parts_array_t parts = split(message);
-
     std::array<int, MAX_ARGS> args;
 
     for (int i = 0; i < MAX_ARGS; ++i) {
@@ -76,10 +77,10 @@ bool decode_event(const std::string& message, Event& event)
     }
 
     if (parts[2] == "W") {
-        Event::write(args[0], args[1]);
+        event = Event::write(args[0], args[1]);
     }
     else if (parts[2] == "P") {
-        Event::set_pinmode(args[0], (PinMode)args[1]);
+        event = Event::set_pinmode(args[0], (PinMode)args[1]);
     }
     else {
         return false;
@@ -89,4 +90,6 @@ bool decode_event(const std::string& message, Event& event)
         !decode_int(parts[1], event.localVirtualTime)) {
         return false;
     }
+
+    return true;
 }
