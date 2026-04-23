@@ -73,7 +73,7 @@ bool decode_event(const std::string& message, Event& event)
     std::array<int, MAX_ARGS> args;
 
     for (int i = 0; i < MAX_ARGS; ++i) {
-        if (!decode_int(parts[COMMON_PARTS + i + 1], args[i])) break;
+        if (!decode_int(parts[COMMON_PARTS + i], args[i])) break;
     }
 
     if (parts[2] == "W") {

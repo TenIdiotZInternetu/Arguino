@@ -31,7 +31,7 @@ void Simulator::handle_events()
 
     do {
         queue.execute_next_event();
-    } while (lastLvt <= queue.last_executed_event().localVirtualTime);
+    } while (lastLvt < queue.last_executed_event().localVirtualTime);
 }
 
 
