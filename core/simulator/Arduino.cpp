@@ -22,8 +22,6 @@ void digitalWrite(uint8_t pin, uint8_t val)
     Simulator::handle_event(            //
         Event::write(pin, val == HIGH)  //
     );
-
-    Simulator::log(std::format("Written value {} to pin {}", val, pin));
 }
 
 int digitalRead(uint8_t pin)
@@ -31,6 +29,7 @@ int digitalRead(uint8_t pin)
     // TODO: Create a synchronization barrier before read.
     // This is the only reasonable place where can the code branch.
     // Implement confirmation event produced by remote process, that will unblock this call.
+    Simulator::handle_events();
     return Simulator::state().get_digital(pin);
 }
 
@@ -47,7 +46,5 @@ void pinMode(uint8_t pin, uint8_t mode)
     Simulator::handle_event(              //
         Event::set_pinmode(pin, pinMode)  //
     );
-
-    Simulator::log(std::format("Set pin mode to {} on pin {}", (char)pinMode, pin));
 }
 #endif  // ARGUINO_ARDUINO_HPP

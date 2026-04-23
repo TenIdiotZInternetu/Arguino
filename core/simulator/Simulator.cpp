@@ -22,5 +22,17 @@ void Simulator::handle_event(Event event)
     s_instance->f_eventCallback(event);
 }
 
+void Simulator::handle_events()
+{
+    auto& queue = s_instance->_eventQueue;
+    if (queue.is_empty()) return;
+
+    auto lastLvt = queue.last_lvt();
+
+    do {
+        queue.execute_next_event();
+    } while (lastLvt <= queue.last_executed_event().localVirtualTime);
+}
+
 
 };  // namespace arguino::simulator

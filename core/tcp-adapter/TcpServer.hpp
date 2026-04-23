@@ -89,10 +89,11 @@ void TcpServer<TLogger>::start_accepting()
 
     _acceptor.async_accept(newConnection->socket(), [=, this](auto error) {
         // TODO: Consider multiple clients to be able to connect
-        if (is_connected()) {
-            _logger->log("Connection denied: Cannot connect to more than one client at a time.");
-        }
-        else if (!error) {
+        // TODO: Race condition in is_connecter()
+        // if (is_connected()) {
+        //     _logger->log("Connection denied: Cannot connect to more than one client at a time.");
+        // }
+        if (!error) {
             _logger->log("Connection accepted!");
             _connectionHandler = newConnection;
             _connectionCv.notify_one();

@@ -29,6 +29,7 @@ struct Event {
     Event(Type type, Args... arguments);
 
     size_t id() const { return _id; }
+    std::string to_string();
 
     static Event write(pin_t pin, digital_t value);
     static Event set_pinmode(pin_t pin, PinMode mode);

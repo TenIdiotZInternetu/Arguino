@@ -20,6 +20,7 @@ class Simulator {
     static EventQueue& queue() { return s_instance->_eventQueue; }
 
     static void handle_event(Event event);
+    static void handle_events();
 
     template <logger::ILogger TLogger>
     static void init_logger(std::shared_ptr<TLogger> loggerPtr);
