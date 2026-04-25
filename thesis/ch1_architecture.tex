@@ -2,8 +2,33 @@
 
 \section{Architecture overview}
 
-\section{Interprocess communication}
+The whole project is divided into two main parts. The purpose of the backend is to execute the Arduino code and simulate the change on the board's pinout. The purpose of the frontend is to reflect these changes on a user defined logical circuit, while offering the user control over the simulation. We chose to implement the backend in C++ and the frontend in C\#. Both backend and frontend are running in its own separate process. There is a technical and an engineering reason for this decision.
+
+The user must be able to have full control over the frontend user interface at all times, even while the Arduino code is being debugged. Every common debugger blocks all running threads of a process, when a breakpoint is hit. If the GUI has been part of the same process as the systems running the simulation, it would freeze and become unresponsive every time a breakpoint is hit. The only way to avoid this behavior is to separate the GUI to a different process. We want to support breakpoints in our project, as they are the most useful tool in a debugger's toolkit.
+
+Splitting the application into multiple processes is actually a common practice among larger pieces of software. The program of each process can be written in a different programming language, they mark clear separation of concerns and force a solid interface design. Each process is easily swappable for another implementation with the same interface while the other processes are still running. In our case, the GUI process could be replaced by a web client, a CLI client, or an IDE add-on.
+
+However, this practice comes with certain challenges. Processes always run concurrently, so a variety of synchronization techniques must be applied to avoid race conditions. The other question is how will the processes exchange data. Process is a kernel level mechanism, thus approaches to handle the exchange can vary between operating systems. These mechanisms are what is called inter-process communication, or IPC for short.
+
+\section{Inter-process communication}
+
+There are more than a few ways to handle IPC on every OS. The ones that we implemented are TCP stream and memory mapping. These are among the most common approaches available both on Windows and Linux. In either case, we must clearly define what the shared data represent. Although memory mapping has more flexibility than TCP, we stuck to sending discrete text or binary messages over time, to keep the implementation simpler and the two approaches interchangable.
+
+In the early iterations, the full state of the Arduino was sent over one message. That included the pinout state, pin modes, timer, etc. The state was periodically requested by the client with a 'Read' message without payload. On a change in the frontend, a 'Write' message with the state as payload would be sent to the server and the values of input pins would be overwritten atomically to the backend's internal state. 
+
+This approach was flawed, but easy to implement and synchronize. The main issue was the frequency of reads. 
+
+\subsection{TCP stream}
+Messages can be sent and received through a stream of data on a TCP connection. TCP is commonly used to send data over a network, meaning backend and frontend processes can run on different machines. But listening to a connection on the same machine works just as well.
+
+The backend implements the TCP server, while the frontend implements the client, both connected to the same port.
+
+\subsection{Memory mapping}
+
+\subsection{Events}
 
 \section{Backend}
+
+The choice for backend was obvious, the Arduino code is a syntactically valid C++ code.
 
 \section{Frontend}
