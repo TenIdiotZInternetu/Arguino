@@ -12,8 +12,6 @@
 #include <memory>
 #include <mutex>
 
-#include "LogMessages.hpp"
-
 namespace arguino::tcp {
 
 template <logger::ILogger TLogger>
@@ -84,12 +82,11 @@ inline bool TcpServer<TLogger>::is_connected() const
 template <logger::ILogger TLogger>
 void TcpServer<TLogger>::start_accepting()
 {
-    // TODO: Handle reconnects to the same client
     auto newConnection = handler_t::create(_ioContext, _messageHandler, _logger);
 
     _acceptor.async_accept(newConnection->socket(), [=, this](auto error) {
         // TODO: Consider multiple clients to be able to connect
-        // TODO: Race condition in is_connecter()
+        // TODO: Race condition in is_connected()
         // if (is_connected()) {
         //     _logger->log("Connection denied: Cannot connect to more than one client at a time.");
         // }

@@ -5,10 +5,11 @@
 
 namespace logger {
 
-// TODO: Better logging, this is annoying
+enum class LogLevel { Debug, Info, Warning, Error };
 
 template <typename T>
 concept IMessage = requires(T message) {
+    { message.log_level() } -> std::same_as<LogLevel>;
     { message.what() } -> std::convertible_to<std::string>;
     { message.type() } -> std::convertible_to<std::string>;
 };

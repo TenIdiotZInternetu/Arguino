@@ -8,7 +8,6 @@ endif()
 add_library(arguino.tcp STATIC
     TcpServer.hpp
     ConnectionHandler.hpp
-    StateEncoder.hpp
 )
 
 target_include_directories(arguino.tcp PUBLIC

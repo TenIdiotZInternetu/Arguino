@@ -7,13 +7,11 @@
 #include "ConnectionHandler.hpp"
 #include "Events.hpp"
 #include "FileLogger.hpp"
-#include "StateEncoder.hpp"
 #include "TcpServer.hpp"
 
 using namespace arguino::simulator;
 
 using logger_t = logger::FileLogger;
-using encoder_t = arguino::tcp::StateEncoder;
 using tcp_server_t = arguino::tcp::TcpServer<logger_t>;
 
 static const ProgramOptions* _options;

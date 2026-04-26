@@ -14,7 +14,6 @@
 #include <queue>
 
 #include "ArduinoState.hpp"
-#include "LogMessages.hpp"
 
 namespace arguino::tcp {
 
