@@ -3,26 +3,24 @@
 
 #include <string>
 
+#include "Messages.hpp"
+
 namespace logger {
 
-enum class LogLevel { Debug, Info, Warning, Error };
+class ILogger {
+   public:
+    virtual void log(std::string&& text) const = 0;
+    virtual void log(const IMessage& message) const = 0;
 
-template <typename T>
-concept IMessage = requires(T message) {
-    { message.log_level() } -> std::same_as<LogLevel>;
-    { message.what() } -> std::convertible_to<std::string>;
-    { message.type() } -> std::convertible_to<std::string>;
+    void log_debug(std::string&& text) { log(DebugMessage(std::move(text))); }
+    void log_info(std::string&& text) { log(InfoMessage(std::move(text))); }
+    void log_warning(std::string&& text) { log(WarningMessage(std::move(text))); }
+    void log_error(std::string&& text) { log(ErrorMessage(std::move(text))); }
 };
 
-template <typename T>
-concept ILogger = requires(T logger, std::string&& str) {
-    { logger.log(std::move(str)) } -> std::same_as<void>;
-    // { logger.log(msg) } -> std::same_as<void>;
-
-    { logger.log_debug(std::move(str)) } -> std::same_as<void>;
-    { logger.log_info(std::move(str)) } -> std::same_as<void>;
-    { logger.log_warning(std::move(str)) } -> std::same_as<void>;
-    { logger.log_error(std::move(str)) } -> std::same_as<void>;
+struct DummyLogger : ILogger {
+    void log(std::string&& message) {}
+    void log(const IMessage& message) {}
 };
 
 }  // namespace logger

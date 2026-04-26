@@ -3,11 +3,19 @@
 
 #include <string>
 
-#include "ILogger.hpp"
-
 namespace logger {
 
-struct DebugMessage {
+enum class LogLevel { Debug, Info, Warning, Error };
+
+struct IMessage {
+    std::string text;
+
+    virtual LogLevel log_level() const = 0;
+    virtual std::string what() const = 0;
+    virtual std::string type() const = 0;
+};
+
+struct DebugMessage : public IMessage {
     std::string text;
     DebugMessage(std::string&& text)
         : text(text)
@@ -18,7 +26,7 @@ struct DebugMessage {
     std::string type() const { return "DEBUG"; }
 };
 
-struct InfoMessage {
+struct InfoMessage : public IMessage {
     std::string text;
     InfoMessage(std::string&& text)
         : text(text)
@@ -29,7 +37,7 @@ struct InfoMessage {
     std::string type() const { return "INFO"; }
 };
 
-struct WarningMessage {
+struct WarningMessage : public IMessage {
     std::string text;
     WarningMessage(std::string&& text)
         : text(text)
@@ -40,7 +48,7 @@ struct WarningMessage {
     std::string type() const { return "WARNING"; }
 };
 
-struct ErrorMessage {
+struct ErrorMessage : public IMessage {
     std::string text;
     ErrorMessage(std::string&& text)
         : text(text)
@@ -50,11 +58,6 @@ struct ErrorMessage {
     std::string what() const { return text; }
     std::string type() const { return "ERROR"; }
 };
-
-static_assert(IMessage<DebugMessage>);
-static_assert(IMessage<InfoMessage>);
-static_assert(IMessage<WarningMessage>);
-static_assert(IMessage<ErrorMessage>);
 
 }  // namespace logger
 
