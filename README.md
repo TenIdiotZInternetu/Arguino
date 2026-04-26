@@ -15,7 +15,7 @@
 - `-p | --port <int>` - Port on which to launch TCP server [= `8888`]
 - `--log-simulator <path>` - Path to the log file for simulator events [= `./core.log`]
 - `--log-tcp <path>` - Path to the log file for TCP events" [= `./core_tcp.log`]
-- - `-v | --verbosity <Debug | Info | Warning | Error>` - Verbosity of the log files [= `Info`]
+- `-v | --verbosity <Debug | Info | Warning | Error>` - Verbosity of the log files [= `Info`]
 
 ### Gui
 - `-s | --scene <path>` - Path to the .yaml scene defintion [= `./scene.yaml`]
