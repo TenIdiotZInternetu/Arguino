@@ -11,14 +11,14 @@ void EventQueue::enqueue_local(Event& event)
     _localEvents.push(event);
     _lastLvt = std::max(_lastLvt, event.localVirtualTime);
 
-    Simulator::log("Enqueued local event " + event.to_string());
+    Simulator::log_debug("Enqueued local event " + event.to_string());
 }
 
 void EventQueue::enqueue_remote(Event event)
 {
     _remoteEvents.push(event);
     _lastLvt = std::max(_lastLvt, event.localVirtualTime);
-    Simulator::log("Enqueued remote event " + event.to_string());
+    Simulator::log_debug("Enqueued remote event " + event.to_string());
 }
 
 void EventQueue::execute_next_event()

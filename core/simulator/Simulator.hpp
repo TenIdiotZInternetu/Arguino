@@ -14,7 +14,9 @@ namespace arguino::simulator {
 class Simulator {
    public:
     using event_callback_fnct = std::function<void(const Event&)>;
-    static void init(event_callback_fnct eventCallback);
+    using logger_ptr = std::shared_ptr<logger::ILogger>;
+
+    static void init(event_callback_fnct eventCallback, logger_ptr logger = nullptr);
 
     static ArduinoState& state() { return s_instance->_state; }
     static EventQueue& queue() { return s_instance->_eventQueue; }
@@ -22,31 +24,20 @@ class Simulator {
     static void handle_event(Event event);
     static void handle_events();
 
-    template <logger::ILogger TLogger>
-    static void init_logger(std::shared_ptr<TLogger> loggerPtr);
-    static void log(std::string&& str) { s_instance->f_log(std::move(str)); }
+    static void log_debug(std::string&& str) { s_instance->_logger->log_debug(std::move(str)); }
+    static void log_info(std::string&& str) { s_instance->_logger->log_info(std::move(str)); }
+    static void log_warning(std::string&& str) { s_instance->_logger->log_warning(std::move(str)); }
+    static void log_error(std::string&& str) { s_instance->_logger->log_error(std::move(str)); }
 
    private:
     static Simulator* s_instance;
 
     event_callback_fnct f_eventCallback;
-    std::function<void(std::string&&)> f_log;
+    logger_ptr _logger;
 
     ArduinoState _state;
     EventQueue _eventQueue;
 };
-
-template <logger::ILogger TLogger>
-inline void Simulator::init_logger(std::shared_ptr<TLogger> loggerPtr)
-{
-    s_instance->f_log = [=](std::string&& str) {
-        if (!loggerPtr) {
-            return;
-        }
-
-        loggerPtr->log(std::move(str));
-    };
-}
 
 }  // namespace arguino::simulator
 

@@ -11,7 +11,7 @@ struct IMessage {
     std::string text;
 
     virtual LogLevel log_level() const = 0;
-    virtual std::string what() const = 0;
+    virtual const std::string& what() const = 0;
     virtual std::string type() const = 0;
 };
 
@@ -22,7 +22,7 @@ struct DebugMessage : public IMessage {
     {}
 
     LogLevel log_level() const { return LogLevel::Debug; }
-    std::string what() const { return text; }
+    const std::string& what() const { return text; }
     std::string type() const { return "DEBUG"; }
 };
 
@@ -33,7 +33,7 @@ struct InfoMessage : public IMessage {
     {}
 
     LogLevel log_level() const { return LogLevel::Info; }
-    std::string what() const { return text; }
+    const std::string& what() const { return text; }
     std::string type() const { return "INFO"; }
 };
 
@@ -44,7 +44,7 @@ struct WarningMessage : public IMessage {
     {}
 
     LogLevel log_level() const { return LogLevel::Warning; }
-    std::string what() const { return text; }
+    const std::string& what() const { return text; }
     std::string type() const { return "WARNING"; }
 };
 
@@ -55,7 +55,7 @@ struct ErrorMessage : public IMessage {
     {}
 
     LogLevel log_level() const { return LogLevel::Error; }
-    std::string what() const { return text; }
+    const std::string& what() const { return text; }
     std::string type() const { return "ERROR"; }
 };
 

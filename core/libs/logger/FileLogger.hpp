@@ -19,8 +19,8 @@ class FileLogger : public ILogger {
     using path_t = std::filesystem::path;
     FileLogger(const path_t& filePath);
 
-    void log(const IMessage& message);
-    void log(std::string&& message);
+    void log(const IMessage& message) override;
+    void log(std::string&& message) override;
 
     ~FileLogger();
 

@@ -4,10 +4,13 @@ namespace arguino::simulator {
 
 Simulator* Simulator::s_instance;
 
-void Simulator::init(std::function<void(const Event&)> eventCallback)
+void Simulator::init(std::function<void(const Event&)> eventCallback, logger_ptr logger)
 {
     s_instance = new Simulator();
     s_instance->f_eventCallback = eventCallback;
+    s_instance->_logger = logger == nullptr  //
+        ? std::make_shared<logger::DummyLogger>()
+        : logger;
 }
 
 void Simulator::handle_event(Event event)

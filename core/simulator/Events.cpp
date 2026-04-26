@@ -44,7 +44,7 @@ Event Event::write(pin_t pin, digital_t value)
     Event event(Type::Write, pin, value);
     event.action = [=]() {
         Simulator::state().set_digital(pin, value);
-        Simulator::log(std::format("Written value {} to pin {}", value, pin));
+        Simulator::log_info(std::format("Written value {} to pin {}", value, pin));
     };
 
     event.reverseAction = [=]() { Simulator::state().set_digital(pin, !value); };
@@ -60,7 +60,7 @@ Event Event::set_pinmode(pin_t pin, PinMode mode)
     Event event(Type::PinMode, pin, mode);
     event.action = [=]() {
         Simulator::state().set_pin_mode(pin, mode);
-        Simulator::log(std::format("Set pin mode to {} on pin {}", pinmode_to_str(mode), pin));
+        Simulator::log_info(std::format("Set pin mode to {} on pin {}", pinmode_to_str(mode), pin));
     };
 
     event.reverseAction = [=]() { Simulator::state().set_pin_mode(pin, oppositeMode); };
