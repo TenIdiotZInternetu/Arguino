@@ -12,7 +12,7 @@
 using namespace arguino::simulator;
 
 using logger_t = logger::FileLogger;
-using tcp_server_t = arguino::tcp::TcpServer<logger_t>;
+using tcp_server_t = arguino::tcp::TcpServer;
 
 static const ProgramOptions* _options;
 static std::shared_ptr<logger_t> _tcpLogger;

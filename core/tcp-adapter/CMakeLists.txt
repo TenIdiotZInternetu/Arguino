@@ -6,8 +6,8 @@ if (NOT ${Boost_Found})
 endif()
 
 add_library(arguino.tcp STATIC
-    TcpServer.hpp
-    ConnectionHandler.hpp
+    TcpServer.cpp
+    ConnectionHandler.cpp
 )
 
 target_include_directories(arguino.tcp PUBLIC

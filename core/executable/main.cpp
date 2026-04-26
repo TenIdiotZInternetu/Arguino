@@ -14,12 +14,11 @@ ProgramOptions options;
 
 void run_simulator(simulator_t::event_callback_fnct eventCallback)
 {
-    using state_t = arguino::simulator::Simulator;
-    auto logger = std::make_shared<logger_t>(std::filesystem::absolute(options.SimulatorLogPath));
+    auto logPath = std::filesystem::absolute(options.SimulatorLogPath);
+    auto logger = std::make_shared<logger_t>(logPath);
 
-    state_t::init(eventCallback);
-    state_t::init_logger(logger);
-    state_t::state().init_timer();
+    simulator_t::init(eventCallback, logger);
+    simulator_t::state().init_timer();
 
     setup();
     while (true) {

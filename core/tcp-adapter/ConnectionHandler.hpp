@@ -10,6 +10,7 @@
 #include <boost/asio/read_until.hpp>
 #include <boost/asio/write.hpp>
 #include <condition_variable>
+#include <memory>
 #include <mutex>
 #include <queue>
 
@@ -17,14 +18,13 @@
 
 namespace arguino::tcp {
 
-template <logger::ILogger TLogger>
-class ConnectionHandler : public std::enable_shared_from_this<ConnectionHandler<TLogger>> {
+class ConnectionHandler : public std::enable_shared_from_this<ConnectionHandler> {
    public:
     static constexpr char MESSAGE_DELIMITER = ';';
     static constexpr size_t MAX_QUEUE_SIZE = 100;
 
-    using self_ptr = std::shared_ptr<ConnectionHandler<TLogger>>;
-    using logger_ptr = std::shared_ptr<TLogger>;
+    using self_ptr = std::shared_ptr<ConnectionHandler>;
+    using logger_ptr = std::shared_ptr<logger::ILogger>;
     using message_funct = std::function<void(const std::string&)>;
 
     ConnectionHandler(
@@ -61,115 +61,6 @@ class ConnectionHandler : public std::enable_shared_from_this<ConnectionHandler<
     void write_from_queue();
     void disconnect();
 };
-
-template <logger::ILogger TLogger>
-size_t ConnectionHandler<TLogger>::_nextConnectionId = 1;
-
-template <logger::ILogger TLogger>
-ConnectionHandler<TLogger>::ConnectionHandler(
-    boost::asio::io_context& ioContext, message_funct messageHandler, logger_ptr logger)
-    : _executor(ioContext.get_executor()),
-      _socket(ioContext),
-      _messageHandler(messageHandler),
-      _logger(logger)
-{}
-
-template <logger::ILogger TLogger>
-ConnectionHandler<TLogger>::self_ptr ConnectionHandler<TLogger>::create(
-    boost::asio::io_context& ioContext, message_funct messageHandler, logger_ptr logger)
-{
-    return std::make_shared<ConnectionHandler>(ioContext, messageHandler, logger);
-}
-
-template <logger::ILogger TLogger>
-void ConnectionHandler<TLogger>::handle()
-{
-    _isConnected = true;
-    _connectionId = _nextConnectionId;
-    ++_nextConnectionId;
-
-    boost::asio::async_read_until(                                         //
-        _socket,                                                           //
-        boost::asio::dynamic_buffer(_incomingBuffer),                      //
-        MESSAGE_DELIMITER,                                                 //
-        [me = this->shared_from_this()](auto error, size_t messageSize) {  //
-            if (error == boost::asio::error::eof) {
-                me->disconnect();
-            }
-            else {
-                me->handle_message(error, messageSize);
-                me->handle();
-            }
-        }  //
-    );
-}
-
-template <logger::ILogger TLogger>
-void ConnectionHandler<TLogger>::post_message(const std::string& message)
-{
-    {
-        std::unique_lock lock(_queueMutex);
-        _queueCv.wait(lock, [this]() {  //
-            return _outboxQueue.size() <= MAX_QUEUE_SIZE;
-        });
-
-        _outboxQueue.push(message);
-    }
-
-    boost::asio::post(_executor, [me = this->shared_from_this()] {  //
-        me->write_from_queue();
-    });
-}
-
-template <logger::ILogger TLogger>
-void ConnectionHandler<TLogger>::handle_message(boost::system::error_code error, size_t messageSize)
-{
-    if (error) {
-        _logger->log_error("Error occured while reading from socket: " + error.what());
-        return;
-    }
-
-    if (_incomingBuffer.empty()) return;
-
-    const std::string message = _incomingBuffer.substr(0, messageSize - 1);  // -1 strips delimeter
-    _logger->log_debug("Recieved message: " + message);
-    _messageHandler(message);
-
-    _incomingBuffer.erase(0, messageSize);
-}
-
-template <logger::ILogger TLogger>
-inline void ConnectionHandler<TLogger>::write_from_queue()
-{
-    if (_isWriting) return;
-    if (_outboxQueue.empty()) return;
-
-    _isWriting = true;
-
-    boost::asio::async_write(_socket,
-        boost::asio::buffer(_outboxQueue.front() + ';'),
-        [me = this->shared_from_this()](auto error, size_t bytes_written) {
-            if (error) {
-                me->_logger->log_error("Error occured while writing to socket: " + error.what());
-            }
-            else {
-                me->_logger->log_debug("Sent message: " + me->_outboxQueue.front());
-                me->_outboxQueue.pop();
-                me->_queueCv.notify_one();
-            }
-
-            me->_isWriting = false;
-            me->write_from_queue();
-        }  //
-    );
-}
-
-template <logger::ILogger TLogger>
-inline void ConnectionHandler<TLogger>::disconnect()
-{
-    _isConnected = false;
-    _logger->log_warning("The client has disconnected");
-}
 
 }  // namespace arguino::tcp
 
