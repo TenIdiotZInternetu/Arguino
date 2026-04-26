@@ -36,6 +36,8 @@ std::string encode_event(const Event& event)
             return commonPart + encode_write(event);
         case Event::Type::PinMode:
             return commonPart + encode_pinmode(event);
+        default:
+            return UNKNOWN_EVENT;
     }
 }
 

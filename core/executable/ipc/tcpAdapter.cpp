@@ -24,6 +24,11 @@ static std::unique_ptr<tcp_server_t> _tcpServer;
 static void on_send_event(const Event& event)
 {
     auto message = encode_event(event);
+    if (message == UNKNOWN_EVENT) {
+        _tcpLogger->log("Encountered unknown event type; skipping.");
+        return;
+    }
+
     _tcpLogger->log("Enqueuing message " + message);
     _tcpServer->post_message(message);
 }

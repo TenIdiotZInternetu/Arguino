@@ -62,7 +62,7 @@ Event Event::set_pinmode(pin_t pin, PinMode mode)
     Event event(Type::PinMode, pin, mode);
     event.action = [=]() {
         Simulator::state().set_pin_mode(pin, mode);
-        Simulator::log(std::format("Set pin mode to {} on pin {}", (char)mode, pin));
+        Simulator::log(std::format("Set pin mode to {} on pin {}", pinmode_to_str(mode), pin));
     };
 
     event.reverseAction = [=]() { Simulator::state().set_pin_mode(pin, oppositeMode); };
