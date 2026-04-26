@@ -8,9 +8,9 @@
             "name": "C/C++ Debug (gdb Attach)",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/core/build/executable/arguino",
+            "program": "${workspaceFolder}/backend/build/executable/arguino",
             "MIMode": "gdb",
-            "cwd": "${workspaceFolder}/core",
+            "cwd": "${workspaceFolder}/backend",
             "setupCommands": [
                 {
                     "description": "Enable pretty-printing for gdb",
