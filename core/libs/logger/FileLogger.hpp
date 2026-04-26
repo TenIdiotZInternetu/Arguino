@@ -13,11 +13,13 @@ namespace logger {
 
 class FileLogger : public ILogger {
    public:
-    LogLevel verbosityLevel = LogLevel::Info;
-    std::shared_ptr<Timer> timer;
-
     using path_t = std::filesystem::path;
-    FileLogger(const path_t& filePath);
+    using timer_ptr = std::shared_ptr<Timer>;
+
+    LogLevel verbosityLevel = LogLevel::Info;
+    timer_ptr timer;
+
+    FileLogger(const path_t& filePath, timer_ptr timer = nullptr);
 
     void log(const IMessage& message) override;
     void log(std::string&& message) override;
@@ -27,6 +29,8 @@ class FileLogger : public ILogger {
    private:
     const std::filesystem::path _fileName;
     std::ofstream _file;
+
+    std::string formatted_time();
 };
 
 }  // namespace logger

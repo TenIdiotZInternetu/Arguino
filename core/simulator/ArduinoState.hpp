@@ -27,8 +27,8 @@ class ArduinoState {
     using digital_arr_t = std::array<digital_t, DIGITAL_PIN_COUNT>;
     using pinmode_arr_t = std::array<PinMode, PIN_COUNT>;
 
-    void init_timer() { _timer.step(); }
-    float get_time() { return _timer.deltaTime(); }
+    std::shared_ptr<Timer> init_timer();
+    float get_time() { return _timer->deltaTime(); }
 
     analog_arr_t& get_analog() { return _analogPins; }
     const analog_arr_t& get_analog() const { return _analogPins; }
@@ -47,7 +47,7 @@ class ArduinoState {
 
    private:
     // TODO: Implement changing clock speed. Virtual and Real Clock
-    Timer _timer;
+    std::shared_ptr<Timer> _timer = std::make_shared<Timer>();
 
     analog_arr_t _analogPins = {};
     digital_arr_t _digitalPins = {};

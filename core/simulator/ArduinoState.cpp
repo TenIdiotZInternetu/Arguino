@@ -5,6 +5,12 @@
 #include "ArduinoState.hpp"
 
 namespace arguino::simulator {
+std::shared_ptr<Timer> ArduinoState::init_timer()
+{
+    _timer->step();
+    return _timer;
+}
+
 
 bool ArduinoState::get_digital(pin_t pin) const
 {
@@ -28,4 +34,4 @@ bool ArduinoState::set_pin_mode(pin_t pin, PinMode mode)
     return true;
 }
 
-}
+}  // namespace arguino::simulator

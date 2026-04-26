@@ -18,9 +18,16 @@ void run_simulator(simulator_t::event_callback_fnct eventCallback)
     auto logger = std::make_shared<logger_t>(logPath);
 
     simulator_t::init(eventCallback, logger);
-    simulator_t::state().init_timer();
+    auto timer = simulator_t::state().init_timer();
+
+    logger->timer = timer;
+    logger->verbosityLevel = options.Verbosity;
+
+    logger->log_info("Simulator initialized.");
 
     setup();
+    logger->log_info("setup() finished successfully, starting loop().");
+
     while (true) {
         loop();
     }
