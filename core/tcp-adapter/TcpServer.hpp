@@ -88,16 +88,17 @@ void TcpServer<TLogger>::start_accepting()
         // TODO: Consider multiple clients to be able to connect
         // TODO: Race condition in is_connected()
         // if (is_connected()) {
-        //     _logger->log("Connection denied: Cannot connect to more than one client at a time.");
+        //     _logger->log_error("Connection denied: Cannot connect to more than one client at a
+        //     time.");
         // }
         if (!error) {
-            _logger->log("Connection accepted!");
+            _logger->log_info("Connection accepted!");
             _connectionHandler = newConnection;
             _connectionCv.notify_one();
             _connectionHandler->handle();
         }
         else {
-            _logger->log(message::Error("Error occured while accepting new connection: ", error));
+            _logger->log_error("Error occured while accepting new connection: " + error.what());
         }
         start_accepting();
     });

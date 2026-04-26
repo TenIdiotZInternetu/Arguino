@@ -23,11 +23,11 @@ static void on_send_event(const Event& event)
 {
     auto message = encode_event(event);
     if (message == UNKNOWN_EVENT) {
-        _tcpLogger->log("Encountered unknown event type; skipping.");
+        _tcpLogger->log_error("Encountered unknown event type; skipping.");
         return;
     }
 
-    _tcpLogger->log("Enqueuing message " + message);
+    _tcpLogger->log_debug("Enqueuing message " + message);
     _tcpServer->post_message(message);
 }
 
@@ -38,7 +38,7 @@ static void on_received_tcp_message(const std::string message)
         Simulator::queue().enqueue_remote(event);
     }
     else {
-        _tcpLogger->log("Could not decode event from message " + message);
+        _tcpLogger->log_error("Could not decode event from message " + message);
     }
 }
 
@@ -58,7 +58,7 @@ void setup_simulator_with_ipc(loop_fnct simulatorLoop, const ProgramOptions& opt
 
     std::thread tcp_thread(run_tcp);
 
-    _tcpLogger->log("Tcp Server launched");
+    _tcpLogger->log_info("Tcp Server launched");
 
     simulatorLoop(on_send_event);
     tcp_thread.join();

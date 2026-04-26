@@ -125,14 +125,14 @@ template <logger::ILogger TLogger>
 void ConnectionHandler<TLogger>::handle_message(boost::system::error_code error, size_t messageSize)
 {
     if (error) {
-        _logger->log(message::Error("Error occured while reading from socket: ", error));
+        _logger->log_error("Error occured while reading from socket: " + error.what());
         return;
     }
 
     if (_incomingBuffer.empty()) return;
 
     const std::string message = _incomingBuffer.substr(0, messageSize - 1);  // -1 strips delimeter
-    _logger->log(message::Read(message));
+    _logger->log_debug("Recieved message: " + message);
     _messageHandler(message);
 
     _incomingBuffer.erase(0, messageSize);
@@ -150,10 +150,10 @@ inline void ConnectionHandler<TLogger>::write_from_queue()
         boost::asio::buffer(_outboxQueue.front() + ';'),
         [me = this->shared_from_this()](auto error, size_t bytes_written) {
             if (error) {
-                me->_logger->log(message::Error("Error occured while writing to socket: ", error));
+                me->_logger->log_error("Error occured while writing to socket: " + error.what());
             }
             else {
-                me->_logger->log(message::Write(me->_outboxQueue.front()));
+                me->_logger->log_debug("Sent message: " + me->_outboxQueue.front());
                 me->_outboxQueue.pop();
                 me->_queueCv.notify_one();
             }
@@ -168,7 +168,7 @@ template <logger::ILogger TLogger>
 inline void ConnectionHandler<TLogger>::disconnect()
 {
     _isConnected = false;
-    _logger->log("The client has disconnected");
+    _logger->log_warning("The client has disconnected");
 }
 
 }  // namespace arguino::tcp
