@@ -6,8 +6,6 @@ namespace arguino::simulator {
 
 size_t Event::s_nextEventId = 1;
 
-// TODO: Reset timer for reverse actions
-
 template <typename... Args>
 Event::Event(Type type, Args... arguments)
     : type(type), timestampMicros(Simulator::state().get_time()), _id(s_nextEventId)

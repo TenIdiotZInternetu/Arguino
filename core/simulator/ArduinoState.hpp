@@ -46,7 +46,7 @@ class ArduinoState {
     bool set_pin_mode(pin_t pin, PinMode mode);
 
    private:
-    // TODO: Implement changing clock speed
+    // TODO: Implement changing clock speed. Virtual and Real Clock
     Timer _timer;
 
     analog_arr_t _analogPins = {};

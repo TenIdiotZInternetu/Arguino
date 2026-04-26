@@ -33,7 +33,7 @@ struct Event {
 
     static Event write(pin_t pin, digital_t value);
     static Event set_pinmode(pin_t pin, PinMode mode);
-    // TODO: Jump and reboot events
+    // TODO: Jump, reboot and fetch events
 
    private:
     static size_t s_nextEventId;
