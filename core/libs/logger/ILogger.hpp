@@ -15,9 +15,14 @@ concept IMessage = requires(T message) {
 };
 
 template <typename T>
-concept ILogger = requires(T logger, const std::string& str) {
-    { logger.log(str) } -> std::same_as<void>;
+concept ILogger = requires(T logger, std::string&& str) {
+    { logger.log(std::move(str)) } -> std::same_as<void>;
     // { logger.log(msg) } -> std::same_as<void>;
+
+    { logger.log_debug(std::move(str)) } -> std::same_as<void>;
+    { logger.log_info(std::move(str)) } -> std::same_as<void>;
+    { logger.log_warning(std::move(str)) } -> std::same_as<void>;
+    { logger.log_error(std::move(str)) } -> std::same_as<void>;
 };
 
 }  // namespace logger

@@ -6,6 +6,7 @@
 #include <string>
 
 #include "ILogger.hpp"
+#include "Messages.hpp"
 #include "Timer.hpp"
 
 namespace logger {
@@ -20,7 +21,12 @@ class FileLogger {
 
     template <IMessage TMessage>
     void log(TMessage message);
-    void log(const std::string& message);
+    void log(std::string&& message);
+
+    void log_debug(std::string&& message) { log(DebugMessage(std::move(message))); }
+    void log_info(std::string&& message) { log(InfoMessage(std::move(message))); }
+    void log_warning(std::string&& message) { log(WarningMessage(std::move(message))); }
+    void log_error(std::string&& message) { log(ErrorMessage(std::move(message))); }
 
     ~FileLogger();
 

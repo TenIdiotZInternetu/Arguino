@@ -24,13 +24,13 @@ class Simulator {
 
     template <logger::ILogger TLogger>
     static void init_logger(std::shared_ptr<TLogger> loggerPtr);
-    static void log(const std::string& str) { s_instance->f_log(str); }
+    static void log(std::string&& str) { s_instance->f_log(std::move(str)); }
 
    private:
     static Simulator* s_instance;
 
     event_callback_fnct f_eventCallback;
-    std::function<void(const std::string&)> f_log;
+    std::function<void(std::string&&)> f_log;
 
     ArduinoState _state;
     EventQueue _eventQueue;
@@ -39,12 +39,12 @@ class Simulator {
 template <logger::ILogger TLogger>
 inline void Simulator::init_logger(std::shared_ptr<TLogger> loggerPtr)
 {
-    s_instance->f_log = [=](const std::string& str) {
+    s_instance->f_log = [=](std::string&& str) {
         if (!loggerPtr) {
             return;
         }
 
-        loggerPtr->log(str);
+        loggerPtr->log(std::move(str));
     };
 }
 

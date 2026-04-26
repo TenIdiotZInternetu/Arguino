@@ -12,7 +12,7 @@ logger::FileLogger::FileLogger(const path_t& filePath)
     }
 }
 
-void logger::FileLogger::log(const std::string& message)
+void logger::FileLogger::log(std::string&& message)
 {
     _file << message << std::endl;
 }
