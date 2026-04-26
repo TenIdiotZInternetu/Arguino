@@ -19,7 +19,10 @@
                 }
             ],
             "preLaunchTask": "CMake: build",
-            "args": []
+            "args": [
+                "-v",
+                "Debug"
+            ]
         }
     ]
 }

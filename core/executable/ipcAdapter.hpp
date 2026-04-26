@@ -3,11 +3,15 @@
 
 #include <functional>
 
+#include "Events.hpp"
 #include "Simulator.hpp"
 #include "programOptions.hpp"
 
-using loop_fnct = std::function<void(arguino::simulator::Simulator::event_callback_fnct)>;
+using init_fnct = std::function<void(arguino::simulator::Simulator::event_callback_fnct)>;
+using loop_fnct = std::function<void()>;
 
-void setup_simulator_with_ipc(loop_fnct event_loop, const ProgramOptions& options);
+void run_simulator_with_ipc(loop_fnct loopFunction, const ProgramOptions& options);
+
+void on_event(const arguino::simulator::Event& event);
 
 #endif

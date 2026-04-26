@@ -5,10 +5,9 @@
 #include "ArduinoState.hpp"
 
 namespace arguino::simulator {
-std::shared_ptr<Timer> ArduinoState::init_timer()
+void ArduinoState::init_timer()
 {
-    _timer->step();
-    return _timer;
+    _timer.step();
 }
 
 

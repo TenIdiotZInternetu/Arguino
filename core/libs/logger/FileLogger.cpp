@@ -4,8 +4,8 @@
 
 namespace logger {
 
-FileLogger::FileLogger(const path_t& filePath, timer_ptr timer)
-    : _fileName(filePath), timer(timer)
+FileLogger::FileLogger(const path_t& filePath, timer_fnct timerFunction)
+    : _fileName(filePath), timerFunction(timerFunction)
 {
     _file.open(_fileName);
 
@@ -30,10 +30,10 @@ logger::FileLogger::~FileLogger() {}
 
 std::string FileLogger::formatted_time()
 {
-    if (timer == nullptr) return "";
+    if (timerFunction == nullptr) return "";
 
     // TODO: deltaTime is weird here
-    auto micros = timer->deltaTime();
+    auto micros = timerFunction();
     auto seconds = micros / 1'000'000;
     auto minutes = seconds / 60;
 

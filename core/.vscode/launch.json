@@ -8,7 +8,7 @@
             "name": "C/C++ Debug (gdb Attach)",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/build/executable/arguino",
+            "program": "${workspaceFolder}/build/executable/arguino -v Debug",
             "MIMode": "gdb",
             "cwd": "${workspaceFolder}",
             "setupCommands": [

@@ -21,6 +21,9 @@ class Simulator {
     static ArduinoState& state() { return s_instance->_state; }
     static EventQueue& queue() { return s_instance->_eventQueue; }
 
+    static int64_t simulation_time() { return state().get_time(); }
+    static int64_t real_time() { return s_instance->_timer.deltaTime(); }
+
     static void handle_event(Event event);
     static void handle_events();
 
@@ -37,6 +40,7 @@ class Simulator {
 
     ArduinoState _state;
     EventQueue _eventQueue;
+    Timer _timer;
 };
 
 }  // namespace arguino::simulator

@@ -19,7 +19,7 @@ static std::shared_ptr<logger_t> _tcpLogger;
 static std::unique_ptr<tcp_server_t> _tcpServer;
 
 
-static void on_send_event(const Event& event)
+void on_event(const Event& event)
 {
     auto message = encode_event(event);
     if (message == UNKNOWN_EVENT) {
@@ -47,11 +47,14 @@ static void run_tcp()
     _tcpServer->launch();
 }
 
-void setup_simulator_with_ipc(loop_fnct simulatorLoop, const ProgramOptions& options)
+void run_simulator_with_ipc(loop_fnct loopFunction, const ProgramOptions& options)
 {
     _options = &options;
     auto loggerAbsolutePath = std::filesystem::absolute(_options->TcpLogPath);
     _tcpLogger = std::make_shared<logger_t>(loggerAbsolutePath);
+
+    _tcpLogger->verbosityLevel = options.Verbosity;
+    _tcpLogger->timerFunction = Simulator::real_time;
 
     _tcpServer = std::make_unique<tcp_server_t>(
         _options->TcpPort, on_received_tcp_message, _tcpLogger);
@@ -60,7 +63,7 @@ void setup_simulator_with_ipc(loop_fnct simulatorLoop, const ProgramOptions& opt
 
     _tcpLogger->log_info("Tcp Server launched");
 
-    simulatorLoop(on_send_event);
+    loopFunction();
     tcp_thread.join();
 }
 

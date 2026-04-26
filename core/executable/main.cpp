@@ -8,25 +8,27 @@
 #include "sketch.cpp"
 
 using logger_t = logger::FileLogger;
-using simulator_t = arguino::simulator::Simulator;
+using namespace arguino::simulator;
 
 ProgramOptions options;
 
-void run_simulator(simulator_t::event_callback_fnct eventCallback)
+void init_simulator(Simulator::event_callback_fnct eventCallback)
 {
     auto logPath = std::filesystem::absolute(options.SimulatorLogPath);
     auto logger = std::make_shared<logger_t>(logPath);
 
-    simulator_t::init(eventCallback, logger);
-    auto timer = simulator_t::state().init_timer();
+    Simulator::init(eventCallback, logger);
 
-    logger->timer = timer;
+    logger->timerFunction = Simulator::simulation_time;
     logger->verbosityLevel = options.Verbosity;
+}
 
-    logger->log_info("Simulator initialized.");
-
+void simulator_loop()
+{
+    Simulator::state().init_timer();
+    Simulator::log_info("Simulator initialized.");
     setup();
-    logger->log_info("setup() finished successfully, starting loop().");
+    Simulator::log_info("setup() finished successfully. Running loop().");
 
     while (true) {
         loop();
@@ -36,5 +38,6 @@ void run_simulator(simulator_t::event_callback_fnct eventCallback)
 int main(int argc, char** argv)
 {
     options = parse_arguments(argc, argv);
-    setup_simulator_with_ipc(run_simulator, options);
+    init_simulator(on_event);
+    run_simulator_with_ipc(simulator_loop, options);
 }
