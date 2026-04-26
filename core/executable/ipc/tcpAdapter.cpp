@@ -30,7 +30,6 @@ static void on_send_event(const Event& event)
 
 static void on_received_tcp_message(const std::string message)
 {
-    _tcpLogger->log("Message recieved " + message);
     Event event;
     if (decode_event(message, event)) {
         Simulator::queue().enqueue_remote(event);
