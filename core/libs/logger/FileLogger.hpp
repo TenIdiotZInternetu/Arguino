@@ -6,11 +6,15 @@
 #include <string>
 
 #include "ILogger.hpp"
+#include "Timer.hpp"
 
 namespace logger {
 
 class FileLogger {
    public:
+    LogLevel verbosityLevel = LogLevel::Info;
+    std::shared_ptr<Timer> timer;
+
     using path_t = std::filesystem::path;
     FileLogger(const path_t& filePath);
 
@@ -29,7 +33,10 @@ class FileLogger {
 template <IMessage TMessage>
 inline void FileLogger::log(TMessage message)
 {
-    log('[' + message.type() + "] " + message.what());
+    if (message.log_level() < verbosityLevel) return;
+
+    // TODO: deltaTime is weird here
+    log(std::format("[][{}] {}", timer->deltaTime(), message.type(), message.what()));
 }
 
 }  // namespace logger
