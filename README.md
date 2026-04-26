@@ -23,7 +23,7 @@
 - `--no-tcp` - Skips connection to TCP server at initialization
 - `--log-tcp <path>` - Path to the log file for TCP messages [= `./frontend_tcp.log`]
 - `--log-circuit <path>` - Path to the log file for general circuitry events [= `./frontend.log`]
-- `-v | --verbosity <debug | info | warning | error>` - Verbosity of the log files [= `info`]
+- `-v | --verbosity <Debug | Info | Warning | Error>` - Verbosity of the log files [= `info`]
  
 ## Gui controls
 - `Mouse wheel scroll` - Zoom and unzoom canvas
