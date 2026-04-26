@@ -8,7 +8,7 @@ using namespace arguino::simulator;
 constexpr char PART_DELIMETER = ':';
 constexpr char COMMON_PART_FORMAT[] = "{:012}:{:07}:";
 constexpr char WRITE_FORMAT[] = "W:{:02}:{}";
-constexpr char PINMODE_FORMAT[] = "P:{:02}:{:c}";
+constexpr char PINMODE_FORMAT[] = "P:{:02}:{}";
 
 constexpr int COMMON_PARTS = 3;
 constexpr int MAX_ARGS = 3;

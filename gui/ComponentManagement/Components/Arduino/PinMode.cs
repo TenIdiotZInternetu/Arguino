@@ -1,6 +1,3 @@
 namespace ComponentManagement.Components;
 
-public enum PinMode {
-    In = 'I',
-    Out = 'O'
-}
+public enum PinMode { Out, In }
