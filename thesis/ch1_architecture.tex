@@ -8,24 +8,41 @@ The user must be able to have full control over the frontend user interface at a
 
 Splitting the application into multiple processes is actually a common practice among larger pieces of software. The program of each process can be written in a different programming language, they mark clear separation of concerns and force a solid interface design. Each process is easily swappable for another implementation with the same interface while the other processes are still running. In our case, the GUI process could be replaced by a web client, a CLI client, or an IDE add-on.
 
-However, this practice comes with certain challenges. Processes always run concurrently, so a variety of synchronization techniques must be applied to avoid race conditions. The other question is how will the processes exchange data. Process is a kernel level mechanism, thus approaches to handle the exchange can vary between operating systems. These mechanisms are what is called inter-process communication, or IPC for short.
-
 \section{Inter-process communication}
 
-There are more than a few ways to handle IPC on every OS. The ones that we implemented are TCP stream and memory mapping. These are among the most common approaches available both on Windows and Linux. In either case, we must clearly define what the shared data represent. Although memory mapping has more flexibility than TCP, we stuck to sending discrete text or binary messages over time, to keep the implementation simpler and the two approaches interchangable.
+However, this practice comes with certain challenges. Processes always run concurrently, so a variety of synchronization techniques must be applied to avoid race conditions. Before that we need to determine how will the processes exchange data. Process is a kernel level mechanism, thus approaches to handle the exchange can vary between operating systems. These mechanisms are what is called \textit{Inter-process communication}, or IPC for short.
 
-In the early iterations, the full state of the Arduino was sent over one message. That included the pinout state, pin modes, timer, etc. The state was periodically requested by the client with a 'Read' message without payload. On a change in the frontend, a 'Write' message with the state as payload would be sent to the server and the values of input pins would be overwritten atomically to the backend's internal state. 
+There are more than a few ways to handle IPC on every OS. The ones that we implemented are \textit{TCP stream} and \textit{memory mapping}. These are among the most common approaches available both on Windows and Linux. In either case, we must clearly define what the shared data represent. Although memory mapping has more flexibility than TCP, we stuck to sending discrete text or binary messages of predetermined format over time, to keep the implementation simpler and the two approaches interchangable.
 
-This approach was flawed, but easy to implement and synchronize. The main issue was the frequency of reads. 
+Another question is what will we encode in our message. At first we encoded the full state of the simulated Arduino in \textit{snapshots} but due to its various shortcomings we later switched to sending discrete \textit{events}. So the simulator in the backend and its interpratation in the frontend both operate in terms of events, but TCP and Memory mapping modules only understand the notion of sending and receiving messages with very distinct interfaces. That's why we need to design an adapter in both processes and for both IPC methods that sets up the mechanism and encodes or decodes the passing messages into structured event data the simulation logic understands. The IPC adapter then informs the other systems in it's process any time a new event is received.
 
-\subsection{TCP stream}
-Messages can be sent and received through a stream of data on a TCP connection. TCP is commonly used to send data over a network, meaning backend and frontend processes can run on different machines. But listening to a connection on the same machine works just as well.
+\subsection{Snapshotting}
 
-The backend implements the TCP server, while the frontend implements the client, both connected to the same port.
+In the early iterations, a snapshot of a the Arduino state was sent over one message. That included the pinout state, pin modes, timer, etc. The state was periodically requested by the client with a \textit{Read} message without payload. On a change in the frontend, a \textit{Write} message with the state as payload would be sent to the server and the values of input pins would be overwritten atomically to the backend's internal state. 
 
-\subsection{Memory mapping}
+This approach was easy to implement but flawed. The main issue was the frequency of reads. 
+
 
 \subsection{Events}
+
+Right now synchronization between processes is maintained by recording every significant event produced by either the backend or the frontend, and sending it to the other process. Each process is equipped with an event queue, that consumes the events in order of the least recent to the most recent. Consuming an event means invoking the appropriate function based on the type of the event with arguments stored in the event's signature. 
+
+The Arduino object in the frontend has no logic on its own, so the only consumed events are those produced by the backend. For that reason a simple queue is sufficient, and no further synchronization is necessary. In the backend however, both simulator's and frontend's events are consumed. Sending an event to the frontend and receiving direct consequeunces of the event back can involve a significant time overhead. In the meantime the simulator produces more events that are consumed almost instantaneously. We need to ensure that the events are consumed in a valid order. We also need a robust queue implementation that isn't prone to race conditions.
+
+An event is labeled with two timestamps. Timestamps don't have to be based on a real clock, the only requirement is that it is a non-decreasing sequence of numbers. The first timestamp sent is the simulation time, the time as perceived by the Arduino being simulated. That is time given by a clock that is started right before the \texttt{setup()} is invoked. It can be manipulated by the user by pausing or slowing down. This is to aid the user while analyzing the logs of the simulator.
+
+The other timestamp included is \textit{Local virtual time} (LVT)\footnotemark. Each process holds its own integer value of LVT. This number is increased with newly produced events and events received from the other process. When a decision has to be made on which event to consume next (like in the case of the backend's queue), the event with lower LVT is chosen. The relation $LVT_{1} > LVT_{2}$ means that the event with $LVT_{1}$ happens after the event with $LVT_{2}$. In other words, event 1 is the consequence of the event 2 regardless of the real time passed between the events.
+
+\footnotetext{The terminology and principles are inspired by the \textit{Optimistic synchronization} paradigm in distributed systems. In this paradigm, the events are consumed as fast as possible, and then rolled back once an event with a lower LVT than the ones consumed appears (so called \textit{Time Warp} mechanism). But Time Warp is not viable for simulating code of a high level language like C++ without custom memory management, and in our implementation it isn't even necessary.}
+
+\subsection{TCP stream}
+Messages can be sent and received through a stream of data on a TCP connection. TCP is commonly used to send data over a network, meaning backend and frontend processes can run on different machines. But listening to a connection on the same machine on the same port works just as well. TCP messages are guaranteed to arrive in the same order as they were sent.
+
+The backend implements the TCP server, while the frontend implements the client. The implementations and design considerations behind these are very different based on the language they were written. But in both cases TCP handlers need to run on their own threads, due to how heavyweight they are. There is a buffer to which read bytes are stored from an OS network stream. These are passed as a chunk to a higher level message handler that splits the chunk into individual messages according to predetermined delimeter character. When a message needs to be sent from another thread, it is passed to the message handler where it is posted to the end of a queue and is scheduled to be processed by the OS.
+
+There is a minor limitation of IPC over TCP that makes the debugging experience of the user's code uncomfortable. As we established, hitting a breakpoint will block running threads of the process, including the thread with the TCP handler. When stepping through the lines of the code where events are produced, the TCP thread has to schedule posting of the message with the event, and it takes time for it to be eventually sent. In many cases the TCP thread won't be fast enough to send the message in the time the main thread progresses to the next line where a breakpoint will be hit again. As a result, consequences of the event won't be reflected in the frontend process until another one or more lines have been stepped through. This is the main reason we decided to also implement IPC with memory mapping, even though TCP is fully functional.
+
+\subsection{Memory mapping}
 
 \section{Backend}
 
