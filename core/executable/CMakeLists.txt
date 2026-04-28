@@ -3,7 +3,11 @@ project(arguino.executable)
 find_package(Boost REQUIRED COMPONENTS program_options REQUIRED)
 
 # TCP IMPLEMENTATION
-add_executable(arguino-tcp.exe main.cpp)
+add_executable(arguino-tcp.exe main.cpp
+    ipc/tcpAdapter.cpp
+    encoders/textEncoder.cpp
+)
+
 target_compile_definitions(arguino-tcp.exe PRIVATE ARGUINO_TCP)
 target_link_libraries(arguino-tcp.exe PRIVATE
     arguino.simulator
@@ -12,7 +16,10 @@ target_link_libraries(arguino-tcp.exe PRIVATE
 )
 
 # SHARED MEMORY IMPLEMENTATION
-add_executable(arguino-shared-memory.exe main.cpp)
+add_executable(arguino-shared-memory.exe main.cpp
+    encoders/textEncoder.cpp
+)
+
 target_compile_definitions(arguino-shared-memory.exe PRIVATE ARGUINO_SHARED_MEMORY)
 target_link_libraries(arguino-shared-memory.exe PRIVATE
     arguino.simulator

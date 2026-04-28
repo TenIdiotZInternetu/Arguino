@@ -9,6 +9,8 @@
 
 namespace arguino::tcp::message {
 
+// TODO Remove this
+
 class Read {
    public:
     Read(const std::string& readData)
@@ -16,7 +18,7 @@ class Read {
     {}
 
     std::string type() { return "TCP:READ"; }
-    std::string what() { return std::format("Read data '{}' from simulator", _data); }
+    std::string what() { return std::format("Message received: {}", _data); }
 
    private:
     std::string _data;
@@ -29,7 +31,7 @@ class Write {
     {}
 
     std::string type() { return "TCP:WRITE"; }
-    std::string what() { return std::format("Written data '{}' to simulator", _data); }
+    std::string what() { return std::format("Message sent: {}", _data); }
 
    private:
     std::string _data;

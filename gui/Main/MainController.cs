@@ -10,6 +10,8 @@ using ComponentManagement.Loaders;
 using ComponentManagement.Scenes;
 using Gui.ViewModels;
 using Gui.Views;
+using IpcAdapter;
+using IpcAdapter.Encoders;
 using Logger;
 using TcpAdapter;
 
@@ -19,7 +21,7 @@ public static class MainController {
     public static CommandLineArguments Arguments { get; private set; } = null!;
     public static MainWindow MainWindow { get; private set; } = null!;
     public static Scene Scene { get; private set; } = null!;
-    public static MessageHandler Adapter { get; private set; } = null!;
+    public static TcpMessageHandler Adapter { get; private set; } = null!;
     public static Stopwatch GlobalTimer { get; private set; } = null!;
     
     public static ILogger Logger { get; private set; } = null!;
@@ -42,19 +44,20 @@ public static class MainController {
         Arguments = Parser.Default.ParseArguments<CommandLineArguments>(desktop.Args).Value;
         GlobalTimer = Stopwatch.StartNew();
         InitLogger();
-        Logger.Log(new InfoMessage("Starting App initialization."));
+        Logger.LogInfo("Starting App initialization.");
 
         InitScene();
         InitArduino();
         
         _isInitialized = true;
         AppInitializedEvent?.Invoke();
-        Logger.Log(new InfoMessage("App initialization complete."));
+        Logger.LogInfo("App initialization complete.");
     }
 
     private static void InitLogger() {
         var fileLogger = new FileLogger(Arguments.CircuitLogFile);
         fileLogger.Timer = GlobalTimer;
+        fileLogger.Verbosity = Arguments.Verbosity;
         Logger = new CompositeLogger(fileLogger);
         ComponentManager.Logger = Logger;
     }
@@ -82,21 +85,23 @@ public static class MainController {
             arduino = Scene.ComponentsMap.First(c => c.Value.TypeName == nameof(Arduino)).Value as Arduino;
         }
         catch (InvalidOperationException) {
-            Logger.Log(new WarningMessage("Arduino not found in the scene. Skipping TCP initialization."));
+            Logger.LogWarning("Arduino not found in the scene. Skipping IPC initialization.");
             return;
         }
 
         if (Arguments.NoTcp) {
-            Logger.Log(new InfoMessage("--no-tcp flag is set. Skipping TCP initialization."));
+            Logger.LogInfo("--no-tcp flag is set. Skipping TCP initialization.");
             return;
         }
         
-        var fileLogger = new FileLogger(Arguments.TcpLogFile);
+        var fileLogger = new FileLogger(Arguments.TcpLogFile, Arguments.Verbosity);
         fileLogger.Timer = GlobalTimer;
-
-        var tcpClient = new TcpClient(Arguments.TcpPort)
-            .SetLogger(new CompositeLogger(fileLogger));
+        var logger = new CompositeLogger(fileLogger);
         
-        arduino?.ConnectToSimulator(tcpClient);
+        var tcpClient = new TcpClient(Arguments.TcpPort);
+        IEncoder encoder = new TextEncoder();
+        IIpcAdapter ipc = new TcpMessageHandler(tcpClient, encoder, logger);
+
+        arduino?.ConnectToSimulator(ipc);
     }
 }

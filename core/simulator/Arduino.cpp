@@ -5,36 +5,46 @@
 #ifndef ARGUINO_ARDUINO_HPP
 #define ARGUINO_ARDUINO_HPP
 
-#include "ArduinoState.hpp"
+#include "Events.hpp"
+#include "Simulator.hpp"
 
 // Arduino.h must be the last included header because it defines macros like INPUT and OUTPUT that
 // spoil windows.h
 
 #include "Arduino.h"
 
+using namespace arguino::simulator;
+
 void digitalWrite(uint8_t pin, uint8_t val)
 {
-    CanonicalState::state().set_digital(pin, val == HIGH);
-    // CanonicalState::log("Writing stuff");
+    if (Simulator::state().get_digital(pin) == val) return;
+
+    Simulator::handle_event(            //
+        Event::write(pin, val == HIGH)  //
+    );
 }
 
 int digitalRead(uint8_t pin)
 {
-    return CanonicalState::state().get_digital(pin);
+    // TODO: Create a synchronization barrier before read.
+    // This is the only reasonable place where can the code branch.
+    // Implement confirmation event produced by remote process, that will unblock this call.
+    Simulator::handle_events();
+    return Simulator::state().get_digital(pin);
 }
 
 unsigned long millis()
 {
-    return std::floor(CanonicalState::state().get_time() / 1000);
+    return std::floor(Simulator::state().get_time() / 1000);
 }
 
 void pinMode(uint8_t pin, uint8_t mode)
 {
-    if (mode == OUTPUT) {
-        CanonicalState::state().set_pin_mode(pin, PinMode::Out);
-    }
-    if (mode == INPUT) {
-        CanonicalState::state().set_pin_mode(pin, PinMode::In);
-    }
+    PinMode pinMode = mode == OUTPUT ? PinMode::Out : PinMode::In;
+    if (Simulator::state().get_pin_mode(pin) == pinMode) return;
+
+    Simulator::handle_event(              //
+        Event::set_pinmode(pin, pinMode)  //
+    );
 }
 #endif  // ARGUINO_ARDUINO_HPP

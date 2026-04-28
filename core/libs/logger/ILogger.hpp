@@ -5,6 +5,8 @@
 
 namespace logger {
 
+// TODO: Better logging, this is annoying
+
 template <typename T>
 concept IMessage = requires(T message) {
     { message.what() } -> std::convertible_to<std::string>;

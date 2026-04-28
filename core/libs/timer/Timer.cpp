@@ -4,37 +4,45 @@
 
 #include "Timer.hpp"
 
-inline void Timer::update() {
+inline void Timer::update()
+{
     currentTime_ = clock_t::now();
 }
 
-void Timer::step() {
+void Timer::step()
+{
     currentTime_ = clock_t::now();
     lastStep_ = currentTime_;
 }
 
-void Timer::wait(float time) {
+void Timer::wait(float time)
+{
     step();
-    while (!timePassed(time)) {}
+    while (!timePassed(time)) {
+    }
 }
 
-bool Timer::timePassed() {
+bool Timer::timePassed()
+{
     if (deltaTime() < cycleDuration_) return false;
 
     step();
     return true;
 }
 
-bool Timer::timePassed(float time) {
+bool Timer::timePassed(float time)
+{
     return deltaTime() >= time;
 }
 
-float Timer::deltaTime() {
+int64_t Timer::deltaTime()
+{
     update();
     return std::chrono::duration_cast<duration_t>(currentTime_ - lastStep_).count();
 }
 
-float Timer::lifetime() {
+int64_t Timer::lifetime()
+{
     update();
     return std::chrono::duration_cast<duration_t>(currentTime_ - startTime_).count();
 }

@@ -4,17 +4,19 @@ namespace Logger;
 
 public class FileLogger : ILogger, IDisposable {
     private const float FLUSH_INTERVAL = 2f;
-    
+
+    public LogLevel Verbosity { get; set; }
     public Stopwatch? Timer { get; set; }
     
     StreamWriter _writer;
     PeriodicTimer _flushTimer;
     Task _flushTask;
     
-    public FileLogger(string path) {
+    public FileLogger(string path, LogLevel verbosity = LogLevel.Info) {
         _writer = new StreamWriter(path);
         _flushTimer = new PeriodicTimer(TimeSpan.FromSeconds(FLUSH_INTERVAL));
         _flushTask = BackgroundFlushAsync();
+        Verbosity = verbosity;
     }
     
     public void Log(string message) {
@@ -22,6 +24,8 @@ public class FileLogger : ILogger, IDisposable {
     }
     
     public void Log(IMessage message) {
+        if (message.LogLevel < Verbosity) return;
+        
         _writer.WriteLine($"{GetTimestamp()}[{message.Type()}] {message.AsString()}");
     }
 

@@ -1,4 +1,5 @@
 using CommandLine;
+using Logger;
 
 namespace Gui;
 
@@ -6,7 +7,8 @@ public class CommandLineArguments {
     [Option('s', "scene", Default = "./scene.yaml", HelpText = "Path to the .yaml scene defintion")]
     public string ScenePath { get; set; } = "./scene.yaml";
 
-    [Option('c', "components", Default = "./ComponentManagement/Components", HelpText = "Path to the directory of components definitions")]
+    [Option('c', "components", Default = "./ComponentManagement/Components",
+        HelpText = "Path to the directory of components definitions")]
     public string ComponentsPath { get; set; } = "./ComponentManagement/Components";
 
     [Option('p', "--port", Default = 8888, HelpText = "Port of the core's TCP server")]
@@ -14,11 +16,13 @@ public class CommandLineArguments {
 
     [Option("no-tcp", Default = false, HelpText = "Turn off connection to TCP server at initialization")]
     public bool NoTcp { get; set; }
-    
+
     [Option("log-tcp", Default = "./frontend_tcp.log", HelpText = "Path to the log file for TCP messages")]
-    public string TcpLogFile { get; set; } =  "./frontend_tcp.log";
-    
+    public string TcpLogFile { get; set; } = "./frontend_tcp.log";
+
     [Option("log-circuit", Default = "./frontend.log", HelpText = "Path to the log file for general circuitry events")]
-    public string CircuitLogFile { get; set; } =  "./frontend.log";
+    public string CircuitLogFile { get; set; } = "./frontend.log";
+
+    [Option('v', "verbosity", Default = LogLevel.Info, HelpText = "Verbosity of the log files")]
+    public LogLevel Verbosity { get; set; } = LogLevel.Info;
 }
-        

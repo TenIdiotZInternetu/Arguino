@@ -8,113 +8,117 @@ using Logger;
 namespace TcpAdapter;
 
 public class TcpClient {
-    public MessageHandler Handler { get; init; }
+    private const int RECONNECT_DELAY = 3000;
     
-    public bool Connected => _client.Connected;
+    public bool Connected => _client?.Connected ?? false;
     public readonly IPEndPoint Endpoint;
     
     private const string LOCAL_HOST = "127.0.0.1";
-    private const uint BUFFER_SIZE = 256;
+    private const uint BUFFER_SIZE = 4096;
     
-    private readonly System.Net.Sockets.TcpClient _client = new();
+    private System.Net.Sockets.TcpClient? _client = new();
     private NetworkStream? _stream = null;
     private byte[] _buffer = new byte[BUFFER_SIZE];
     private Channel<string> _sendQueue = Channel.CreateUnbounded<string>();
     
-    private CancellationTokenSource _cts = new();
+    private CancellationTokenSource _cts;
+
+    public event Action<string> ReadBytesEvent;
 
     private ILogger? _logger;
 
     public TcpClient(int port) {
         Endpoint = new IPEndPoint(IPAddress.Parse(LOCAL_HOST), port);
-        Handler = new MessageHandler(this);
     }
 
     public TcpClient(string ip, int port) {
         Endpoint = new IPEndPoint(IPAddress.Parse(ip), port);
-        Handler = new MessageHandler(this);
     }
 
     public async Task ConnectAsync() {
+        while (!await TryConnectAsync()) {
+            await Task.Delay(RECONNECT_DELAY);
+        }
+    }
+
+    public async Task<bool> TryConnectAsync() {
         try {
+            _cts = new();
+            _client = new System.Net.Sockets.TcpClient();
             await _client.ConnectAsync(Endpoint);
             _stream = _client.GetStream();
-        }
-        catch (Exception e) {
-            _logger?.Log(new ErrorMessage($"Error while connecting to server: {e.Message}"));
-            return;
-        }
-
-        _logger?.Log(new InfoMessage("Connected to server."));
-
-        try {
+            _logger?.LogInfo($"Connected to server at {Endpoint}.");
+            
             _ = Task.Run(LoopReadAsync);
-            _logger?.Log(new InfoMessage("Reading loop began."));
-        }
-        catch (Exception e) {
-            _logger?.Log(new ErrorMessage($"Error while processing Read loop: {e.Message}"));
-        }
-
-        try {
+            _logger?.LogInfo("Reading loop initiated.");
+            
             _ = Task.Run(LoopWriteAsync);
-            _logger?.Log(new InfoMessage("Writing loop began."));
+            _logger?.LogInfo("Writing loop initiated.");
         }
         catch (Exception e) {
-            _logger?.Log(new ErrorMessage($"Error while processing Write loop: {e.Message}"));
+            _logger?.LogError($"Failed to initiate TCP Client: {e.Message}");
+            return false;
         }
+        
+        _logger?.LogInfo("TCP Client successfully initiated.");
+        return true;
+    }
+
+    public void Disconnect() {
+        _cts.Cancel();
+        _stream?.Dispose();
+        _client?.Close();
+        _logger?.LogWarning("Server disconnected.");
+    }
+
+    public void Reconnect() {
+        Disconnect();
+        _logger?.LogInfo($"Attempting to reconnect at {Endpoint}.");
+        Task.Run(ConnectAsync);
     }
 
     public async Task SendMessageAsync(string message) {
         await _sendQueue.Writer.WriteAsync(message);
     }
 
-    public TcpClient SetLogger(ILogger logger) {
+    public TcpClient SetLogger(ILogger? logger) {
         _logger = logger;
-        Handler.SetLogger(logger);
         return this;
     }
 
     private async Task LoopReadAsync() {
-        StringBuilder chunkBuilder = new();
-        StringBuilder messageBuilder = new();
-        List<string> messages = new();
-
-        while (!_cts.IsCancellationRequested) {
-            int bytesRead = await _stream!.ReadAsync(_buffer,  0, _buffer.Length, _cts.Token);
-            if (bytesRead == 0) break; // Disconnected
-            
-            _logger?.Log(new DebugMessage($"Reading {bytesRead} bytes..."));
-            
-            var chunk = Encoding.UTF8.GetString(_buffer, 0, bytesRead);
-            chunkBuilder.Append(chunk);
-            messageBuilder.Clear();
-
-            foreach (char c in chunkBuilder.ToString()) {
-                if (c == Handler.Delimeter) {
-                    messages.Add(messageBuilder.ToString());
-                    chunkBuilder.Remove(0, messageBuilder.Length + 1);
-                    messageBuilder.Clear();
+        try {
+            while (!_cts.IsCancellationRequested) {
+                int bytesRead = await _stream!.ReadAsync(_buffer, 0, _buffer.Length, _cts.Token);
+                if (bytesRead == 0) {
+                    // Disconnected
+                    Reconnect();
+                    return;
                 }
-                else {
-                    messageBuilder.Append(c);
-                }
-            }
 
-            foreach (var message in messages) {
-                Handler.OnReadMessage(message);
+                _logger?.LogDebug($"Reading {bytesRead} bytes...");
+
+                var byteChunk = Encoding.UTF8.GetString(_buffer, 0, bytesRead);
+                ReadBytesEvent?.Invoke(byteChunk);
             }
-            
-            messages.Clear();
+        }
+        catch (Exception e) {
+            _logger?.LogError($"TCP Reading loop failed: {e.Message}");
         }
     }
 
     private async Task LoopWriteAsync() {
-        while (await _sendQueue.Reader.WaitToReadAsync()) {
-            while (_sendQueue.Reader.TryRead(out var message)) {
-                var data = Encoding.UTF8.GetBytes(message + Handler.Delimeter);
-                await _stream!.WriteAsync(data, 0, data.Length);
-                _logger?.Log(new DebugMessage($"Sent {data.Length} bytes..."));
+        try {
+            while (await _sendQueue.Reader.WaitToReadAsync()) {
+                while (_sendQueue.Reader.TryRead(out var message)) {
+                    var data = Encoding.UTF8.GetBytes(message);
+                    await _stream!.WriteAsync(data, 0, data.Length);
+                    _logger?.LogDebug($"Sent {data.Length} bytes...");
+                }
             }
+        }
+        catch (Exception e) {
+            _logger?.LogError($"TCP Writing loop failed: {e.Message}");
         }
     }
 }
