@@ -16,16 +16,20 @@ There are more than a few ways to handle IPC on every OS. The ones that we imple
 
 In the early iterations, the full state of the Arduino was sent over one message. That included the pinout state, pin modes, timer, etc. The state was periodically requested by the client with a 'Read' message without payload. On a change in the frontend, a 'Write' message with the state as payload would be sent to the server and the values of input pins would be overwritten atomically to the backend's internal state. 
 
-This approach was flawed, but easy to implement and synchronize. The main issue was the frequency of reads. 
+This approach was flawed, but easy to implement and synchronize. The main issue was the frequency of reads. At lower frequencies, the system is prone to temporal aliasing. \xxx{Find temporal aliasing definition}. Some events, like very short impulses, can be missed completely. This is not much of an issue in purely combinational circuits. But we want our frontend to support stateful components, e.g. shift registers present on the Funshield, which are controlled by digital writes less than a microsecond a part.
+
+Highering the frequency to such an extent is not viable. 
+
+\subsection{Events}
+
 
 \subsection{TCP stream}
 Messages can be sent and received through a stream of data on a TCP connection. TCP is commonly used to send data over a network, meaning backend and frontend processes can run on different machines. But listening to a connection on the same machine works just as well.
 
-The backend implements the TCP server, while the frontend implements the client, both connected to the same port.
+The backend implements the TCP server, while the frontend implements the client, both connected to the same port. 
 
 \subsection{Memory mapping}
 
-\subsection{Events}
 
 \section{Backend}
 
