@@ -1,19 +1,23 @@
-#include <ipcAdapter.hpp>
-#include <shared-memory-adapter/IpcHandler.hpp>
+#include "../ipcAdapter.hpp"
+#include "IpcHandler.hpp"
 
-void setup_shared_memory()
+using namespace arguino::shmem;
+
+IpcHandler _shmem;
+
+void run_simulator_with_ipc(loop_fnct loopFunction, const ProgramOptions& options)
 {
-    arguino::shmem::IpcHandler shmem(options.ShmemName, options.ShmemSizePages);
-
-    shmem.write(std::vector<uint32_t>{7, 2, 7});
-
-    for (uint64_t i = 0; i < 1024; ++i) {
-        shmem.write(i);
-    }
-
-    std::cout << "INitneded" << std::endl;
+    _shmem = IpcHandler(options.ShmemName, options.ShmemSizePages);
+    loopFunction();
 }
 
-void run_simulator_with_ipc(loop_fnct loopFunction, const ProgramOptions& options) {}
+void on_event(const Event& event)
+{
+    auto message = encode_event(event);
+    if (message == UNKNOWN_EVENT) {
+        _tcpLogger->log_error("Encountered unknown event type; skipping.");
+        return;
+    }
 
-void on_event(const arguino::simulator::Event& event) {}
+    _tcpServer->post_message(message);
+}

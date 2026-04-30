@@ -16,6 +16,5 @@ target_include_directories(arguino.shmem PUBLIC
 )
 
 target_link_libraries(arguino.shmem PUBLIC
-    arguino.simulator
     logger
 )

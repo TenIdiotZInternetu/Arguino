@@ -1,9 +1,9 @@
 #ifndef ARGUINO_PROGRAMOPTIONS_HPP
 #define ARGUINO_PROGRAMOPTIONS_HPP
 
+#include <Messages.hpp>
 #include <boost/program_options.hpp>
 #include <iostream>
-#include <logger/Messages.hpp>
 
 namespace po = boost::program_options;
 

@@ -2,8 +2,8 @@ project(logger)
 
 add_library(logger STATIC
         ILogger.hpp
-        FileLogger.hpp
         FileLogger.cpp
+        Messages.hpp
 )
 
 target_include_directories(logger PUBLIC

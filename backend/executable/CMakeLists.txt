@@ -17,6 +17,7 @@ target_link_libraries(arguino-tcp.exe PRIVATE
 
 # SHARED MEMORY IMPLEMENTATION
 add_executable(arguino-shared-memory.exe main.cpp
+    ipc/shmemAdapter.cpp
     encoders/textEncoder.cpp
 )
 
@@ -28,6 +29,6 @@ target_link_libraries(arguino-shared-memory.exe PRIVATE
 )
 
 # DEFAULT EXE
-set(DEFAULT_IMPL arguino-tcp.exe)
+set(DEFAULT_IMPL arguino-shared-memory.exe)
 set_target_properties(${DEFAULT_IMPL} PROPERTIES OUTPUT_NAME arguino)
 add_executable(arguino ALIAS ${DEFAULT_IMPL})
