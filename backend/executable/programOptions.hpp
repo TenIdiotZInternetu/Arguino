@@ -61,7 +61,7 @@ static po::options_description create_shmem_options()
             po::value<std::string>()->default_value("Arguino-ipc"),                 //
             "Name of the shared memory segment")                                    //
         ("shmem-size,s",                                                            //
-            po::value<int>()->default_value(1024),                                  //
+            po::value<int>()->default_value(1),                                     //
             "Size of each of the write and read shared memory segments in pages");  //
 
     return description;

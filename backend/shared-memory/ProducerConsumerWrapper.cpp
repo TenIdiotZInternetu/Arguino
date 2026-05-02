@@ -11,10 +11,10 @@ ProducerConsumerWrapper::ProducerConsumerWrapper(const std::string& shmemName, s
       _pages(sizeInPages),                                               //
       _shmemObject(ipc::open_or_create, _name.c_str(), ipc::read_write)  //
 {
-    size_t shmem_size = _pages * ipc::mapped_region::get_page_size();
+    size_t shmem_size = 2 * _pages * ipc::mapped_region::get_page_size();
     _shmemObject.truncate(shmem_size);
-    _producer = CircularBuffer(_shmemObject, 0, size());
-    _consumer = CircularBuffer(_shmemObject, 0, size());
+    _producer = CircularBuffer(_shmemObject, 0, shmem_size / 2);
+    _consumer = CircularBuffer(_shmemObject, shmem_size / 2, shmem_size / 2);
 }
 
 ProducerConsumerWrapper::~ProducerConsumerWrapper()
