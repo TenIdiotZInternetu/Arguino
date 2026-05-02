@@ -1,15 +1,15 @@
 #include "../encoder.hpp"
 #include "../ipcAdapter.hpp"
-#include "IpcHandler.hpp"
+#include "ProducerConsumerWrapper.hpp"
 
 using namespace arguino::shmem;
 using namespace arguino::simulator;
 
-IpcHandler* _shmem;
+ProducerConsumerWrapper* _shmem;
 
 void run_simulator_with_ipc(loop_fnct loopFunction, const ProgramOptions& options)
 {
-    _shmem = new IpcHandler(options.ShmemName, options.ShmemSizePages);
+    _shmem = new ProducerConsumerWrapper(options.ShmemName, options.ShmemSizePages);
     loopFunction();
 }
 

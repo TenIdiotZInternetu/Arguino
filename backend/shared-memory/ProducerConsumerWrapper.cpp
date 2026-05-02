@@ -1,4 +1,4 @@
-#include "IpcHandler.hpp"
+#include "ProducerConsumerWrapper.hpp"
 
 #include "MemoryRegion.hpp"
 
@@ -6,7 +6,7 @@ namespace ipc = boost::interprocess;
 
 namespace arguino::shmem {
 
-IpcHandler::IpcHandler(const std::string& shmemName, size_t sizeInPages)
+ProducerConsumerWrapper::ProducerConsumerWrapper(const std::string& shmemName, size_t sizeInPages)
     : _name(shmemName),                                                  //
       _pages(sizeInPages),                                               //
       _shmemObject(ipc::open_or_create, _name.c_str(), ipc::read_write)  //
@@ -17,12 +17,12 @@ IpcHandler::IpcHandler(const std::string& shmemName, size_t sizeInPages)
     _consumer = CircularBuffer(_shmemObject, 0, size());
 }
 
-IpcHandler::~IpcHandler()
+ProducerConsumerWrapper::~ProducerConsumerWrapper()
 {
     ipc::shared_memory_object::remove(_name.c_str());
 }
 
-size_t IpcHandler::size()
+size_t ProducerConsumerWrapper::size()
 {
     ipc::offset_t size;
     _shmemObject.get_size(size);

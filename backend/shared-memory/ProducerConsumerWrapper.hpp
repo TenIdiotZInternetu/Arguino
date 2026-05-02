@@ -13,12 +13,12 @@
 
 namespace arguino::shmem {
 
-class IpcHandler {
+class ProducerConsumerWrapper {
    public:
     using shmem_t = boost::interprocess::shared_memory_object;
 
-    IpcHandler(const std::string& shmemName, size_t sizeInPages);
-    ~IpcHandler();
+    ProducerConsumerWrapper(const std::string& shmemName, size_t sizeInPages);
+    ~ProducerConsumerWrapper();
 
     template <typename T>
     void write(const T& data);
@@ -37,7 +37,7 @@ class IpcHandler {
 
 
 template <typename T>
-inline void IpcHandler::write(const T& data)
+inline void ProducerConsumerWrapper::write(const T& data)
 {
     if (!_producer.write(data)) {
         std::cout << "Not enough space" << std::endl;
