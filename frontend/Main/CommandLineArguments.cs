@@ -3,22 +3,29 @@ using Logger;
 
 namespace Gui;
 
+public enum IpcType { None, Tcp, Shmem }
+
 public class CommandLineArguments {
     [Option('s', "scene", Default = "./scene.yaml", HelpText = "Path to the .yaml scene defintion")]
     public string ScenePath { get; set; } = "./scene.yaml";
 
-    [Option('c', "components", Default = "./ComponentManagement/Components",
-        HelpText = "Path to the directory of components definitions")]
+    [Option('c', "components", Default = "./ComponentManagement/Components", HelpText = "Path to the directory of components definitions")]
     public string ComponentsPath { get; set; } = "./ComponentManagement/Components";
 
-    [Option('p', "--port", Default = 8888, HelpText = "Port of the core's TCP server")]
+    [Option('i', "ipc", Default = IpcType.None, HelpText = "Which interprocess communication technology should be used")]
+    public IpcType IpcType { get; set; } = IpcType.None;
+    
+    [Option('p', "port", Default = 8888, HelpText = "Port of the core's TCP server (ipc=Tcp only)")]
     public int TcpPort { get; set; }
+    
+    [Option("shmem-name", Default = "", HelpText = "Named of the memory mapped file (ipc=Shmem only)")]
+    public string ShmemName { get; set; }
 
-    [Option("no-tcp", Default = false, HelpText = "Turn off connection to TCP server at initialization")]
-    public bool NoTcp { get; set; }
+    [Option("shmem-size", Default = 1, HelpText = "Size of the memory mapped region per buffer in pages (ipc=Shmem only)")]
+    public int ShmemSize { get; set; } = 1;
 
-    [Option("log-tcp", Default = "./frontend_tcp.log", HelpText = "Path to the log file for TCP messages")]
-    public string TcpLogFile { get; set; } = "./frontend_tcp.log";
+    [Option("log-ipc", Default = "./frontend_tcp.log", HelpText = "Path to the log file for interprocess messages")]
+    public string IpcLogFile { get; set; } = "./frontend_ipc.log";
 
     [Option("log-circuit", Default = "./frontend.log", HelpText = "Path to the log file for general circuitry events")]
     public string CircuitLogFile { get; set; } = "./frontend.log";

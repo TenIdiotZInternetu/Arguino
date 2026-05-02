@@ -14,6 +14,7 @@ using Gui.Views;
 using IpcAdapter;
 using IpcAdapter.Encoders;
 using Logger;
+using SharedMemoryAdapter;
 using TcpAdapter;
 
 namespace Gui;
@@ -47,31 +48,12 @@ public static class MainController {
         InitLogger();
         Logger.LogInfo("Starting App initialization.");
 
-        TestShmem();
         InitScene();
         InitArduino();
         
         _isInitialized = true;
         AppInitializedEvent?.Invoke();
         Logger.LogInfo("App initialization complete.");
-    }
-
-    private static void TestShmem() {
-        using var shmem = MemoryMappedFile.CreateFromFile("/dev/shm/MyMem");
-        int shmemSize = 2 * Environment.SystemPageSize;
-        using var reader = shmem.CreateViewAccessor(0, shmemSize / 2);
-        using var writer = shmem.CreateViewAccessor(shmemSize / 2, shmemSize / 2);
-        
-        Console.WriteLine("Reading memory...");
-        for (int i = 0; i < 20; i++) {
-            reader.Read(i, out byte a);
-            Console.WriteLine(a);
-        }
-        
-        Console.WriteLine("Writing memory...");
-        for (int i = 0; i < 10; i++) {
-            writer.Write(i, (byte)(0x60 + i));
-        }
     }
 
     private static void InitLogger() {
@@ -100,28 +82,36 @@ public static class MainController {
     private static void InitArduino() {
         Arduino? arduino;
         
+        if (Arguments.IpcType == IpcType.None) {
+            Logger.LogInfo("IPC type not specified. Skipping connection to simulator..");
+            return;
+        }
+        
         try {
             // TODO: This is probably a stupid way to do this
             arduino = Scene.ComponentsMap.First(c => c.Value.TypeName == nameof(Arduino)).Value as Arduino;
         }
         catch (InvalidOperationException) {
-            Logger.LogWarning("Arduino not found in the scene. Skipping IPC initialization.");
+            Logger.LogWarning("Arduino not found in the scene. Skipping connection to simulator.");
             return;
         }
 
-        if (Arguments.NoTcp) {
-            Logger.LogInfo("--no-tcp flag is set. Skipping TCP initialization.");
-            return;
-        }
         
-        var fileLogger = new FileLogger(Arguments.TcpLogFile, Arguments.Verbosity);
+        var fileLogger = new FileLogger(Arguments.IpcLogFile, Arguments.Verbosity);
         fileLogger.Timer = GlobalTimer;
         var logger = new CompositeLogger(fileLogger);
         
-        var tcpClient = new TcpClient(Arguments.TcpPort);
         IEncoder encoder = new TextEncoder();
-        IIpcAdapter ipc = new TcpMessageHandler(tcpClient, encoder, logger);
+        IIpcAdapter? ipc = null;
 
-        arduino?.ConnectToSimulator(ipc);
+        if (Arguments.IpcType == IpcType.Tcp) {
+            var tcpClient = new TcpClient(Arguments.TcpPort);
+            ipc = new TcpMessageHandler(tcpClient, encoder, logger);
+        }
+        if (Arguments.IpcType == IpcType.Shmem) {
+            ipc = new TwoWayBuffer(Arguments.ShmemName, Arguments.ShmemSize, encoder, logger);
+        }
+
+        arduino?.ConnectToSimulator(ipc!);
     }
 }

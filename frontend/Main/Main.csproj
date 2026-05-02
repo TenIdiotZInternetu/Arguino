@@ -37,6 +37,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\ComponentManagement\ComponentManagement.csproj" />
+      <ProjectReference Include="..\SharedMemoryAdapter\SharedMemoryAdapter.csproj" />
       <ProjectReference Include="..\TcpAdapter\TcpAdapter.csproj" />
     </ItemGroup>
 </Project>

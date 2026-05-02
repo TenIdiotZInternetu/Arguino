@@ -33,8 +33,6 @@ public class CircularBuffer {
 
     public CircularBuffer(MemoryMappedFile mappedMemory, long offset, long size) {
         _mappedRegion = mappedMemory.CreateViewAccessor(offset, size);
-        _mappedRegion.Write(PRODUCER_PTR_LOCATION, 0);
-        _mappedRegion.Write(CONSUMER_PTR_LOCATION, 0);
     }
 
     public bool Write(ReadOnlySpan<byte> data) {
@@ -46,13 +44,13 @@ public class CircularBuffer {
 
         if (data.Length < bytesUntilBufferEnd) {
             // TODO: Potentially slow?
-            _mappedRegion.WriteArray(ProducerOffset, data.ToArray(), 0, data.Length);
+            _mappedRegion.WriteArray(BUFFER_LOCATION + ProducerOffset, data.ToArray(), 0, data.Length);
         }
         else {
             var firstBytes = data.Slice(0, (int)bytesUntilBufferEnd);
             var lastBytes = data.Slice((int)bytesUntilBufferEnd, data.Length);
             
-            _mappedRegion.WriteArray(ProducerOffset, firstBytes.ToArray(), 0, firstBytes.Length);
+            _mappedRegion.WriteArray(BUFFER_LOCATION + ProducerOffset, firstBytes.ToArray(), 0, firstBytes.Length);
             _mappedRegion.WriteArray(BUFFER_LOCATION, lastBytes.ToArray(), 0, lastBytes.Length);
         }
 
