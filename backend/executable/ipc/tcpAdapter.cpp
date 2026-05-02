@@ -5,7 +5,6 @@
 #include "../encoder.hpp"
 #include "../ipcAdapter.hpp"
 #include "ConnectionHandler.hpp"
-#include "Events.hpp"
 #include "FileLogger.hpp"
 #include "TcpServer.hpp"
 
