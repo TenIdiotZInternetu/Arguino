@@ -6,4 +6,8 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\IpcAdapter\IpcAdapter.csproj" />
+    </ItemGroup>
+
 </Project>
