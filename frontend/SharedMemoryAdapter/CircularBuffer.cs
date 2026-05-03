@@ -14,6 +14,8 @@ public class CircularBuffer {
     public long BufferSize => _mappedRegion.Capacity - BUFFER_LOCATION;
     public long BytesFilled => Math.Abs(ProducerOffset - ConsumerOffset);
     public long BytesAvailable => BufferSize - BytesFilled;
+
+    public bool IsEmpty => ConsumerOffset == ProducerOffset;
     
     public long ProducerOffset {
         get {
@@ -55,7 +57,7 @@ public class CircularBuffer {
         }
 
         ProducerOffset = _nextProducerOffset;
-        _nextProducerOffset = GetNextProducerOffset(data.Length);
+        _nextProducerOffset = ShiftOffset(_nextProducerOffset, data.Length);
         return true;
     }
 
@@ -64,11 +66,58 @@ public class CircularBuffer {
     }
 
 
-    // public bool Consume<T>(out T data) {
-    //     return false;
-    // }
+    public byte[]? ConsumeUntil(byte delimeter) {
+        if (!FindDelimeter(delimeter, out long offset)) {
+            return null;
+        }
 
-    private long GetNextProducerOffset(long shift) {
-        return (ProducerOffset + shift) % BufferSize;
+        bool wrapsAround = offset < ConsumerOffset;
+        long dataLength = wrapsAround ? 
+            offset + BufferSize - ConsumerOffset :
+            offset - ConsumerOffset;
+
+        dataLength++; // 0-indexed offset
+        
+        byte[] result = new byte[dataLength];
+
+        if (!wrapsAround) {
+            _mappedRegion.ReadArray(BUFFER_LOCATION + ConsumerOffset, result, 0, result.Length);
+        }
+        else {
+            long firstBytesCount = BufferSize - ConsumerOffset;
+            long lastBytesCount = offset;
+
+            _mappedRegion.ReadArray(BUFFER_LOCATION + ConsumerOffset, result, 0, (int)firstBytesCount);
+            _mappedRegion.ReadArray(BUFFER_LOCATION, result, (int)firstBytesCount, (int)lastBytesCount);
+        }
+        
+        ConsumerOffset = ShiftOffset(ConsumerOffset, dataLength);
+        return result;
+    }
+
+    private bool FindDelimeter(byte delimeter, out long foundAtOffset) {
+        long offset = ConsumerOffset;
+        byte data;
+
+        do {
+            foundAtOffset = offset;
+            
+            if (offset == ProducerOffset) { // Delimeter not found in the present data
+                return false;
+            }
+            
+            if (offset == BufferSize) {
+                offset = 0;
+            }
+            
+            _mappedRegion.Read(BUFFER_LOCATION + offset, out data);
+            offset++;
+        } while (data != delimeter);
+
+        return true;
+    }
+
+    private long ShiftOffset(long offset, long shift) {
+        return (offset + shift) % BufferSize;
     }
 }
