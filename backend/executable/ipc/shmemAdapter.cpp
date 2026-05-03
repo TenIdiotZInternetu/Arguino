@@ -1,15 +1,15 @@
 #include "../encoder.hpp"
 #include "../ipcAdapter.hpp"
-#include "ProducerConsumerWrapper.hpp"
+#include "TwoWayBuffer.hpp"
 
 using namespace arguino::shmem;
 using namespace arguino::simulator;
 
-ProducerConsumerWrapper* _shmem;
+TwoWayBuffer* _shmem;
 
 void run_simulator_with_ipc(loop_fnct loopFunction, const ProgramOptions& options)
 {
-    _shmem = new ProducerConsumerWrapper(options.ShmemName, options.ShmemSizePages);
+    _shmem = new TwoWayBuffer(options.ShmemName, options.ShmemSizePages);
     loopFunction();
 }
 

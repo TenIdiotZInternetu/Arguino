@@ -6,7 +6,7 @@ if (NOT ${Boost_Found})
 endif()
 
 add_library(arguino.shmem STATIC
-    ProducerConsumerWrapper.cpp
+    TwoWayBuffer.cpp
     MemoryRegion.cpp
     CircularBuffer.cpp
 )

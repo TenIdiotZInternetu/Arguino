@@ -13,12 +13,12 @@
 
 namespace arguino::shmem {
 
-class ProducerConsumerWrapper {
+class TwoWayBuffer {
    public:
     using shmem_t = boost::interprocess::shared_memory_object;
 
-    ProducerConsumerWrapper(const std::string& shmemName, size_t sizeInPages);
-    ~ProducerConsumerWrapper();
+    TwoWayBuffer(const std::string& shmemName, size_t sizeInPages);
+    ~TwoWayBuffer();
 
     template <typename T>
     void write(const T& data);
@@ -37,7 +37,7 @@ class ProducerConsumerWrapper {
 
 
 template <typename T>
-inline void ProducerConsumerWrapper::write(const T& data)
+inline void TwoWayBuffer::write(const T& data)
 {
     if (!_producer.write(data)) {
         std::cout << "Not enough space" << std::endl;
