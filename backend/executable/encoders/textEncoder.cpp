@@ -1,5 +1,6 @@
 #include <ranges>
 #include <sstream>
+#include <charconv>
 
 #include "../encoder.hpp"
 
@@ -43,13 +44,13 @@ std::string encode_event(const Event& event)
 
 bool decode_int(std::string_view str, int64_t& out)
 {
-    auto [ptr, ec] = std::from_chars(str.begin(), str.end(), out);
+    auto [ptr, ec] = std::from_chars(str.data(), str.data() + str.size(), out);
     return ec == std::errc();
 }
 
 bool decode_int(std::string_view str, int& out)
 {
-    auto [ptr, ec] = std::from_chars(str.begin(), str.end(), out);
+    auto [ptr, ec] = std::from_chars(str.data(), str.data() + str.size(), out);
     return ec == std::errc();
 }
 

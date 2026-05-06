@@ -4,6 +4,7 @@
 #include <chrono>
 #include <functional>
 #include <variant>
+#include <array>
 
 #include "SimulatorTypes.hpp"
 
