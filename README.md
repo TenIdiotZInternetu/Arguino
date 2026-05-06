@@ -6,8 +6,9 @@
 ## Current usage workflow:
   1. Run `preprocess.sh <test dir>`. For example `preprocess.sh tests/buttons`
   2. Build `core/CMakeLists.txt`, target either `arguino` or `arguino-tcp.exe` (they are aliases)
-  3. Run core as `<build dir>/executable/arguino`
-  4. Build and run gui from the `gui` directory with specified scene. For example `<build dir>/Gui -s ./arduinoScene.yaml`
+  3. In no specific order
+      - Run core as `<build dir>/executable/arguino`
+      - Build and run gui from the `gui` directory with specified scene. For example `<build dir>/Gui -s ./Scene/buttons.yaml`
 
 ## Command line arguments:
 ### Core
@@ -22,6 +23,7 @@
 - `--no-tcp` - Skips connection to TCP server at initialization
 - `--log-tcp <path>` - Path to the log file for TCP messages [= `./frontend_tcp.log`]
 - `--log-circuit <path>` - Path to the log file for general circuitry events [= `./frontend.log`]
+- `-v | --verbosity <Debug | Info | Warning | Error>` - Verbosity of the log files [= `info`]
  
 ## Gui controls
 - `Mouse wheel scroll` - Zoom and unzoom canvas

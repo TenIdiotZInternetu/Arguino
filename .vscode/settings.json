@@ -1,4 +1,4 @@
 {
-    "cmake.sourceDirectory": "${workspaceFolder}/core",
-    "cmake.buildDirectory": "${workspaceFolder}/core/build",
+    "cmake.sourceDirectory": "/home/touster/Kodiky/arguino/backend",
+    "cmake.buildDirectory": "${workspaceFolder}/backend/build",
 }
