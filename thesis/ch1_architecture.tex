@@ -8,6 +8,15 @@ The user must be able to have full control over the frontend user interface at a
 
 Splitting the application into multiple processes is actually a common practice among larger pieces of software. The program of each process can be written in a different programming language, they mark clear separation of concerns and force a solid interface design. Each process is easily swappable for another implementation with the same interface while the other processes are still running. In our case, the GUI process could be replaced by a web client, a CLI client, or an IDE add-on.
 
+\begin{figure}
+    \centering
+    \vfill
+    \includegraphics[width=\textwidth, keepaspectratio]{img/overall-architecture.pdf}
+    \caption{Top-level architecture overview}
+    \label{fig:architecture}
+    \vfill
+\end{figure}
+
 \section{Inter-process communication}
 
 However, this practice comes with certain challenges. Processes always run concurrently, so a variety of synchronization techniques must be applied to avoid race conditions. Before that we need to determine how will the processes exchange data. Process is a kernel level mechanism, thus approaches to handle the exchange can vary between operating systems. These mechanisms are what is called \textit{Inter-process communication}, or IPC for short.
@@ -46,6 +55,6 @@ There is a minor limitation of IPC over TCP that makes the debugging experience 
 
 \section{Backend}
 
-The choice for backend was obvious, the Arduino code is a syntactically valid C++ code.
+The language choice for backend was obvious, the Arduino code is a syntactically valid C++ code. 
 
 \section{Frontend}
