@@ -2,13 +2,9 @@
 
 \section{Architecture overview}
 
-The whole project is divided into two main parts. The purpose of the backend is to execute the Arduino code and simulate the change on the board's pinout. The purpose of the frontend is to reflect these changes on a user defined logical circuit, while offering the user control over the simulation. We chose to implement the backend in C++ and the frontend in C\#. Both backend and frontend are running in its own separate process. There is a technical and an engineering reason for this decision.
+The whole project is divided into two main parts. The purpose of the backend is to execute the Arduino code and simulate the change on the board's pinout. The purpose of the frontend is to reflect these changes on a user defined logical circuit, while offering the user control over the simulation. We chose to implement the backend in C++ and the frontend in C\#. Both backend and frontend are running in its own separate process.
 
-The user must be able to have full control over the frontend user interface at all times, even while the Arduino code is being debugged. Every common debugger blocks all running threads of a process, when a breakpoint is hit. If the GUI has been part of the same process as the systems running the simulation, it would freeze and become unresponsive every time a breakpoint is hit. The only way to avoid this behavior is to separate the GUI to a different process. We want to support breakpoints in our project, as they are the most useful tool in a debugger's toolkit.
-
-Splitting the application into multiple processes is actually a common practice among larger pieces of software. The program of each process can be written in a different programming language, they mark clear separation of concerns and force a solid interface design. Each process is easily swappable for another implementation with the same interface while the other processes are still running. In our case, the GUI process could be replaced by a web client, a CLI client, or an IDE add-on.
-
-\begin{figure}
+\begin{figure}[h]
     \centering
     \vfill
     \includegraphics[width=\textwidth, keepaspectratio]{img/overall-architecture.pdf}
@@ -17,9 +13,22 @@ Splitting the application into multiple processes is actually a common practice 
     \vfill
 \end{figure}
 
+The Figure \ref{fig:architecture} shows the most important systems in each process. The user coded is compiled together with the \texttt{executable} module of the backend. The declarations in the header \texttt{Arduino.h} prepended to the top of the \texttt{.ino} is implemented by a mock library \texttt{Arduino.cpp}. For each observable action an event is created and passed to the singleton \texttt{Simulator} class to compute and put into an event queue. The event is also communicated to the frontend process.
+
+In the frontend the events are consumed by the \texttt{Arduino} component, one of several components predefined as part of the \texttt{ComponentManager} project. This project is responsible for loading user-defined components and scenes, which connect the components together in a circuit. The circuit is simulated in the same project. The user interface is implemented in the \texttt{Main} project using Avalonia UI as a framework. Interacting with the UI may invoke new events in the \texttt{Arduino} component. Those are sent back to the backend's event queue in the same manner as they were received.
+
+The IPC Adapter is an interface implemented in each process responsible for encoding and decoding the events into a standardised format and relaying to the other process.
+
 \section{Inter-process communication}
 
-However, this practice comes with certain challenges. Processes always run concurrently, so a variety of synchronization techniques must be applied to avoid race conditions. Before that we need to determine how will the processes exchange data. Process is a kernel level mechanism, thus approaches to handle the exchange can vary between operating systems. These mechanisms are what is called \textit{Inter-process communication}, or IPC for short.
+Implementing processes that depend on each other comes with certain challenges. Processes always run concurrently, so a variety of synchronization techniques must be applied to avoid race conditions. Before that we need to determine how will the processes exchange data. Process is a kernel level mechanism, thus approaches to handle the exchange can vary between operating systems. These mechanisms are what is called \textit{Inter-process communication}, or IPC for short.
+
+\subsection{Considerations}
+There is a technical and an engineering reason for splitting the work into more than one process.
+
+The user must be able to have full control over the frontend user interface at all times, even while the Arduino code is being debugged. Every common debugger blocks all running threads of a process, when a breakpoint is hit. If the GUI has been part of the same process as the systems running the simulation, it would freeze and become unresponsive every time a breakpoint is hit. The only way to avoid this behavior is to separate the GUI to a different process. We want to support breakpoints in our project, as they are the most useful tool in a debugger's toolkit.
+
+Splitting the application into multiple processes is actually a common practice among larger pieces of software. The program of each process can be written in a different programming language and thus delegated into teams with different competencies. They mark clear separation of concerns and force a solid interface design. Each process is easily swappable for another implementation with the same interface while the other processes are still running. In our case, the GUI process could be replaced by a web client, a CLI client, or an IDE add-on.
 
 There are more than a few ways to handle IPC on every OS. The ones that we implemented are \textit{TCP stream} and \textit{memory mapping}. These are among the most common approaches available both on Windows and Linux. In either case, we must clearly define what the shared data represent. Although memory mapping has more flexibility than TCP, we stuck to sending discrete text or binary messages of predetermined format over time, to keep the implementation simpler and the two approaches interchangable.
 
