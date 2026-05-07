@@ -17,9 +17,9 @@ public class CommandLineArguments {
     
     [Option('p', "port", Default = 8888, HelpText = "Port of the core's TCP server (ipc=Tcp only)")]
     public int TcpPort { get; set; }
-    
-    [Option("shmem-name", Default = "", HelpText = "Named of the memory mapped file (ipc=Shmem only)")]
-    public string ShmemName { get; set; }
+
+    [Option("shmem-name", Default = "arguino-ipc", HelpText = "Named of the memory mapped file (ipc=Shmem only)")]
+    public string ShmemName { get; set; } = "arguino-ipc";
 
     [Option("shmem-size", Default = 1, HelpText = "Size of the memory mapped region per buffer in pages (ipc=Shmem only)")]
     public int ShmemSize { get; set; } = 1;
