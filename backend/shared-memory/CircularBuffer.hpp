@@ -94,7 +94,7 @@ struct CircularBuffer::iterator_t {
     using value_type = uint8_t;
     using difference_type = size_t;
     using pointer = uint8_t*;
-    using reference = uint8_t;
+    using reference = uint8_t&;
 
     iterator_t() = default;
     iterator_t(CircularBuffer* parent)
@@ -105,15 +105,15 @@ struct CircularBuffer::iterator_t {
     {}
 
     reference operator*();
-    pointer operator&();
-    bool operator=(iterator_t other) { return _offset == other._offset };
+    pointer operator->();
+    bool operator=(iterator_t other) { return _offset == other._offset; };
     iterator_t operator++();
     iterator_t operator++(int);
 
    private:
     CircularBuffer* _parent;
     offset_t _offset;
-}
+};
 
 }  // namespace arguino::shmem
 

@@ -13,7 +13,7 @@ CircularBuffer::CircularBuffer(const shmem_t& shmemObject, size_t offset, size_t
     _memoryRegion->at<uint64_t>(CONSUMER_PTR_LOCATION) = 0;
 };
 
-std::vector<std::byte> CircularBuffer::consume_until(std::byte delimeter)
+std::vector<uint8_t> CircularBuffer::consume_until(uint8_t delimeter)
 {
     auto consumer_it = _memoryRegion->at(consumer_offset());
     auto delimeter_it = std::find(             //
@@ -47,12 +47,12 @@ CircularBuffer::offset_t CircularBuffer::next_producer_offset(size_t shift)
 
 CircularBuffer::iterator_t::reference CircularBuffer::iterator_t::operator*()
 {
-    return _parent->_memoryRegion->begin() + BUFFER_LOCATION + _offset;
+    return *(_parent->_memoryRegion->begin() + BUFFER_LOCATION + _offset);
 }
 
-CircularBuffer::iterator_t::pointer CircularBuffer::iterator_t::operator&()
+CircularBuffer::iterator_t::pointer CircularBuffer::iterator_t::operator->()
 {
-    return &*(*this);
+    return &(operator*());
 }
 
 CircularBuffer::iterator_t CircularBuffer::iterator_t::operator++()
