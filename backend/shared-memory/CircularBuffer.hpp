@@ -25,7 +25,7 @@ class CircularBuffer {
     CircularBuffer() = default;
     CircularBuffer(const shmem_t& shmemObject, size_t offset, size_t size);
 
-    bool is_empty() { return producer_offset() == consumer_offset(); }
+    bool is_empty();
     size_t buffer_size() { return _memoryRegion->size() - BUFFER_LOCATION; }
 
     size_t bytes_filled();
@@ -43,50 +43,15 @@ class CircularBuffer {
 
    private:
     std::unique_ptr<MemoryRegion> _memoryRegion;
-    offset_t _nextProducerOffset;
 
-    uint8_t* buffer_begin() { return _memoryRegion->begin() + BUFFER_LOCATION; }
-    uint8_t* at(offset_t offset) { return buffer_begin() + offset; }
+    iterator_t begin();
+    iterator_t end();
+    iterator_t at(offset_t offset);
 
-    offset_t& producer_offset();
-    offset_t& consumer_offset();
-
-    offset_t next_producer_offset(offset_t shift);
+    iterator_t producer_it();
+    iterator_t consumer_it();
 };
 
-template <typename T>
-    requires std::is_trivially_copyable_v<T> && (!std::ranges::contiguous_range<T>)
-inline bool CircularBuffer::write(const T& data)
-{
-    return write(std::span<const T, 1>(&data, 1));
-}
-
-template <std::ranges::contiguous_range TRange>
-inline bool CircularBuffer::write(const TRange& data)
-{
-    auto bytes = std::as_bytes(std::span(data));
-
-    if (bytes_available() <= bytes.size()) {  // We don't want the buffer to be fully filled
-        return false;
-    }
-
-    offset_t bytesUntilBufferEnd = buffer_size() - _nextProducerOffset;
-
-    if (bytes.size() < bytesUntilBufferEnd) {
-        std::memcpy(at(_nextProducerOffset), bytes.data(), bytes.size());
-    }
-    else {
-        auto firstBytes = bytes.first(bytesUntilBufferEnd);
-        auto lastBytes = bytes.last(bytes.size() - bytesUntilBufferEnd);
-
-        std::memcpy(at(_nextProducerOffset), firstBytes.data(), firstBytes.size());
-        std::memcpy(buffer_begin(), lastBytes.data(), lastBytes.size());
-    }
-
-    producer_offset() = _nextProducerOffset;
-    _nextProducerOffset = next_producer_offset(bytes.size());
-    return true;
-}
 
 struct CircularBuffer::iterator_t {
    public:
@@ -106,14 +71,50 @@ struct CircularBuffer::iterator_t {
 
     reference operator*();
     pointer operator->();
-    bool operator=(iterator_t other) { return _offset == other._offset; };
+    bool operator==(iterator_t other) { return _offset == other._offset; };
     iterator_t operator++();
     iterator_t operator++(int);
+    iterator_t operator+(iterator_t other);
+    iterator_t operator+(difference_type shift);
+    difference_type operator-(iterator_t other);
 
    private:
     CircularBuffer* _parent;
     offset_t _offset;
 };
+
+template <typename T>
+    requires std::is_trivially_copyable_v<T> && (!std::ranges::contiguous_range<T>)
+inline bool CircularBuffer::write(const T& data)
+{
+    return write(std::span<const T, 1>(&data, 1));
+}
+
+template <std::ranges::contiguous_range TRange>
+inline bool CircularBuffer::write(const TRange& data)
+{
+    auto bytes = std::as_bytes(std::span(data));
+
+    if (bytes_available() <= bytes.size()) {  // We don't want the buffer to be fully filled
+        return false;
+    }
+
+    size_t bytesUntilBufferEnd = end() - producer_it();
+
+    if (bytes.size() < bytesUntilBufferEnd) {
+        std::memcpy(&*producer_it(), bytes.data(), bytes.size());
+    }
+    else {
+        auto firstBytes = bytes.first(bytesUntilBufferEnd);
+        auto lastBytes = bytes.last(bytes.size() - bytesUntilBufferEnd);
+
+        std::memcpy(&*producer_it(), firstBytes.data(), firstBytes.size());
+        std::memcpy(&*begin(), lastBytes.data(), lastBytes.size());
+    }
+
+    *producer_it() += bytes.size();
+    return true;
+}
 
 }  // namespace arguino::shmem
 

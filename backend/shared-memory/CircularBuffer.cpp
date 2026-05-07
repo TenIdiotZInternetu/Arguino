@@ -6,43 +6,50 @@
 namespace arguino::shmem {
 
 CircularBuffer::CircularBuffer(const shmem_t& shmemObject, size_t offset, size_t size)
-    : _memoryRegion(std::make_unique<MemoryRegion>(shmemObject, offset, size)),
-      _nextProducerOffset(0)
+    : _memoryRegion(std::make_unique<MemoryRegion>(shmemObject, offset, size))
 {
     _memoryRegion->at<uint64_t>(PRODUCER_PTR_LOCATION) = 0;
     _memoryRegion->at<uint64_t>(CONSUMER_PTR_LOCATION) = 0;
-};
+}
+
+bool CircularBuffer::is_empty()
+{
+    return producer_it() == consumer_it();
+}
 
 std::vector<uint8_t> CircularBuffer::consume_until(uint8_t delimeter)
 {
-    auto consumer_it = _memoryRegion->at(consumer_offset());
-    auto delimeter_it = std::find(             //
-        _memoryRegion->at(consumer_offset()),  //
-        _memoryRegion->at(producer_offset()),  //
-        delimeter);
+    auto delimeter_it = std::find(consumer_it(), producer_it(), delimeter);
 }
 
-CircularBuffer::offset_t& CircularBuffer::producer_offset()
+CircularBuffer::iterator_t CircularBuffer::begin()
 {
-    return _memoryRegion->at<offset_t>(PRODUCER_PTR_LOCATION);
+    return iterator_t(this, 0);
 }
 
-CircularBuffer::offset_t& CircularBuffer::consumer_offset()
+CircularBuffer::iterator_t CircularBuffer::end()
 {
-    return _memoryRegion->at<offset_t>(CONSUMER_PTR_LOCATION);
+    return iterator_t(this, buffer_size());
+}
+
+CircularBuffer::iterator_t CircularBuffer::at(offset_t offset)
+{
+    return iterator_t(this, offset);
+}
+
+CircularBuffer::iterator_t CircularBuffer::producer_it()
+{
+    return iterator_t(this, _memoryRegion->at<offset_t>(PRODUCER_PTR_LOCATION));
+}
+
+CircularBuffer::iterator_t CircularBuffer::consumer_it()
+{
+    return iterator_t(this, _memoryRegion->at<offset_t>(CONSUMER_PTR_LOCATION));
 }
 
 size_t CircularBuffer::bytes_filled()
 {
-    return consumer_offset() > producer_offset()  //
-             ? consumer_offset() - producer_offset()
-             : producer_offset() - consumer_offset();
-}
-
-CircularBuffer::offset_t CircularBuffer::next_producer_offset(size_t shift)
-{
-    offset_t newOffset = producer_offset() + shift;
-    return newOffset % buffer_size();
+    return producer_it() - consumer_it();
 }
 
 CircularBuffer::iterator_t::reference CircularBuffer::iterator_t::operator*()
@@ -69,6 +76,23 @@ CircularBuffer::iterator_t CircularBuffer::iterator_t::operator++(int)
     iterator_t tmp = *this;
     ++(*this);
     return tmp;
+}
+
+CircularBuffer::iterator_t CircularBuffer::iterator_t::operator+(iterator_t other)
+{
+    return *this + other._offset;
+}
+
+CircularBuffer::iterator_t CircularBuffer::iterator_t::operator+(difference_type shift)
+{
+    return iterator_t(_parent, (_offset + shift) % _parent->buffer_size());
+}
+
+CircularBuffer::iterator_t::difference_type CircularBuffer::iterator_t::operator-(iterator_t other)
+{
+    return _offset > other._offset  //
+             ? _offset - other._offset
+             : _parent->end()._offset - other._offset + _offset;
 }
 
 }  // namespace arguino::shmem
