@@ -9,7 +9,6 @@ public class CircularBuffer {
     public const long BUFFER_LOCATION = 16;
     
     private MemoryMappedViewAccessor _mappedRegion;
-    private long _nextProducerOffset;
 
     public long BufferSize => _mappedRegion.Capacity - BUFFER_LOCATION;
     public long BytesFilled => Math.Abs(ProducerOffset - ConsumerOffset);
@@ -42,7 +41,7 @@ public class CircularBuffer {
             return false;
         }
         
-        long bytesUntilBufferEnd = BufferSize - _nextProducerOffset;
+        long bytesUntilBufferEnd = BufferSize - ProducerOffset;
 
         if (data.Length < bytesUntilBufferEnd) {
             // TODO: Potentially slow?
@@ -56,8 +55,7 @@ public class CircularBuffer {
             _mappedRegion.WriteArray(BUFFER_LOCATION, lastBytes.ToArray(), 0, lastBytes.Length);
         }
 
-        ProducerOffset = _nextProducerOffset;
-        _nextProducerOffset = ShiftOffset(_nextProducerOffset, data.Length);
+        ProducerOffset = ShiftOffset(ProducerOffset, data.Length);
         return true;
     }
 

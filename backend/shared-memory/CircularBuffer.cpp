@@ -1,5 +1,7 @@
 #include "CircularBuffer.hpp"
 
+#include <math.h>
+
 #include <algorithm>
 #include <vector>
 
@@ -19,7 +21,31 @@ bool CircularBuffer::is_empty()
 
 std::vector<uint8_t> CircularBuffer::consume_until(uint8_t delimeter)
 {
-    auto delimeter_it = std::find(consumer_it(), producer_it(), delimeter);
+    iterator_t producerIt = producer_it();
+    iterator_t consumerIt = consumer_it();
+
+    auto delimeterIt = std::find(consumerIt, producerIt, delimeter);
+    bool delimeterNotFound = delimeterIt == producerIt;
+    if (delimeterNotFound) return {};
+
+    size_t dataLength = delimeterIt - consumerIt + 1;
+    size_t wrapsAround = dataLength > end() - consumerIt;
+
+    std::vector<uint8_t> result(dataLength);
+
+    if (!wrapsAround) {
+        std::memcpy(&result[0], &*consumerIt, dataLength);
+    }
+    else {
+        size_t firstBytesLength = end() - consumerIt;
+        size_t lastBytesLength = delimeterIt - begin();
+
+        std::memcpy(&result[0], &*consumerIt, firstBytesLength);
+        std::memcpy(&result[firstBytesLength], &*begin(), lastBytesLength);
+    }
+
+    write_consumer(delimeterIt);
+    return result;
 }
 
 CircularBuffer::iterator_t CircularBuffer::begin()
