@@ -16,7 +16,6 @@ class CircularBuffer {
     friend struct iterator_t;
 
     using shmem_t = boost::interprocess::shared_memory_object;
-    using offset_t = uint64_t;
 
     static constexpr size_t PRODUCER_PTR_LOCATION = 0;
     static constexpr size_t CONSUMER_PTR_LOCATION = 8;
@@ -46,10 +45,13 @@ class CircularBuffer {
 
     iterator_t begin();
     iterator_t end();
-    iterator_t at(offset_t offset);
+    iterator_t at(size_t offset);
 
     iterator_t producer_it();
     iterator_t consumer_it();
+
+    void write_producer(iterator_t producer_it);
+    void write_consumer(iterator_t consumer_it);
 };
 
 
@@ -65,13 +67,16 @@ struct CircularBuffer::iterator_t {
     iterator_t(CircularBuffer* parent)
         : _parent(parent)
     {}
-    iterator_t(CircularBuffer* parent, offset_t offset)
-        : _parent(parent), _offset(offset)
+    iterator_t(CircularBuffer* parent, size_t offset)
+        : _parent(parent), offset(offset)
     {}
+
+    size_t offset;
 
     reference operator*();
     pointer operator->();
-    bool operator==(iterator_t other) { return _offset == other._offset; };
+    bool operator==(iterator_t other) { return offset == other.offset; };
+    bool operator!=(iterator_t other) { return !(*this == other); }
     iterator_t operator++();
     iterator_t operator++(int);
     iterator_t operator+(iterator_t other);
@@ -80,7 +85,6 @@ struct CircularBuffer::iterator_t {
 
    private:
     CircularBuffer* _parent;
-    offset_t _offset;
 };
 
 template <typename T>
@@ -112,7 +116,7 @@ inline bool CircularBuffer::write(const TRange& data)
         std::memcpy(&*begin(), lastBytes.data(), lastBytes.size());
     }
 
-    *producer_it() += bytes.size();
+    write_producer(producer_it() + bytes.size());
     return true;
 }
 

@@ -32,19 +32,29 @@ CircularBuffer::iterator_t CircularBuffer::end()
     return iterator_t(this, buffer_size());
 }
 
-CircularBuffer::iterator_t CircularBuffer::at(offset_t offset)
+CircularBuffer::iterator_t CircularBuffer::at(size_t offset)
 {
     return iterator_t(this, offset);
 }
 
 CircularBuffer::iterator_t CircularBuffer::producer_it()
 {
-    return iterator_t(this, _memoryRegion->at<offset_t>(PRODUCER_PTR_LOCATION));
+    return iterator_t(this, _memoryRegion->at<size_t>(PRODUCER_PTR_LOCATION));
 }
 
 CircularBuffer::iterator_t CircularBuffer::consumer_it()
 {
-    return iterator_t(this, _memoryRegion->at<offset_t>(CONSUMER_PTR_LOCATION));
+    return iterator_t(this, _memoryRegion->at<size_t>(CONSUMER_PTR_LOCATION));
+}
+
+void CircularBuffer::write_producer(iterator_t producer_it)
+{
+    _memoryRegion->at<size_t>(PRODUCER_PTR_LOCATION) = producer_it.offset;
+}
+
+void CircularBuffer::write_consumer(iterator_t consumer_it)
+{
+    _memoryRegion->at<size_t>(CONSUMER_PTR_LOCATION) = consumer_it.offset;
 }
 
 size_t CircularBuffer::bytes_filled()
@@ -54,7 +64,7 @@ size_t CircularBuffer::bytes_filled()
 
 CircularBuffer::iterator_t::reference CircularBuffer::iterator_t::operator*()
 {
-    return *(_parent->_memoryRegion->begin() + BUFFER_LOCATION + _offset);
+    return *(_parent->_memoryRegion->begin() + BUFFER_LOCATION + offset);
 }
 
 CircularBuffer::iterator_t::pointer CircularBuffer::iterator_t::operator->()
@@ -64,9 +74,9 @@ CircularBuffer::iterator_t::pointer CircularBuffer::iterator_t::operator->()
 
 CircularBuffer::iterator_t CircularBuffer::iterator_t::operator++()
 {
-    _offset++;
-    if (_offset == _parent->buffer_size()) {
-        _offset = 0;
+    offset++;
+    if (offset == _parent->buffer_size()) {
+        offset = 0;
     }
     return *this;
 }
@@ -80,19 +90,19 @@ CircularBuffer::iterator_t CircularBuffer::iterator_t::operator++(int)
 
 CircularBuffer::iterator_t CircularBuffer::iterator_t::operator+(iterator_t other)
 {
-    return *this + other._offset;
+    return *this + other.offset;
 }
 
 CircularBuffer::iterator_t CircularBuffer::iterator_t::operator+(difference_type shift)
 {
-    return iterator_t(_parent, (_offset + shift) % _parent->buffer_size());
+    return iterator_t(_parent, (offset + shift) % _parent->buffer_size());
 }
 
 CircularBuffer::iterator_t::difference_type CircularBuffer::iterator_t::operator-(iterator_t other)
 {
-    return _offset > other._offset  //
-             ? _offset - other._offset
-             : _parent->end()._offset - other._offset + _offset;
+    return offset >= other.offset  //
+             ? offset - other.offset
+             : _parent->end().offset - other.offset + offset;
 }
 
 }  // namespace arguino::shmem
