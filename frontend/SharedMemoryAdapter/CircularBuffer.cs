@@ -49,7 +49,7 @@ public class CircularBuffer {
         }
         else {
             var firstBytes = data.Slice(0, (int)bytesUntilBufferEnd);
-            var lastBytes = data.Slice((int)bytesUntilBufferEnd, data.Length);
+            var lastBytes = data.Slice((int)bytesUntilBufferEnd, data.Length - (int)bytesUntilBufferEnd);
             
             _mappedRegion.WriteArray(BUFFER_LOCATION + ProducerOffset, firstBytes.ToArray(), 0, firstBytes.Length);
             _mappedRegion.WriteArray(BUFFER_LOCATION, lastBytes.ToArray(), 0, lastBytes.Length);

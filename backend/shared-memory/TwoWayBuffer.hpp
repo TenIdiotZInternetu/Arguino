@@ -23,6 +23,11 @@ class TwoWayBuffer {
     template <typename T>
     void write(const T& data);
 
+    std::vector<uint8_t> consume_until(uint8_t delimeter);
+
+    CircularBuffer& producer() { return _producer; }
+    CircularBuffer& consumer() { return _consumer; }
+
     std::string& name() { return _name; }
     size_t pages() { return _pages; }
     size_t size();

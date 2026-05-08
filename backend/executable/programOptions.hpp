@@ -10,9 +10,9 @@ namespace po = boost::program_options;
 struct ProgramOptions {
     std::string SimulatorLogPath;
     logger::LogLevel Verbosity;
+    std::string IcpLogPath;
 
     // TCP implementation
-    std::string TcpLogPath;
     int TcpPort;
 
     // Shared memory implementation
@@ -30,6 +30,9 @@ static po::options_description create_common_options()
         ("log-simulator",                                                          //
             po::value<std::string>()->default_value("./core.log"),                 //
             "Path to the log file for simulator events")                           //
+        ("log-icp",                                                                //
+            po::value<std::string>()->default_value("./core_ipc.log"),             //
+            "Path to the log file for TCP events")                                 //
         ("verbosity,v",                                                            //
             po::value<logger::LogLevel>()->default_value(logger::LogLevel::Info),  //
             "Verbosity of used loggers");
@@ -41,13 +44,10 @@ static po::options_description create_tcp_options()
 {
     po::options_description description("TCP options");
 
-    description.add_options()                                           //
-        ("port,p",                                                      //
-            po::value<int>()->default_value(8888),                      //
-            "Port on which to launch TCP server")                       //
-        ("log-tcp",                                                     //
-            po::value<std::string>()->default_value("./core_tcp.log"),  //
-            "Path to the log file for TCP events");                     //
+    description.add_options()                       //
+        ("port,p",                                  //
+            po::value<int>()->default_value(8888),  //
+            "Port on which to launch TCP server");  //
 
     return description;
 }
@@ -91,10 +91,10 @@ inline ProgramOptions parse_arguments(int argc, char** argv)
     ProgramOptions options;
     options.SimulatorLogPath = variables["log-simulator"].as<std::string>();
     options.Verbosity = variables["verbosity"].as<logger::LogLevel>();
+    options.IcpLogPath = variables["log-icp"].as<std::string>();
 
 #ifdef ARGUINO_TCP
     options.TcpPort = variables["port"].as<int>();
-    options.TcpLogPath = variables["log-tcp"].as<std::string>();
 #endif
 #ifdef ARGUINO_SHARED_MEMORY
     options.ShmemName = variables["shmem-name"].as<std::string>();

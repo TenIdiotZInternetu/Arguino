@@ -75,7 +75,7 @@ struct CircularBuffer::iterator_t {
 
     reference operator*();
     pointer operator->();
-    bool operator==(iterator_t other) { return offset == other.offset; };
+    bool operator==(iterator_t other) const { return offset == other.offset; };
     bool operator!=(iterator_t other) { return !(*this == other); }
     iterator_t operator++();
     iterator_t operator++(int);

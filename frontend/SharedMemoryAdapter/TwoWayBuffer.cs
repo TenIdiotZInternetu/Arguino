@@ -8,7 +8,7 @@ using Logger;
 namespace SharedMemoryAdapter;
 
 public class TwoWayBuffer : IIpcAdapter {
-    public const byte MESSAGE_DELIMETER = (byte)';';
+    public const char MESSAGE_DELIMETER = ';';
     
     public bool IsConnected { get; private set; }
     public event Action<Event>? ReceivedEventEvent;
@@ -57,7 +57,7 @@ public class TwoWayBuffer : IIpcAdapter {
             while (IsConnected) {
                 if (_consumingBuffer.IsEmpty) continue;
 
-                byte[]? data = _consumingBuffer.ConsumeUntil(MESSAGE_DELIMETER);
+                byte[]? data = _consumingBuffer.ConsumeUntil((byte)MESSAGE_DELIMETER);
                 if (data == null) {
                     _logger?.LogError("A span of incoming message could not be determined, skipping.");
                     continue;

@@ -44,7 +44,7 @@ std::vector<uint8_t> CircularBuffer::consume_until(uint8_t delimeter)
         std::memcpy(&result[firstBytesLength], &*begin(), lastBytesLength);
     }
 
-    write_consumer(delimeterIt);
+    write_consumer(delimeterIt + 1);
     return result;
 }
 

@@ -22,6 +22,11 @@ TwoWayBuffer::~TwoWayBuffer()
     ipc::shared_memory_object::remove(_name.c_str());
 }
 
+std::vector<uint8_t> TwoWayBuffer::consume_until(uint8_t delimeter)
+{
+    return _consumer.consume_until(delimeter);
+}
+
 size_t TwoWayBuffer::size()
 {
     ipc::offset_t size;
