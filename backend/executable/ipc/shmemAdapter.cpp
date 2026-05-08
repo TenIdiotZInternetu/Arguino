@@ -16,10 +16,15 @@ void on_event(const Event& event)
 {
     auto message = encode_event(event);
     if (message == UNKNOWN_EVENT) {
+        IpcLogger->log_error("Encountered unknown event type while encoding.");
         return;
     }
 
-    _shmem->write(message + ';');
+    if (!_shmem->write(message + ';')) {
+        // TODO block
+        IpcLogger->log_error(
+            "Could not write to shared memory buffer, not enough available space.");
+    }
 }
 
 static void run_shmem_consumer()

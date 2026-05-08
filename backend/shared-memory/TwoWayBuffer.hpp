@@ -21,7 +21,7 @@ class TwoWayBuffer {
     ~TwoWayBuffer();
 
     template <typename T>
-    void write(const T& data);
+    bool write(const T& data);
 
     std::vector<uint8_t> consume_until(uint8_t delimeter);
 
@@ -42,11 +42,9 @@ class TwoWayBuffer {
 
 
 template <typename T>
-inline void TwoWayBuffer::write(const T& data)
+inline bool TwoWayBuffer::write(const T& data)
 {
-    if (!_producer.write(data)) {
-        std::cout << "Not enough space" << std::endl;
-    }
+    return _producer.write(data);
 }
 
 }  // namespace arguino::shmem
