@@ -43,7 +43,13 @@ public static class MainController {
             throw new UnreachableException("Only main window of type MainWindow is supported");
         }
 
-        Arguments = Parser.Default.ParseArguments<CommandLineArguments>(desktop.Args).Value;
+        if (CommandLineArguments.ParseArguments(desktop.Args) is CommandLineArguments args) {
+            Arguments = args;
+        }
+        else {
+            throw new ArgumentException("Command line errors");
+        }
+        
         GlobalTimer = Stopwatch.StartNew();
         InitLogger();
         Logger.LogInfo("Starting App initialization.");

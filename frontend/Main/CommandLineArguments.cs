@@ -1,4 +1,6 @@
+using System;
 using CommandLine;
+using CommandLine.Text;
 using Logger;
 
 namespace Gui;
@@ -25,7 +27,7 @@ public class CommandLineArguments
     [Option("shmem-size", Default = 1, HelpText = "Size of the memory mapped region per buffer in pages (ipc=Shmem only)")]
     public int ShmemSize { get; set; } = 1;
 
-    [Option("log-ipc", Default = "./frontend_tcp.log", HelpText = "Path to the log file for interprocess messages")]
+    [Option("log-ipc", Default = "./frontend_ipc.log", HelpText = "Path to the log file for interprocess messages")]
     public string IpcLogFile { get; set; } = "./frontend_ipc.log";
 
     [Option("log-circuit", Default = "./frontend.log", HelpText = "Path to the log file for general circuitry events")]
@@ -33,4 +35,21 @@ public class CommandLineArguments
 
     [Option('v', "verbosity", Default = LogLevel.Info, HelpText = "Verbosity of the log files")]
     public LogLevel Verbosity { get; set; } = LogLevel.Info;
+
+    // Solution taken by Simon at https://stackoverflow.com/questions/42010512/how-to-view-commandlineparser-parsing-errors-in-visual-studio-2015
+    public static CommandLineArguments? ParseArguments(string[]? args) {
+        CommandLineArguments? options = null;
+        
+        var result = Parser.Default.ParseArguments<CommandLineArguments>(args);
+        result
+            .WithParsed(o => options = o)
+            .WithNotParsed(_ => {
+                    var helpText = HelpText.AutoBuild(result,
+                        h => HelpText.DefaultParsingErrorsHandler(result, h), 
+                        e => e);
+                    Console.WriteLine(helpText);
+            });
+
+        return options;
+    }
 }
