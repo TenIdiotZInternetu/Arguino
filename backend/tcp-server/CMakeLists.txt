@@ -16,7 +16,6 @@ target_include_directories(arguino.tcp PUBLIC ${Boost_INCLUDE_DIRS})
 target_link_libraries(arguino.tcp PUBLIC
     arguino.simulator
     logger
-    Boost::asio
 )
 
 if(WIN32)
