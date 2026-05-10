@@ -5,7 +5,8 @@ namespace Gui;
 
 public enum IpcType { None, Tcp, Shmem }
 
-public class CommandLineArguments {
+public class CommandLineArguments
+{
     [Option('s', "scene", Default = "./scene.yaml", HelpText = "Path to the .yaml scene defintion")]
     public string ScenePath { get; set; } = "./scene.yaml";
 
@@ -14,12 +15,12 @@ public class CommandLineArguments {
 
     [Option('i', "ipc", Default = IpcType.None, HelpText = "Which interprocess communication technology should be used")]
     public IpcType IpcType { get; set; } = IpcType.None;
-    
+
     [Option('p', "port", Default = 8888, HelpText = "Port of the core's TCP server (ipc=Tcp only)")]
     public int TcpPort { get; set; }
 
-    [Option("shmem-name", Default = "arguino-ipc", HelpText = "Named of the memory mapped file (ipc=Shmem only)")]
-    public string ShmemName { get; set; } = "arguino-ipc";
+    [Option("shmem-name", Default = "Arguino-ipc", HelpText = "Named of the memory mapped file (ipc=Shmem only)")]
+    public string ShmemName { get; set; } = "Arguino-ipc";
 
     [Option("shmem-size", Default = 1, HelpText = "Size of the memory mapped region per buffer in pages (ipc=Shmem only)")]
     public int ShmemSize { get; set; } = 1;

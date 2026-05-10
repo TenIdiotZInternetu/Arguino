@@ -1,13 +1,17 @@
 ﻿using System.IO.MemoryMappedFiles;
+using System.Runtime.InteropServices;
 using System.Text;
 using IpcAdapter;
 using IpcAdapter.Encoders;
 using IpcAdapter.Events;
 using Logger;
+using Microsoft.Win32;
 
 namespace SharedMemoryAdapter;
 
 public class TwoWayBuffer : IIpcAdapter {
+    public const string POSIX_SHARED_MEMORY_PATH = "/dev/shm/";
+        
     public const char MESSAGE_DELIMETER = ';';
     
     public bool IsConnected { get; private set; }
@@ -20,13 +24,11 @@ public class TwoWayBuffer : IIpcAdapter {
     private IEncoder _encoder;
     private ILogger? _logger;
 
-    public TwoWayBuffer(string path, int pages, IEncoder encoder, ILogger? logger = null) {
+    public TwoWayBuffer(string name, int pages, IEncoder encoder, ILogger? logger = null) {
         _encoder = encoder;
         _logger = logger;
+        OpenSharedMemory(name);
         
-        // TODO: Don't use absolute path, just a filename
-        // DIfferentiate Windows and Linux path
-        _mappedMemory = MemoryMappedFile.CreateFromFile(path, FileMode.Open);
         int shmemSize = 2 * pages * Environment.SystemPageSize;
         _consumingBuffer = new CircularBuffer(_mappedMemory, 0, shmemSize / 2);
         _producingBuffer = new CircularBuffer(_mappedMemory, shmemSize / 2, shmemSize / 2);
@@ -49,6 +51,16 @@ public class TwoWayBuffer : IIpcAdapter {
         _mappedMemory = null;
         IsConnected = false;
         _logger?.LogWarning("Disconnected from shared memory.");
+    }
+
+    void OpenSharedMemory(string name) {
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) {
+            string appdataPath = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData);
+            _mappedMemory = MemoryMappedFile.CreateFromFile(Path.Combine(appdataPath, name), FileMode.Open);
+        }
+        else { // POSIX
+            _mappedMemory = MemoryMappedFile.CreateFromFile(POSIX_SHARED_MEMORY_PATH + name, FileMode.Open);
+        }
     }
 
     private void ListenForRemoteEvents() {

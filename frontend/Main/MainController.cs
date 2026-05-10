@@ -88,30 +88,34 @@ public static class MainController {
         }
         
         try {
-            // TODO: This is probably a stupid way to do this
             arduino = Scene.ComponentsMap.First(c => c.Value.TypeName == nameof(Arduino)).Value as Arduino;
         }
         catch (InvalidOperationException) {
             Logger.LogWarning("Arduino not found in the scene. Skipping connection to simulator.");
             return;
         }
-
         
         var fileLogger = new FileLogger(Arguments.IpcLogFile, Arguments.Verbosity);
         fileLogger.Timer = GlobalTimer;
-        var logger = new CompositeLogger(fileLogger);
+        ILogger logger = new CompositeLogger(fileLogger);
         
         IEncoder encoder = new TextEncoder();
         IIpcAdapter? ipc = null;
 
-        if (Arguments.IpcType == IpcType.Tcp) {
-            var tcpClient = new TcpClient(Arguments.TcpPort);
-            ipc = new TcpMessageHandler(tcpClient, encoder, logger);
-        }
-        if (Arguments.IpcType == IpcType.Shmem) {
-            ipc = new TwoWayBuffer(Arguments.ShmemName, Arguments.ShmemSize, encoder, logger);
-        }
+        try {
+            if (Arguments.IpcType == IpcType.Tcp) {
+                var tcpClient = new TcpClient(Arguments.TcpPort);
+                ipc = new TcpMessageHandler(tcpClient, encoder, logger);
+            }
 
-        arduino?.ConnectToSimulator(ipc!);
+            if (Arguments.IpcType == IpcType.Shmem) {
+                ipc = new TwoWayBuffer(Arguments.ShmemName, Arguments.ShmemSize, encoder, logger);
+            }
+            
+            arduino?.ConnectToSimulator(ipc!);
+        }
+        catch (Exception e) {
+            logger.LogError("Error during IPC initialization: " + e.Message);
+        }
     }
 }
