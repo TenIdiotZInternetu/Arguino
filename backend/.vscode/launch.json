@@ -5,10 +5,10 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "C/C++ Debug (gdb Attach)",
+            "name": "Linux",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/build/executable/arguino -v Debug",
+            "program": "${workspaceFolder}/build/executable/arguino",
             "MIMode": "gdb",
             "cwd": "${workspaceFolder}",
             "setupCommands": [
@@ -19,7 +19,22 @@
                 }
             ],
             "preLaunchTask": "CMake: build",
-            "args": []
+            "args": [
+                "-v",
+                "Debug"
+            ]
+        },
+        {
+            "name": "Windows",
+            "type": "cppvsdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}\\build\\msvc-vcpkg-debug\\executable\\Debug\\arguino.exe",
+            "cwd": "${workspaceFolder}",
+            "preLaunchTask": "CMake: build",
+            "args": [
+                "-v",
+                "Debug"
+            ]
         }
     ]
 }
