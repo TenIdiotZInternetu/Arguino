@@ -6,12 +6,18 @@ namespace ipc = boost::interprocess;
 
 namespace arguino::shmem {
 
+constexpr int WINDOWS_PAGE_SIZE = 4096;
+
 TwoWayBuffer::TwoWayBuffer(const std::string& shmemName, size_t sizeInPages)
     : _name(shmemName),                                                  //
       _pages(sizeInPages),                                               //
       _shmemObject(ipc::open_or_create, _name.c_str(), ipc::read_write)  //
 {
+#ifdef WIN32
+    size_t shmem_size = 2 * _pages * WINDOWS_PAGE_SIZE;
+#else
     size_t shmem_size = 2 * _pages * ipc::mapped_region::get_page_size();
+#endif
     _shmemObject.truncate(shmem_size);
     _producer = CircularBuffer(_shmemObject, 0, shmem_size / 2);
     _consumer = CircularBuffer(_shmemObject, shmem_size / 2, shmem_size / 2);
