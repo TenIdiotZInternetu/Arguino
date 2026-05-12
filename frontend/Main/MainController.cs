@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using System.IO.MemoryMappedFiles;
 using System.Linq;
 using System.Threading.Tasks;
 using Avalonia.Controls.ApplicationLifetimes;
@@ -13,6 +14,7 @@ using Gui.Views;
 using IpcAdapter;
 using IpcAdapter.Encoders;
 using Logger;
+using SharedMemoryAdapter;
 using TcpAdapter;
 
 namespace Gui;
@@ -41,7 +43,13 @@ public static class MainController {
             throw new UnreachableException("Only main window of type MainWindow is supported");
         }
 
-        Arguments = Parser.Default.ParseArguments<CommandLineArguments>(desktop.Args).Value;
+        if (CommandLineArguments.ParseArguments(desktop.Args) is CommandLineArguments args) {
+            Arguments = args;
+        }
+        else {
+            throw new ArgumentException("Command line errors");
+        }
+        
         GlobalTimer = Stopwatch.StartNew();
         InitLogger();
         Logger.LogInfo("Starting App initialization.");
@@ -80,28 +88,40 @@ public static class MainController {
     private static void InitArduino() {
         Arduino? arduino;
         
+        if (Arguments.IpcType == IpcType.None) {
+            Logger.LogInfo("IPC type not specified. Skipping connection to simulator..");
+            return;
+        }
+        
         try {
-            // TODO: This is probably a stupid way to do this
             arduino = Scene.ComponentsMap.First(c => c.Value.TypeName == nameof(Arduino)).Value as Arduino;
         }
         catch (InvalidOperationException) {
-            Logger.LogWarning("Arduino not found in the scene. Skipping IPC initialization.");
-            return;
-        }
-
-        if (Arguments.NoTcp) {
-            Logger.LogInfo("--no-tcp flag is set. Skipping TCP initialization.");
+            Logger.LogWarning("Arduino not found in the scene. Skipping connection to simulator.");
             return;
         }
         
-        var fileLogger = new FileLogger(Arguments.TcpLogFile, Arguments.Verbosity);
+        var fileLogger = new FileLogger(Arguments.IpcLogFile, Arguments.Verbosity);
         fileLogger.Timer = GlobalTimer;
-        var logger = new CompositeLogger(fileLogger);
+        ILogger logger = new CompositeLogger(fileLogger);
         
-        var tcpClient = new TcpClient(Arguments.TcpPort);
         IEncoder encoder = new TextEncoder();
-        IIpcAdapter ipc = new TcpMessageHandler(tcpClient, encoder, logger);
+        IIpcAdapter? ipc = null;
 
-        arduino?.ConnectToSimulator(ipc);
+        try {
+            if (Arguments.IpcType == IpcType.Tcp) {
+                var tcpClient = new TcpClient(Arguments.TcpPort);
+                ipc = new TcpMessageHandler(tcpClient, encoder, logger);
+            }
+
+            if (Arguments.IpcType == IpcType.Shmem) {
+                ipc = new TwoWayBuffer(Arguments.ShmemName, Arguments.ShmemSize, encoder, logger);
+            }
+            
+            arduino?.ConnectToSimulator(ipc!);
+        }
+        catch (Exception e) {
+            logger.LogError("Error during IPC initialization: " + e.Message);
+        }
     }
 }
