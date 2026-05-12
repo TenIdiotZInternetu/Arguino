@@ -1,2 +1,7 @@
 */build
 *.log
+/.vs
+/frontend/.vs
+/backend/.vs
+/frontend/Main/Properties/launchSettings.json
+/backend/CMakeSettings.json

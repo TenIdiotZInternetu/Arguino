@@ -1,9 +1,6 @@
 project(arguino.tcp)
 
-if (NOT ${Boost_Found})
-    find_package(Boost REQUIRED COMPONENTS asio)
-    target_include_directories(arguino.tcp PUBLIC ${Boost_INCLUDE_DIRS})
-endif()
+find_package(Boost REQUIRED)
 
 add_library(arguino.tcp STATIC
     TcpServer.cpp
@@ -13,6 +10,8 @@ add_library(arguino.tcp STATIC
 target_include_directories(arguino.tcp PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}
 )
+
+target_include_directories(arguino.tcp PUBLIC ${Boost_INCLUDE_DIRS})
 
 target_link_libraries(arguino.tcp PUBLIC
     arguino.simulator
