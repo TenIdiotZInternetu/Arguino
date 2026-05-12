@@ -25,6 +25,9 @@ void on_event(const Event& event)
         IpcLogger->log_error(
             "Could not write to shared memory buffer, not enough available space.");
     }
+    else {
+        IpcLogger->log_debug("Written message to producer buffer: " + message);
+    }
 }
 
 static void run_shmem_consumer()
@@ -40,6 +43,7 @@ static void run_shmem_consumer()
             }
 
             std::string message(data.begin(), data.end());
+            IpcLogger->log_debug("Read message from consumer buffer: " + message);
 
             Event event;
             if (decode_event(message, event)) {
