@@ -26,7 +26,7 @@ public class TcpMessageHandler : IIpcAdapter {
 
         _client.SetLogger(logger);
         _client.ReadBytesEvent += OnBytesRead;
-        Task.Run(_client.ConnectAsync);
+        _client.ReachedEof += (this as IIpcAdapter).Reconnect;
     }
 
     public void SendEvent(Event @event) {
@@ -42,6 +42,9 @@ public class TcpMessageHandler : IIpcAdapter {
             }
         });
     }
+    
+    public async Task<bool> TryConnectAsync() => await _client.TryConnectAsync();
+    public void Disconnect() => _client.Disconnect();
 
     private void OnBytesRead(string bytechunk) {
         foreach (char c in bytechunk) {

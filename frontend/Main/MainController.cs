@@ -51,7 +51,8 @@ public static class MainController {
         }
         
         GlobalTimer = Stopwatch.StartNew();
-        InitLogger();
+        Logger = InitLogger(Arguments.CircuitLogFile, Arguments.Verbosity);
+        ComponentManager.Logger = Logger;
         Logger.LogInfo("Starting App initialization.");
 
         InitScene();
@@ -62,12 +63,10 @@ public static class MainController {
         Logger.LogInfo("App initialization complete.");
     }
 
-    private static void InitLogger() {
-        var fileLogger = new FileLogger(Arguments.CircuitLogFile);
+    private static ILogger InitLogger(string path, LogLevel verbosity) {
+        var fileLogger = new FileLogger(path, verbosity);
         fileLogger.Timer = GlobalTimer;
-        fileLogger.Verbosity = Arguments.Verbosity;
-        Logger = new CompositeLogger(fileLogger);
-        ComponentManager.Logger = Logger;
+        return new CompositeLogger(fileLogger);
     }
 
     private static void InitScene() {
@@ -101,27 +100,25 @@ public static class MainController {
             return;
         }
         
-        var fileLogger = new FileLogger(Arguments.IpcLogFile, Arguments.Verbosity);
-        fileLogger.Timer = GlobalTimer;
-        ILogger logger = new CompositeLogger(fileLogger);
-        
+        ILogger ipcLogger = InitLogger(Arguments.IpcLogFile, Arguments.Verbosity);
         IEncoder encoder = new TextEncoder();
         IIpcAdapter? ipc = null;
 
         try {
             if (Arguments.IpcType == IpcType.Tcp) {
                 var tcpClient = new TcpClient(Arguments.TcpPort);
-                ipc = new TcpMessageHandler(tcpClient, encoder, logger);
+                ipc = new TcpMessageHandler(tcpClient, encoder, ipcLogger);
             }
 
             if (Arguments.IpcType == IpcType.Shmem) {
-                ipc = new TwoWayBuffer(Arguments.ShmemName, Arguments.ShmemSize, encoder, logger);
+                ipc = new TwoWayBuffer(Arguments.ShmemName, Arguments.ShmemSize, encoder, ipcLogger);
             }
-            
-            arduino?.ConnectToSimulator(ipc!);
+
+            Task.Run(ipc!.ConnectAsync);
+            arduino?.ConnectToSimulator(ipc);
         }
         catch (Exception e) {
-            logger.LogError("Error during IPC initialization: " + e.Message);
+            ipcLogger.LogError("Error during IPC initialization: " + e.Message);
         }
     }
 }

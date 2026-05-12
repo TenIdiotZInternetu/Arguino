@@ -24,6 +24,7 @@ public class TcpClient {
     private CancellationTokenSource _cts;
 
     public event Action<string> ReadBytesEvent;
+    public event Action ReachedEof;
 
     private ILogger? _logger;
 
@@ -33,12 +34,6 @@ public class TcpClient {
 
     public TcpClient(string ip, int port) {
         Endpoint = new IPEndPoint(IPAddress.Parse(ip), port);
-    }
-
-    public async Task ConnectAsync() {
-        while (!await TryConnectAsync()) {
-            await Task.Delay(RECONNECT_DELAY);
-        }
     }
 
     public async Task<bool> TryConnectAsync() {
@@ -71,12 +66,6 @@ public class TcpClient {
         _logger?.LogWarning("Server disconnected.");
     }
 
-    public void Reconnect() {
-        Disconnect();
-        _logger?.LogInfo($"Attempting to reconnect at {Endpoint}.");
-        Task.Run(ConnectAsync);
-    }
-
     public async Task SendMessageAsync(string message) {
         await _sendQueue.Writer.WriteAsync(message);
     }
@@ -91,8 +80,7 @@ public class TcpClient {
             while (!_cts.IsCancellationRequested) {
                 int bytesRead = await _stream!.ReadAsync(_buffer, 0, _buffer.Length, _cts.Token);
                 if (bytesRead == 0) {
-                    // Disconnected
-                    Reconnect();
+                    ReachedEof?.Invoke();
                     return;
                 }
 
