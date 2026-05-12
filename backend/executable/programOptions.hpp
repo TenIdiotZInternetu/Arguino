@@ -30,7 +30,7 @@ static po::options_description create_common_options()
         ("log-simulator",                                                          //
             po::value<std::string>()->default_value("./core.log"),                 //
             "Path to the log file for simulator events")                           //
-        ("log-icp",                                                                //
+        ("log-ipc",                                                                //
             po::value<std::string>()->default_value("./core_ipc.log"),             //
             "Path to the log file for TCP events")                                 //
         ("verbosity,v",                                                            //
@@ -59,7 +59,7 @@ static po::options_description create_shmem_options()
     description.add_options()                                                       //
         ("shmem-name,n",                                                            //
             po::value<std::string>()->default_value("Arguino-ipc"),                 //
-            "Name of the shared memory segment")                                    //
+            "Name of the shared memory object")                                     //
         ("shmem-size,s",                                                            //
             po::value<int>()->default_value(1),                                     //
             "Size of each of the write and read shared memory segments in pages");  //
@@ -91,7 +91,7 @@ inline ProgramOptions parse_arguments(int argc, char** argv)
     ProgramOptions options;
     options.SimulatorLogPath = variables["log-simulator"].as<std::string>();
     options.Verbosity = variables["verbosity"].as<logger::LogLevel>();
-    options.IcpLogPath = variables["log-icp"].as<std::string>();
+    options.IcpLogPath = variables["log-ipc"].as<std::string>();
 
 #ifdef ARGUINO_TCP
     options.TcpPort = variables["port"].as<int>();

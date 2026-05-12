@@ -12,19 +12,27 @@
 
 ## Command line arguments:
 ### Core
-- `-p | --port <int>` - Port on which to launch TCP server [= `8888`]
 - `--log-simulator <path>` - Path to the log file for simulator events [= `./core.log`]
-- `--log-tcp <path>` - Path to the log file for TCP events" [= `./core_tcp.log`]
+- `--log-ipc <path>` - Path to the log file for IPC" [= `./core_ipc.log`]
 - `-v | --verbosity <Debug | Info | Warning | Error>` - Verbosity of the log files [= `Info`]
+#### TCP specific
+- `-p | --port <int>` - Port on which to launch TCP server [= `8888`]
+#### Shared memory specific
+- `-n | --shmem-name <string>` - Name of the shared memory object [= `Arguino-ipc`]
+- `-s | --shmem-size <int>` - Size of each of the write and read shared memory segments in pages [= `1`]
 
 ### Gui
 - `-s | --scene <path>` - Path to the .yaml scene defintion [= `./scene.yaml`]
 - `-c | --components <path>` - Path to the directory of components definitions [= `./ComponentManager/Components`]
-- `-p | --port <int>` - TCP port to listen to [= `8888`]
-- `--no-tcp` - Skips connection to TCP server at initialization
-- `--log-tcp <path>` - Path to the log file for TCP messages [= `./frontend_tcp.log`]
+- `-i | --ipc <None | Tcp | Shmem>` - Interprocess communication technology used for connection with the simulator [= `Shmem`]
 - `--log-circuit <path>` - Path to the log file for general circuitry events [= `./frontend.log`]
+- `--log-ipc <path>` - Path to the log file for IPC [= `./frontend_ipc.log`]
 - `-v | --verbosity <Debug | Info | Warning | Error>` - Verbosity of the log files [= `Info`]
+#### TCP specific
+- `-p | --port <int>` - TCP port to listen to [= `8888`]
+#### Share memory specific
+- `--shmem-name` - Name of the memory mapped file [= `Arguino-ipc`]
+- `--shmem-size` - Size of the memory mapped region per buffer in pages [= `1`]
  
 ## Gui controls
 - `Mouse wheel scroll` - Zoom and unzoom canvas
