@@ -18,14 +18,13 @@ void EventQueue::enqueue_remote(Event event)
 {
     _remoteEvents.push(event);
     _lastLvt = std::max(_lastLvt, event.localVirtualTime);
-    Simulator::log_debug("Enqueued remote event " + event.to_string());
 }
 
 void EventQueue::execute_next_event()
 {
     auto& queueAhead = (earliest_queue_lvt(_localEvents) < earliest_queue_lvt(_remoteEvents))
-        ? _localEvents
-        : _remoteEvents;
+                         ? _localEvents
+                         : _remoteEvents;
 
     Event processedEvent = queueAhead.front();
     queueAhead.pop();
