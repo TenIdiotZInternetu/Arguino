@@ -15,7 +15,7 @@
     </UserControl.Styles>
 
     <Panel ClipToBounds="False">
-        <ZoomBorder Stretch="Fill">
+        <ZoomBorder Stretch="Fill" ClipToBounds="True" EnableDoubleClickZoom="False">
 
             <ItemsControl ItemsSource="{Binding Components}">
                 <ItemsControl.ItemsPanel>
