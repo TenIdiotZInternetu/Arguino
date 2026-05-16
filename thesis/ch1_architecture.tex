@@ -4,7 +4,7 @@
 
 The whole project is divided into two main parts. The purpose of the backend is to execute the Arduino code and simulate the change on the board's pinout. The purpose of the frontend is to reflect these changes on a user defined logical circuit, while offering the user control over the simulation. We chose to implement the backend in C++ and the frontend in C\#. Both backend and frontend are running in its own separate process.
 
-\begin{figure}[h]
+\begin{figure}[ht]
     \centering
     \vfill
     \includegraphics[width=\textwidth, keepaspectratio]{img/overall-architecture.pdf}
@@ -82,7 +82,7 @@ As for the metadata, for each buffer a position after the last consumed and prod
 
 \subsection{The simulation}
 
-\begin{figure}[h]
+\begin{figure}[ht]
     \centering
     \vfill
     \includegraphics[width=\textwidth, keepaspectratio]{img/backend-architecture.pdf}
