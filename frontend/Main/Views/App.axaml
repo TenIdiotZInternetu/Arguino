@@ -8,6 +8,5 @@
     <Application.Styles>
         <FluentTheme />
         <StyleInclude Source="avares://Gui/Views/Styles/General.axaml"/>
-        <StyleInclude Source="avares://Gui/Views/Styles/ComponentStyle1.axaml"/>
     </Application.Styles>
 </Application>

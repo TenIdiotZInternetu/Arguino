@@ -15,22 +15,22 @@
     </UserControl.Styles>
 
     <Panel ClipToBounds="False">
-        <ZoomBorder Stretch="Fill" />
+        <ZoomBorder Stretch="Fill">
 
-        <ItemsControl ItemsSource="{Binding Components}">
-
-            <ItemsControl.ItemsPanel>
-                <ItemsPanelTemplate>
-                    <Canvas ClipToBounds="False"/>
-                </ItemsPanelTemplate>
-            </ItemsControl.ItemsPanel>
-
-            <ItemsControl.ItemTemplate>
-                <DataTemplate DataType="cmgraph:Component" >
-                    <tcontrol:ComponentControl Component="{Binding}"/>
-                </DataTemplate>
-            </ItemsControl.ItemTemplate>
-
-        </ItemsControl>
+            <ItemsControl ItemsSource="{Binding Components}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <Canvas ClipToBounds="False"/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+    
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate DataType="cmgraph:Component" >
+                        <tcontrol:ComponentControl Component="{Binding}"/>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+            
+        </ZoomBorder>
     </Panel>
 </UserControl>
