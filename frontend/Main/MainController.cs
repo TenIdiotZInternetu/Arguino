@@ -2,6 +2,7 @@ using System;
 using System.Diagnostics;
 using System.IO.MemoryMappedFiles;
 using System.Linq;
+using System.Threading.Tasks;
 using Avalonia.Controls.ApplicationLifetimes;
 using CommandLine;
 using ComponentManagement;
