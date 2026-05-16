@@ -8,7 +8,7 @@
             "name": "Linux",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/backend/build/executable/arguino",
+            "program": "${workspaceFolder}/backend/build/clang/executable/arguino",
             "MIMode": "gdb",
             "cwd": "${workspaceFolder}/backend",
             "setupCommands": [
