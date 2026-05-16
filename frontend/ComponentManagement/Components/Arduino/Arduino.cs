@@ -1,7 +1,5 @@
 using ComponentManagement.Graph;
-using TcpAdapter;
 using IpcAdapter;
-using IpcAdapter.Events;
 
 namespace ComponentManagement.Components;
 

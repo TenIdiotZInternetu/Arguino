@@ -1,6 +1,4 @@
-﻿using System.Diagnostics;
-
-namespace Logger;
+﻿namespace Logger;
 
 public interface ILogger {
     public LogLevel Verbosity { get; set; }

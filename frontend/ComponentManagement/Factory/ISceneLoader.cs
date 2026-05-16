@@ -1,5 +1,4 @@
 using ComponentManagement.Graph;
-using Svg;
 
 namespace ComponentManagement.Factory;
 

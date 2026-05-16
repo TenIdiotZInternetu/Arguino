@@ -1,4 +1,3 @@
-using System;
 using IpcAdapter.Events;
 
 namespace IpcAdapter;

@@ -1,5 +1,3 @@
-using Logger;
-
 namespace ComponentManagement.Graph;
 
 public record struct PinPrototype(uint Id, string? Name = null);

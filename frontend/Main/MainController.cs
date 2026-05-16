@@ -1,14 +1,11 @@
 using System;
 using System.Diagnostics;
-using System.IO.MemoryMappedFiles;
 using System.Linq;
 using System.Threading.Tasks;
 using Avalonia.Controls.ApplicationLifetimes;
-using CommandLine;
 using ComponentManagement;
 using ComponentManagement.Components;
 using ComponentManagement.Factory;
-using ComponentManagement.Factory.Loaders;
 using ComponentManagement.Scenes;
 using Gui.ViewModels;
 using Gui.Views;

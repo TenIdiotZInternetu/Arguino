@@ -1,6 +1,5 @@
 ﻿using System;
 using Avalonia;
-using Avalonia.Logging;
 using Gui.Views;
 
 namespace Gui;
