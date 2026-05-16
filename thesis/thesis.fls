@@ -466,6 +466,8 @@ INPUT /usr/share/texmf-dist/fonts/tfm/public/lm/ec-lmri12.tfm
 INPUT /usr/share/texmf-dist/fonts/tfm/public/lm/ec-lmr12.tfm
 INPUT /usr/share/texmf-dist/fonts/tfm/public/lm/ec-lmbx12.tfm
 INPUT /usr/share/texmf-dist/fonts/tfm/public/lm/ec-lmr8.tfm
+INPUT /usr/share/texmf-dist/fonts/enc/dvips/lm/lm-mathit.enc
+INPUT /usr/share/texmf-dist/fonts/enc/dvips/lm/lm-rm.enc
 INPUT /usr/share/texmf-dist/fonts/tfm/public/lm/ec-lmr10.tfm
 INPUT /usr/share/texmf-dist/fonts/tfm/public/lm/rm-lmr10.tfm
 INPUT /usr/share/texmf-dist/fonts/tfm/public/lm/rm-lmr7.tfm
@@ -493,8 +495,6 @@ INPUT /usr/share/texmf-dist/fonts/tfm/public/lm/lmbsy7.tfm
 INPUT /usr/share/texmf-dist/fonts/tfm/public/lm/lmbsy5.tfm
 INPUT /usr/share/texmf-dist/fonts/tfm/public/lm/ec-lmr7.tfm
 INPUT /usr/share/texmf-dist/fonts/tfm/public/lm/ec-lmri10.tfm
-INPUT /usr/share/texmf-dist/fonts/enc/dvips/lm/lm-mathit.enc
-INPUT /usr/share/texmf-dist/fonts/enc/dvips/lm/lm-rm.enc
 INPUT ./img/backend-architecture.pdf
 INPUT ./img/backend-architecture.pdf
 INPUT ./img/backend-architecture.pdf
