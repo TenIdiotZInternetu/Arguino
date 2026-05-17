@@ -3,7 +3,7 @@ using ComponentManagement.Scenes;
 using Svg;
 using Svg.Skia;
 
-namespace ComponentManagement.Graph;
+namespace ComponentManagement.Circuitry;
 
 // For full Component initialization check ComponentManagement.Factory.SceneFactory
 

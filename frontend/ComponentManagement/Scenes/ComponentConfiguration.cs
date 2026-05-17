@@ -1,5 +1,5 @@
 using System.Numerics;
-using ComponentManagement.Graph;
+using ComponentManagement.Circuitry;
 using Svg.Skia;
 
 namespace ComponentManagement.Scenes;
