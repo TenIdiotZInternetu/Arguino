@@ -500,6 +500,11 @@ INPUT ./img/backend-architecture.pdf
 INPUT ./img/backend-architecture.pdf
 INPUT ./img/backend-architecture.pdf
 INPUT ./img/backend-architecture.pdf
+INPUT ./img/frontend-architecture.pdf
+INPUT ./img/frontend-architecture.pdf
+INPUT ./img/frontend-architecture.pdf
+INPUT ./img/frontend-architecture.pdf
+INPUT ./img/frontend-architecture.pdf
 INPUT ./ch2_implementation.tex
 INPUT ./ch2_implementation.tex
 OUTPUT ch2_implementation.aux
