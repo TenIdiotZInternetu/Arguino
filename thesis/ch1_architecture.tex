@@ -114,3 +114,12 @@ The module comes with \texttt{FileLogger} implementation of the \texttt{ILogger}
 The other utility model is \texttt{Timer}. It is used to track time from the start of the simulation. The simulator holds two of these timers, one for \textit{real time} and one for \textit{simulation time}. Although there is no difference between them right now, the intention is to apply effects like stopping or slowing down to the simulation time timer from the frontend, so that functions like \texttt{millis} work consistently with disturbances caused by the frontend. Functions returning real time and simulation time are passed to the file logger as a source of its timestamps.
 
 \section{Frontend}
+
+\begin{figure}[ht]
+    \centering
+    \vfill
+    \includegraphics[width=\textwidth, keepaspectratio]{img/frontend-architecture.pdf}
+    \caption{Frontend architecture}
+    \label{fig:frontend}
+    \vfill
+\end{figure}
