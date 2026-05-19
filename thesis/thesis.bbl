@@ -69,9 +69,31 @@
       \verb http://ieeexplore.ieee.org/document/977259/
       \endverb
     \endentry
-    \entry{avalonia-mvvm}{online}{}{}
+    \entry{avalonia_custom_controls}{online}{}{}
       \field{sortinit}{2}
       \field{sortinithash}{8b555b3791beccb63322c22f3320aa9a}
+      \field{labeltitlesource}{title}
+      \field{abstract}{Compare user controls, templated controls, and custom-drawn controls to pick the right approach.}
+      \field{day}{20}
+      \field{langid}{english}
+      \field{month}{4}
+      \field{title}{Choosing a custom control type {|} Avalonia Docs}
+      \field{urlday}{19}
+      \field{urlmonth}{5}
+      \field{urlyear}{2026}
+      \field{year}{2026}
+      \field{dateera}{ce}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://docs.avaloniaui.net/docs/custom-controls/choosing-a-custom-control-type
+      \endverb
+      \verb{url}
+      \verb https://docs.avaloniaui.net/docs/custom-controls/choosing-a-custom-control-type
+      \endverb
+    \endentry
+    \entry{avalonia-mvvm}{online}{}{}
+      \field{sortinit}{3}
+      \field{sortinithash}{ad6fe7482ffbd7b9f99c9e8b5dccd3d7}
       \field{labeltitlesource}{title}
       \field{abstract}{Separate {UI} from logic using the Model-View-{ViewModel} pattern with data binding.}
       \field{day}{20}
