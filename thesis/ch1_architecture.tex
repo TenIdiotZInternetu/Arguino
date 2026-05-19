@@ -56,7 +56,7 @@ The rest of the information stored in an event is its type and arguments. The ty
 
 There are many ways to encode such and event into a message. Currently the only encoder implemented in this work is the text encoder, which parses values of events into human readable strings separated by a colon. The messages themselves are separated by a semicolon. This particular encoding is quite space ineffective, but it helps a lot during debugging of the IPC systems.
 
-\footnotetext{The terminology and principles are inspired by the \textit{Optimistic synchronization} paradigm in distributed systems. In this paradigm, the events are consumed as fast as possible, and then rolled back once an event with a lower LVT than the ones consumed appears (so called \textit{Time Warp} mechanism). But Time Warp is not viable for simulating code of a high level language like C++ without custom memory management, and in our implementation it isn't even necessary.}
+\footnotetext{The terminology and principles are inspired by the \textit{Optimistic synchronization} paradigm in distributed systems. In this paradigm, the events are consumed as fast as possible, and then rolled back once an event with a lower LVT than the ones consumed appears (so called \textit{Time Warp} mechanism). But Time Warp is not viable for simulating code of a high level language like C++ without custom memory management, and in our implementation it isn't even necessary. \cite{fujimoto_parallel_2001}}
 
 \subsection{TCP stream}
 
@@ -130,9 +130,18 @@ The frontend is written in C\#. We consider the language to be more convenient f
 
 For the GUI we decided to use Avalonia UI. Avalonia is a popular open-source cross-platform .NET framework, used by major companies like JetBrains or Unity. It is based on the Microsoft's WPF framework utilising the same XAML markup language and many of the same core principles. We chose it exactly because neither WPF or its cross-platform successor MAUI are available on Linux, one of our target platforms.
 
-Our humble GUI consists mostly of the circuit canvas. A zoomable and pannable space where the components of a circuit can be placed to specific coordinates, uncostrained by the usual layout structures of Avalonia. Each of the component types have its own set of SVG images that 
+Our humble GUI consists mostly of the circuit canvas. A zoomable and pannable space where the components of a circuit can be placed to specific coordinates, uncostrained by the usual layout structures of Avalonia. Each of the component types have its own set of SVG images that are drawn to the canvas. Each individual component always references one of the SVGs from this set, representing its current state to the user. 
 
-The preferred architecture for Avalonia applications is \textit{MVVM}, or Model-View-ViewModel.
+The preferred architecture for Avalonia applications is \textit{MVVM}, or \textit{Model-View-ViewModel}. \textit{View} is the visual layout of the window and its parts. It is written in \textit{XAML} (Extensible Application Markup Language) in files with the \texttt{.axaml} extension. It binds to data and events in the \textit{viewmodel}, which is responsible for behavior of what is being shown. \cite{avalonia-mvvm}
+
+\begin{figure}[ht]
+    \centering
+    \vfill
+    \includegraphics[width=\textwidth, keepaspectratio]{img/mvvm.png}
+    \caption{MVVM architecture {\cite{avalonia-mvvm}}}
+    \label{fig:mvvm}
+    \vfill
+\end{figure}
 
 \subsection{The logic}
 
