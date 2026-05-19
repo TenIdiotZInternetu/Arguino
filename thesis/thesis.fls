@@ -505,6 +505,11 @@ INPUT ./img/frontend-architecture.pdf
 INPUT ./img/frontend-architecture.pdf
 INPUT ./img/frontend-architecture.pdf
 INPUT ./img/frontend-architecture.pdf
+INPUT ./img/mvvm.png
+INPUT ./img/mvvm.png
+INPUT ./img/mvvm.png
+INPUT ./img/mvvm.png
+INPUT ./img/mvvm.png
 INPUT ./ch2_implementation.tex
 INPUT ./ch2_implementation.tex
 OUTPUT ch2_implementation.aux
@@ -529,6 +534,7 @@ OUTPUT bibliography.aux
 INPUT ./bibliography.tex
 INPUT ./bibliography.tex
 INPUT bibliography.tex
+INPUT /usr/share/texmf-dist/fonts/tfm/public/lm/ec-lmcsc10.tfm
 INPUT ./thesis.lof
 INPUT ./thesis.lof
 INPUT thesis.lof
@@ -565,6 +571,7 @@ INPUT thesis.run.xml
 OUTPUT thesis.run.xml
 INPUT /usr/share/texmf-dist/fonts/type1/public/lm/lmbx10.pfb
 INPUT /usr/share/texmf-dist/fonts/type1/public/lm/lmbx12.pfb
+INPUT /usr/share/texmf-dist/fonts/type1/public/lm/lmcsc10.pfb
 INPUT /usr/share/texmf-dist/fonts/type1/public/lm/lmmi12.pfb
 INPUT /usr/share/texmf-dist/fonts/type1/public/lm/lmr10.pfb
 INPUT /usr/share/texmf-dist/fonts/type1/public/lm/lmr12.pfb

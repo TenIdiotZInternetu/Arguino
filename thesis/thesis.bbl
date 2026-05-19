@@ -1,0 +1,97 @@
+% $ biblatex auxiliary file $
+% $ biblatex bbl format version 3.3 $
+% Do not modify the above lines!
+%
+% This is an auxiliary file used by the 'biblatex' package.
+% This file may safely be deleted. It will be recreated by
+% biber as required.
+%
+\begingroup
+\makeatletter
+\@ifundefined{ver@biblatex.sty}
+  {\@latex@error
+     {Missing 'biblatex' package}
+     {The bibliography requires the 'biblatex' package.}
+      \aftergroup\endinput}
+  {}
+\endgroup
+
+
+\refsection{0}
+  \datalist[entry]{none/global//global/global/global}
+    \entry{fujimoto_parallel_2001}{inproceedings}{}{}
+      \name{author}{1}{}{%
+        {{hash=a7306c0bb4fa58444af214ba1498865c}{%
+           family={Fujimoto},
+           familyi={F\bibinitperiod},
+           given={R.M.},
+           giveni={R\bibinitperiod}}}%
+      }
+      \list{location}{1}{%
+        {Arlington, {VA}, {USA}}%
+      }
+      \list{publisher}{1}{%
+        {IEEE}%
+      }
+      \strng{namehash}{a7306c0bb4fa58444af214ba1498865c}
+      \strng{fullhash}{a7306c0bb4fa58444af214ba1498865c}
+      \strng{fullhashraw}{a7306c0bb4fa58444af214ba1498865c}
+      \strng{bibnamehash}{a7306c0bb4fa58444af214ba1498865c}
+      \strng{authorbibnamehash}{a7306c0bb4fa58444af214ba1498865c}
+      \strng{authornamehash}{a7306c0bb4fa58444af214ba1498865c}
+      \strng{authorfullhash}{a7306c0bb4fa58444af214ba1498865c}
+      \strng{authorfullhashraw}{a7306c0bb4fa58444af214ba1498865c}
+      \field{sortinit}{1}
+      \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{abstract}{Originating from basic research conducted in the 1970’s and 1980’s, the parallel and distributed simulation field has matured over the last few decades. Today, operational systems have been fielded for applications such as military training, analysis of communication networks, and air traffic control systems, to mention a few. This tutorial gives an overview of technologies to distribute the execution of simulation programs over multiple computer systems. Particular emphasis is placed on synchronization (also called time management) algorithms as well as data distribution techniques.}
+      \field{booktitle}{Proceeding of the 2001 Winter Simulation Conference (Cat. No.01CH37304)}
+      \field{eventtitle}{2001 Winter Simulation Conference}
+      \field{isbn}{978-0-7803-7307-5}
+      \field{langid}{english}
+      \field{title}{Parallel and distributed simulation systems}
+      \field{urlday}{5}
+      \field{urlmonth}{3}
+      \field{urlyear}{2026}
+      \field{year}{2001}
+      \field{dateera}{ce}
+      \field{urldateera}{ce}
+      \field{pages}{147\bibrangedash 157}
+      \range{pages}{11}
+      \verb{doi}
+      \verb 10.1109/WSC.2001.977259
+      \endverb
+      \verb{urlraw}
+      \verb http://ieeexplore.ieee.org/document/977259/
+      \endverb
+      \verb{url}
+      \verb http://ieeexplore.ieee.org/document/977259/
+      \endverb
+    \endentry
+    \entry{avalonia-mvvm}{online}{}{}
+      \field{sortinit}{2}
+      \field{sortinithash}{8b555b3791beccb63322c22f3320aa9a}
+      \field{labeltitlesource}{title}
+      \field{abstract}{Separate {UI} from logic using the Model-View-{ViewModel} pattern with data binding.}
+      \field{day}{20}
+      \field{langid}{english}
+      \field{month}{4}
+      \field{title}{The {MVVM} pattern {|} Avalonia Docs}
+      \field{urlday}{19}
+      \field{urlmonth}{5}
+      \field{urlyear}{2026}
+      \field{year}{2026}
+      \field{dateera}{ce}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://docs.avaloniaui.net/docs/fundamentals/the-mvvm-pattern
+      \endverb
+      \verb{url}
+      \verb https://docs.avaloniaui.net/docs/fundamentals/the-mvvm-pattern
+      \endverb
+    \endentry
+  \enddatalist
+\endrefsection
+\endinput
+
