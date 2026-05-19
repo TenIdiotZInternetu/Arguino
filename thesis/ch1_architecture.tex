@@ -115,6 +115,8 @@ The other utility model is \texttt{Timer}. It is used to track time from the sta
 
 \section{Frontend}
 
+\subsection{The presentation}
+
 \begin{figure}[ht]
     \centering
     \vfill
@@ -123,3 +125,16 @@ The other utility model is \texttt{Timer}. It is used to track time from the sta
     \label{fig:frontend}
     \vfill
 \end{figure}
+
+The frontend is written in C\#. We consider the language to be more convenient for many of the essentails system than its C++ counterpart. That includes handling the graphics, the user interactions and parsing numerous configuration files needed for extensibility of the application. Libraries are also much easier to set up and compile thanks to NuGet.
+
+For the GUI we decided to use Avalonia UI. Avalonia is a popular open-source cross-platform .NET framework, used by major companies like JetBrains or Unity. It is based on the Microsoft's WPF framework utilising the same XAML markup language and many of the same core principles. We chose it exactly because neither WPF or its cross-platform successor MAUI are available on Linux, one of our target platforms.
+
+Our humble GUI consists mostly of the circuit canvas. A zoomable and pannable space where the components of a circuit can be placed to specific coordinates, uncostrained by the usual layout structures of Avalonia. Each of the component types have its own set of SVG images that 
+
+The preferred architecture for Avalonia applications is \textit{MVVM}, or Model-View-ViewModel.
+
+\subsection{The logic}
+
+Only a minor part of the frontend is actually written with Avalonia.
+
