@@ -1,8 +1,8 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="clr-namespace:Gui.ViewModels"
-             xmlns:cmgraph="clr-namespace:ComponentManagement.Graph;assembly=ComponentManagement"
              xmlns:tcontrol="clr-namespace:Gui.Views.TemplatedControls"
+             xmlns:circuitry="clr-namespace:ComponentManagement.Circuitry;assembly=ComponentManagement"
              x:Class="Gui.Views.UserControls.CircuitCanvas"
              x:DataType="vm:CircuitCanvas">
 
@@ -23,7 +23,7 @@
                 </ItemsControl.ItemsPanel>
     
                 <ItemsControl.ItemTemplate>
-                    <DataTemplate DataType="cmgraph:Component" >
+                    <DataTemplate DataType="circuitry:Component" >
                         <tcontrol:ComponentControl Component="{Binding}"/>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>

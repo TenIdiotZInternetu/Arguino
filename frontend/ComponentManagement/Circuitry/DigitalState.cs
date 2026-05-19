@@ -1,4 +1,4 @@
-namespace ComponentManagement.Graph
+namespace ComponentManagement.Circuitry
 {
     public enum DigitalState {
         Low,

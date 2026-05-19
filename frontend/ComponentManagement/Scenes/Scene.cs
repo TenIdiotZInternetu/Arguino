@@ -1,4 +1,4 @@
-using ComponentManagement.Graph;
+using ComponentManagement.Circuitry;
 
 namespace ComponentManagement.Scenes;
 

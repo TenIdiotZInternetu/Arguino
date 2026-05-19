@@ -1,6 +1,6 @@
 using System.Text;
 
-namespace ComponentManagement.Graph;
+namespace ComponentManagement.Circuitry;
 
 public class ElectricalNode {
     public uint DrivingPins { get; private set; } = 0;

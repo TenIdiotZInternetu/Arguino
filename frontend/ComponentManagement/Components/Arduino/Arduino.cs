@@ -1,4 +1,4 @@
-using ComponentManagement.Graph;
+using ComponentManagement.Circuitry;
 using IpcAdapter;
 
 namespace ComponentManagement.Components;

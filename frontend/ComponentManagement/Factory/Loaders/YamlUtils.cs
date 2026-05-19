@@ -1,6 +1,6 @@
 using System.Numerics;
 
-namespace ComponentManagement.Utils;
+namespace ComponentManagement.Factory.Loaders;
 
 public static class YamlUtils {
     public static Vector2? StringToVector2(string valuePair) {

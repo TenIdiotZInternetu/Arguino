@@ -1,6 +1,6 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
-using ComponentManagement.Graph;
+using ComponentManagement.Circuitry;
 
 namespace Gui.ViewModels;
 
