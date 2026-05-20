@@ -1,6 +1,6 @@
+#include <charconv>
 #include <ranges>
 #include <sstream>
-#include <charconv>
 
 #include "../encoder.hpp"
 
@@ -10,6 +10,7 @@ constexpr char PART_DELIMETER = ':';
 constexpr char COMMON_PART_FORMAT[] = "{:012}:{:07}:";
 constexpr char WRITE_FORMAT[] = "W:{:02}:{}";
 constexpr char PINMODE_FORMAT[] = "P:{:02}:{}";
+constexpr char REBOOT_FORMAT[] = "R";
 
 constexpr int COMMON_PARTS = 3;
 constexpr int MAX_ARGS = 3;
@@ -27,6 +28,11 @@ static std::string encode_pinmode(const Event& e)
     return std::format(PINMODE_FORMAT, e.args[0], e.args[1]);
 }
 
+static std::string encode_reboot(const Event& e)
+{
+    return REBOOT_FORMAT;
+}
+
 std::string encode_event(const Event& event)
 {
     std::string commonPart = std::format(
@@ -37,6 +43,8 @@ std::string encode_event(const Event& event)
             return commonPart + encode_write(event);
         case Event::Type::PinMode:
             return commonPart + encode_pinmode(event);
+        case Event::Type::Reboot:
+            return commonPart + encode_reboot(event);
         default:
             return UNKNOWN_EVENT;
     }

@@ -11,7 +11,7 @@ Event::Event(Type type, Args... arguments)
     : type(type), timestampMicros(Simulator::state().get_time()), _id(s_nextEventId)
 {
     static_assert(sizeof...(arguments) <= MAX_ARGS);
-    args = { static_cast<int>(arguments)... };
+    args = {static_cast<int>(arguments)...};
     ++s_nextEventId;
 }
 
@@ -22,6 +22,8 @@ std::string type_string(Event::Type type)
             return "Write";
         case Event::Type::PinMode:
             return "Pin";
+        case Event::Type::Reboot:
+            return "Reboot";
         default:
             return "Unknown";
     }
@@ -54,8 +56,8 @@ Event Event::write(pin_t pin, digital_t value)
 Event Event::set_pinmode(pin_t pin, PinMode mode)
 {
     PinMode oppositeMode = mode == PinMode::In  //
-        ? PinMode::Out
-        : PinMode::In;
+                             ? PinMode::Out
+                             : PinMode::In;
 
     Event event(Type::PinMode, pin, mode);
     event.action = [=]() {
@@ -64,6 +66,13 @@ Event Event::set_pinmode(pin_t pin, PinMode mode)
     };
 
     event.reverseAction = [=]() { Simulator::state().set_pin_mode(pin, oppositeMode); };
+    return event;
+}
+
+Event Event::reboot()
+{
+    Event event;
+    event.action = [=]() {};  // TODO
     return event;
 }
 

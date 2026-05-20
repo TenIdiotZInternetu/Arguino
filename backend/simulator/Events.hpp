@@ -1,10 +1,10 @@
 #ifndef ARGUINO_EVENTS_HPP
 #define ARGUINO_EVENTS_HPP
 
+#include <array>
 #include <chrono>
 #include <functional>
 #include <variant>
-#include <array>
 
 #include "SimulatorTypes.hpp"
 
@@ -12,7 +12,7 @@ namespace arguino::simulator {
 
 struct Event {
    public:
-    enum class Type { Write, PinMode };
+    enum class Type { Write, PinMode, Reboot };
 
     Type type;
     int64_t timestampMicros;  // TODO: size_t
@@ -34,7 +34,7 @@ struct Event {
 
     static Event write(pin_t pin, digital_t value);
     static Event set_pinmode(pin_t pin, PinMode mode);
-    // TODO: Jump, reboot and fetch events
+    static Event reboot();
 
    private:
     static size_t s_nextEventId;
