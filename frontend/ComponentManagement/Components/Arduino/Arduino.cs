@@ -1,9 +1,12 @@
+using System.Diagnostics;
 using ComponentManagement.Circuitry;
 using IpcAdapter;
 
 namespace ComponentManagement.Components;
 
 public partial class Arduino : Component {
+    private const int DIGITAL_PINS = 14;
+    
     private IIpcAdapter? _ipc;
     private readonly SynchronizationContext _uiContext;
 
@@ -35,7 +38,15 @@ public partial class Arduino : Component {
         GetDigitalPin(pinId).SetMode(mode switch {
             PinMode.In => Pin.Mode.ReadOnly,
             PinMode.Out => Pin.Mode.WriteOnly,
+            _ => throw new UnreachableException("Wrong pin mode parsed from event")
         });
+    }
+
+    private void Reboot() {
+        for (int i = 0; i < DIGITAL_PINS; i++) {
+            WriteToPin(i, DigitalState.Low);
+            SetPinMode(i, PinMode.Out);
+        }
     }
 
     private Pin GetDigitalPin(int index) => GetPin("D" + index)!;

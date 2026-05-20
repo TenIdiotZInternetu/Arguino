@@ -12,6 +12,8 @@ public partial class Arduino {
                 WriteToPin(@event.Args[0], (DigitalState)@event.Args[1]); break;
             case EventType.PinMode:
                 SetPinMode(@event.Args[0], (PinMode)@event.Args[1]); break;
+            case EventType.Reboot:
+                Reboot(); break;
             case EventType.Unknown:
                 ComponentManager.LogError("Encountered unknown event type");
                 return;

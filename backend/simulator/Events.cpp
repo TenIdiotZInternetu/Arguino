@@ -71,7 +71,7 @@ Event Event::set_pinmode(pin_t pin, PinMode mode)
 
 Event Event::reboot()
 {
-    Event event;
+    Event event(Type::Reboot);
     event.action = [=]() {};  // TODO
     return event;
 }

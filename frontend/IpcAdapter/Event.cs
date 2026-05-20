@@ -1,6 +1,6 @@
 namespace IpcAdapter.Events;
 
-public enum EventType { Unknown, Write, PinMode }
+public enum EventType { Unknown, Write, PinMode, Reboot }
 
 public struct Event {
     public const int MAX_ARGS = 3;

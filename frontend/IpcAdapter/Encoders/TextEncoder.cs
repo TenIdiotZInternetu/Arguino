@@ -41,6 +41,7 @@ public class TextEncoder : IEncoder {
         @event.Type = parts[2] switch {
             "W" => EventType.Write,
             "P" => EventType.PinMode,
+            "R" => EventType.Reboot,
             _ => EventType.Unknown
         };
 
