@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using ComponentManagement.Circuitry;
+using ComponentManagement.Scenes;
 using IpcAdapter;
 
 namespace ComponentManagement.Components;

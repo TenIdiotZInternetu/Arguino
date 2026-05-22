@@ -1,5 +1,6 @@
 using System.Numerics;
 using ComponentManagement.Circuitry;
+using ComponentManagement.Scenes;
 
 namespace ComponentManagement.Components.Button;
 

@@ -3,6 +3,7 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Media;
 using ComponentManagement.Circuitry;
+using ComponentManagement.Scenes;
 using Gui.Utils.ExtensionMethods;
 using Svg.Skia;
 

@@ -3,6 +3,7 @@
              xmlns:vm="clr-namespace:Gui.ViewModels"
              xmlns:tcontrol="clr-namespace:Gui.Views.TemplatedControls"
              xmlns:circuitry="clr-namespace:ComponentManagement.Circuitry;assembly=ComponentManagement"
+             xmlns:scenes="clr-namespace:ComponentManagement.Scenes;assembly=ComponentManagement"
              x:Class="Gui.Views.UserControls.CircuitCanvas"
              x:DataType="vm:CircuitCanvas">
 
@@ -23,7 +24,7 @@
                 </ItemsControl.ItemsPanel>
     
                 <ItemsControl.ItemTemplate>
-                    <DataTemplate DataType="circuitry:Component" >
+                    <DataTemplate DataType="scenes:Component" >
                         <tcontrol:ComponentControl Component="{Binding}"/>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
