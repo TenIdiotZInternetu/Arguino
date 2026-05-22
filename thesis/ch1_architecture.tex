@@ -5,12 +5,9 @@
 The whole project is divided into two main parts. The purpose of the backend is to execute the Arduino code and simulate the change on the board's pinout. The purpose of the frontend is to reflect these changes on a user defined logical circuit, while offering the user control over the simulation. We chose to implement the backend in C++ and the frontend in C\#. Both backend and frontend are running in its own separate process.
 
 \begin{figure}[ht]
-    \centering
-    \vfill
     \includegraphics[width=\textwidth, keepaspectratio]{img/overall-architecture.pdf}
     \caption{Top-level architecture overview}
     \label{fig:architecture}
-    \vfill
 \end{figure}
 
 The Figure \ref{fig:architecture} shows the most important systems in each process. The user coded is compiled together with the \texttt{executable} module of the backend. The declarations in the header \texttt{Arduino.h} prepended to the top of the \texttt{.ino} is implemented by a mock library \texttt{Arduino.cpp}. For each observable action an event is created and passed to the singleton \texttt{Simulator} class to compute and put into an event queue. The event is also communicated to the frontend process.
@@ -79,12 +76,9 @@ In the shared memory region, we establish a data structure that stores messages 
 As for the metadata, for each buffer a position after the last consumed and produced message is stored. It is important to never store references as pointers in the shared memory itself. The memory region will be most likely mapped to different addresses in each process. Because of that the \textit{producer offset} and \textit{consumer offset} are regular integers denoting the distance from the first adress of the buffer in bytes. When the offsets are equal, it means the buffer is empty. We don't care about concurrent updates of these offsets, one process changes only one of the offsets for the duration of the simulation.
 
 \begin{figure}
-    \centering
-    \vfill
     \includegraphics[width=\textwidth, keepaspectratio]{img/circular-buffer.pdf}
     \caption{Memory layout of the shared memory region}
     \label{fig:circular-buffer}
-    \vfill
 \end{figure}
 
 \section{Backend}
@@ -92,12 +86,9 @@ As for the metadata, for each buffer a position after the last consumed and prod
 \subsection{The simulation}
 
 \begin{figure}[ht]
-    \centering
-    \vfill
     \includegraphics[width=\textwidth, keepaspectratio]{img/backend-architecture.pdf}
     \caption{Backend architecture}
     \label{fig:backend}
-    \vfill
 \end{figure}
 
 The language choice for backend was obvious, the \texttt{.ino} file is a syntactically valid C++ code. We include the code in the project by passing it as an argument to the \texttt{preprocess.sh} script (\texttt{preprocess.bat} on Windows). Inside we use the \texttt{arduino-cli} tool with the right arguments to apply very light prerpocessing to the file, like adding function declarations to the top or including the \texttt{Arduino.h} header. Important additions are the \texttt{\#line} directives, which link to the definitions in the original \texttt{.ino} file. Thanks to these, breakpoints can be added to the \texttt{.ino} file and debugged as if the file itself was part of the project, completely with stepping through lines and inspection of variables. The file is then saved as \texttt{sketch.cpp} in the directory of the \texttt{executable} module where it is picked up by the CMake configuration and included in the \texttt{main.cpp}. The functions declared by the \texttt{Arduino.h} header file, like \texttt{digitalWrite} or \texttt{millis} are implemented in a custom mock library \texttt{Arduino.cpp} in the \texttt{simulator} module. Instead of instructing the AVR chip, as the real implementation would, the mock definitions create events and pass them to the \texttt{Simulator} for enquing and consumption. 
@@ -127,12 +118,9 @@ The other utility model is \texttt{Timer}. It is used to track time from the sta
 \subsection{The presentation}
 
 \begin{figure}
-    \centering
-    \vfill
     \includegraphics[width=\textwidth, keepaspectratio]{img/frontend-architecture.pdf}
     \caption{Frontend architecture}
     \label{fig:frontend}
-    \vfill
 \end{figure}
 
 The frontend is written in C\#. We consider the language to be more convenient for many of the essentails system than its C++ counterpart. That includes handling the graphics, the user interactions and parsing numerous configuration files needed for extensibility of the application. Libraries are also much easier to set up and compile thanks to NuGet.
@@ -150,12 +138,9 @@ XAML views bind to data and events in a \textit{viewmodel}, which manipulates wi
 Our model is the abstract \texttt{Component} class implemented by various types of components, like LEDs, buttons or our Arduino. A list of the \texttt{Component} instances is stored in \texttt{CircuitCanvas} viewmodel, and each instance is passed to a \texttt{ComponentControl} in the \texttt{CIrcuitCanvas} view. This and all other initialization steps of the application are orchestrated by the static \texttt{MainController} class.
 
 \begin{figure}
-    \centering
-    \vfill
     \includegraphics[width=\textwidth, keepaspectratio]{img/mvvm.png}
     \caption{MVVM architecture {\cite{avalonia-mvvm}}}
     \label{fig:mvvm}
-    \vfill
 \end{figure}
 
 \subsection{The logic}
