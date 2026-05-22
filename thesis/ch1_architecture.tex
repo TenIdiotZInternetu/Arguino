@@ -78,6 +78,15 @@ In the shared memory region, we establish a data structure that stores messages 
 
 As for the metadata, for each buffer a position after the last consumed and produced message is stored. It is important to never store references as pointers in the shared memory itself. The memory region will be most likely mapped to different addresses in each process. Because of that the \textit{producer offset} and \textit{consumer offset} are regular integers denoting the distance from the first adress of the buffer in bytes. When the offsets are equal, it means the buffer is empty. We don't care about concurrent updates of these offsets, one process changes only one of the offsets for the duration of the simulation.
 
+\begin{figure}
+    \centering
+    \vfill
+    \includegraphics[width=\textwidth, keepaspectratio]{img/circular-buffer.pdf}
+    \caption{Memory layout of the shared memory region}
+    \label{fig:circular-buffer}
+    \vfill
+\end{figure}
+
 \section{Backend}
 
 \subsection{The simulation}
