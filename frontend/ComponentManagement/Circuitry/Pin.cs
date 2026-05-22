@@ -1,3 +1,5 @@
+using ComponentManagement.Scenes;
+
 namespace ComponentManagement.Circuitry;
 
 public record struct PinPrototype(uint Id, string? Name = null);

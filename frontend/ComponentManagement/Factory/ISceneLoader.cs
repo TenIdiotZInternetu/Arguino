@@ -1,4 +1,5 @@
 using ComponentManagement.Circuitry;
+using ComponentManagement.Scenes;
 
 namespace ComponentManagement.Factory;
 

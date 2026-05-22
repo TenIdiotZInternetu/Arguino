@@ -1,9 +1,9 @@
 using System.Numerics;
-using ComponentManagement.Scenes;
+using ComponentManagement.Circuitry;
 using Svg;
 using Svg.Skia;
 
-namespace ComponentManagement.Circuitry;
+namespace ComponentManagement.Scenes;
 
 // For full Component initialization check ComponentManagement.Factory.SceneFactory
 
