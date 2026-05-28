@@ -37,7 +37,7 @@ In the early iterations, a snapshot of the Arduino state was sent over one messa
 
 This approach was easy to implement but flawed. The main issue was the frequency of reads. At lower frequencies, the system is prone to temporal aliasing. \xxx{Find temporal aliasing definition}. Some events, like very short impulses, can be missed completely. This is not much of an issue in purely combinational circuits. But we want our frontend to support stateful components, e.g. shift registers present on the Funshield, which are controlled by digital writes less than a microsecond a part.
 
-Highering the frequency to such an extent is not viable. 
+Highering the frequency to such an extent is not viable. \xxx{elaborate}
 
 \subsection{Events} \label{events-section}
 
@@ -133,7 +133,7 @@ For the GUI we decided to use Avalonia UI. Avalonia is a popular open-source cro
 
 Our humble GUI consists mostly of the circuit canvas. A zoomable and pannable space where the \textit{components} of a circuit can be placed to specific coordinates, uncostrained by the usual layout structures of Avalonia. Arrangement of these components is called a \textit{scene}. Each of the component types have its own set of SVG images that are drawn to the canvas. We refer to them as \textit{sprites}. Each individual component always references one of its sprites, conveying the current state to the user. A sprite on the canvas can be clicked on (e.g. a button) to generate some kind of response. Of course, these features are not built into Avalonia, so we need to create custom Avalonia \textit{controls} to achieve them.
 
-\subsubsection{Model-View-Viewmodel}
+\subsubsection{Model-View-ViewModel}
 
 The preferred architecture for Avalonia applications is \textit{MVVM}, or \textit{Model-View-ViewModel}. \textit{View} is the visual layout of the window and its parts. It is written in \textit{XAML} (Extensible Application Markup Language) in files with the \texttt{.axaml} extension. In Avalonia's case, elements of a view are called \textit{controls}. Those can be buttons, labels, containers, etc. 3 types of custom controls can be created in total, our frontend utilizes \textit{user controls} and \textit{custom-drawn controls}. User controls are themselves views built up in XAML from other controls. This is perfect for our \texttt{CircuitCanvas} view, as it is just a list of component controls enveloped in a built-in \texttt{Canvas} panel. The custom-drawn controls are defined as C\# classes, inheriting from the \texttt{Control} class, and defining it's own rendering logic by overriding the \texttt{Render} method \cite{avalonia_custom_controls}.
 
