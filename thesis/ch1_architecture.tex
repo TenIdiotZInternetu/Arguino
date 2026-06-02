@@ -39,7 +39,7 @@ This approach was easy to implement but flawed. The main issue was the frequency
 
 Highering the frequency to such an extent is not viable. \xxx{elaborate}
 
-\subsection{Events} \label{subsec:events}
+\subsection{Events}\label{subsec:events}
 
 Right now synchronization between processes is maintained by recording every significant event produced by either the backend or the frontend, and sending it to the other process. Each process is equipped with an event queue, that consumes the events in order of the least recent to the most recent. Consuming an event means invoking the appropriate function based on the type of the event with arguments stored in the event's signature. 
 
@@ -51,7 +51,7 @@ The other timestamp included is \textit{Local virtual time} (LVT)\footnotemark. 
 
 The rest of the information stored in an event is its type and arguments. The type corresponds to the action taken after the event is consumed, like writing to a pin or changing pin mode. Each type can define up to 3 integer parameters, e.g for a \textit{write} event that is id of the pin, and a digital value we want to write to it. By limiting the number of arguments, we intend to avoid heap allocation of these events, which could considerably slow down the simulation with programs that produce a lot of events in a short time.
 
-There are many ways to encode such and event into a message. Currently the only encoder implemented in this work is the text encoder, which parses values of events into human readable strings separated by a colon. The messages themselves are separated by a semicolon. This particular encoding is quite space ineffective, but it helps a lot during debugging of the IPC systems.
+There are many ways to encode such an event into a message. Currently the only encoder implemented in this work is the text encoder, which parses values of events into human readable strings separated by a colon. The messages themselves are separated by a semicolon. This particular encoding is quite space ineffective, but it helps a lot during debugging of the IPC systems.
 
 \footnotetext{The terminology and principles are inspired by the \textit{Optimistic synchronization} paradigm in distributed systems. In this paradigm, the events are consumed as fast as possible, and then rolled back once an event with a lower LVT than the ones consumed appears (so called \textit{Time Warp} mechanism). But Time Warp is not viable for simulating code of a high level language like C++ without custom memory management, and in our implementation it isn't even necessary. \cite{fujimoto_parallel_2001}}
 
@@ -95,7 +95,7 @@ The language choice for backend was obvious, the \texttt{.ino} file is a syntact
 
 The \texttt{Simulator} singleton class is the beating heart of the backend. It is responsible for handling the events and the event queue, managing the Arduino state, logging changes and keeping track of time. It is initialized in \texttt{main.cpp} and used frequently throughout the \texttt{executable} and \texttt{simulator} modules. The \texttt{Simulator} holds the instance of the \texttt{ArduinoState} class, representing the digital states on its pins, current pin modes and the inner timer of the Arduino. It also holds the instance of the \texttt{EventQueue}, which stores both local and remote events waiting for consumption. The \texttt{SimulatorTypes.hpp} is a header file with very few type defintions commonly used in the \texttt{simulator} module.
 
-\subsection{Events and IPC}
+\subsection{Events and IPC}\label{subsec:cpp-events}
 
 The \texttt{Event} struct is just a "recipe" for what changes should the \texttt{Simulator} do to the \texttt{ArduinoState}. It holds a lambda function, corresponging to an event's type that is executed only after the event is put in the event queue and consumed in the order described in the section \ref{subsec:events}. The struct defines static functions that create new event instances with these predefined lambdas with the event type's parameters. When a local event is consumed, i.e. the lambda is executed, the event is signalled back to the \texttt{executable} module through a callback, that has been passed to the \texttt{Simulator} during initialization. This way the event can be sent to an IPC adapter, regardless of the used implementation, without a circular dependency on the \texttt{executable} module.
 
@@ -107,7 +107,7 @@ Implementations of the IPC adapter are located in the \texttt{ipc} directory. Th
 
 \subsection{Utilities}
 
-\subsubsection{Logger}
+\subsubsection{Logger} \label{subsub:logger}
 
 There are additional utility modules not shown in the figure \ref{fig:backend}. One of them is the humble \texttt{logger} used extensively throughout the project. The \texttt{ILogger} abstract class exposes the \texttt{log} function accepting either a raw string or an \texttt{IMessage} abstract struct. Structs inheriting form \texttt{IMessage} represent unified formatting of a message with a timestamp and a level of verbosity. The verbosity levels from the highest to lowest are \textit{Debug}, \textit{Info}, \textit{Warning} and \textit{Error}. The messages of higher verbosity levels can be ommitted from the logs by setting the appropriate command line option. \texttt{ILogger} offers shorthand functions for logging these general messages, but more specific ones can be defined as well.
 
@@ -127,7 +127,7 @@ The other utility model is \texttt{Timer}. It is used to track time from the sta
     \label{fig:frontend}
 \end{figure}
 
-The frontend is written in C\#. We consider the language to be more convenient for many of the essentails system than its C++ counterpart. That includes handling the graphics, the user interactions and parsing numerous configuration files needed for extensibility of the application. Libraries are also much easier to set up and compile thanks to NuGet.
+The frontend is written in C\#. We consider the language to be more convenient for writing many of the essential systems than its C++ counterpart. That includes handling the graphics, the user interactions and parsing numerous configuration files needed for extensibility of the application. Libraries are also much easier to set up and compile thanks to NuGet.
 
 For the GUI we decided to use Avalonia UI. Avalonia is a popular open-source cross-platform .NET framework, used by major companies like JetBrains or Unity. It is based on the Microsoft's WPF framework utilising the same XAML markup language and many of the same core principles. We chose it exactly because neither WPF or its cross-platform successor MAUI are available on Linux, one of our target platforms. We only include Avalonia in the Main project of the frontend, as this is the only project responsible for rendering.
 
@@ -179,3 +179,16 @@ The example scene in the listing \ref{lst:scene} contains 2 LEDs, 1 button and 1
 
 \subsection{The Arduino component and IPC}
 
+Arduino is one of the component subtypes of the \texttt{ComponentManagement} project. It is a partial class divided into 2 files. In \texttt{Arduino.cs} it overrides virtual methods and deals with interaction with the circuit. In \texttt{Arduino.Events.cs} it creates events and sends to IPC. It also calls its own method from \texttt{Arduino.cs} when a new event arrives, based on its type and arguments. The adapter is now defined as an \texttt{IIpcAdapter} interface, which is owned by the Arduino component. Events are exchanged through this interface.
+
+The interface is defined in the \texttt{IpcAdapter}, and is implemented by the \texttt{TcpAdapter} and \texttt{SharedMemoryAdapter} projects. It declares methods for connecting to IPC and sending messages. It also declares a C\# event called \texttt{ReceivedEventEvent}, which is invoked after decoding a message incoming from the backend, with the decoded \texttt{Event} struct as an argument. The Arduino component is subscribed to \texttt{ReceivedEventEvent}.
+
+The \texttt{IpcAdapter} project also contains message encoders and a definition of the \texttt{Event} struct. The C++ and the C\# version of the \texttt{Event} struct have the same signature, with the exception of owning a lambda function (described in \ref{subsec:cpp-events}). The lambda is not necessary for the frontend, as there will be only one source of events executed in the frontend, the ones received by the backend. They don't have to be put in a queue, they can be consumed immediately as they come. Frontend also produces events, e.g. when value on an Arduino's input pin is changed from the circuit, but those are never consumed by the frontend. It is the reponsibility of the backend to handle them.
+
+\texttt{IEncoder} and its \texttt{TextEncoder} implementation are analogous to \texttt{encoder.hpp} and \texttt{textEncoder.cpp} in the backend. The interface declares \texttt{EncodeEvent} and \texttt{TryDecodeEvent}, which transcribe events structs into human-readable strings and vice versa.
+
+\subsection{Utilities}
+
+\subsubsection{Logger}
+
+The \texttt{Logger} project is analogous to its backend counterpart (\ref{subsub:logger}). It provides logging to a file with 4 levels of verbosity, that can be set up with a command line argument. Two loggers are used in the frontend as well, one for IPC and one for circuitry logs. There is one additional implemenation of the \texttt{ILogger} called \texttt{CompositeLogger}, which holds list of loggers, and logs into all of them simultaneously. This mechanism anticipates a need for another logger implementation, which will display the log messages in the GUI using Avalonia.
