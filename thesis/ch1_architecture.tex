@@ -165,6 +165,8 @@ The \texttt{Component} base class provides multiple virtual methods with the \te
 
 Usually, specific pins have inherent semantics of being used only for reading or only for writing. This property can be set explicitly on the \texttt{Pin} object with \texttt{MakeReadOnly} and \texttt{MakeWriteOnly} methods. Read only pins refuse write attempts from the component's logic and write only pins refuse notifying a component with a new state from node's propagation. General pins, defined by method \texttt{MakeGeneral} don't have these constraints. Incorrect use of pins with these semantics is followed by a warning in the simulation logs.
 
+\lstinputlisting[language=yaml, caption={Component configuration example: Led.yaml}]{../frontend/ComponentManagement/Components/Led/Led.yaml}
+
 \subsubsection{Scenes}
 
 The final form of the graph is achieved with creation of the scene. The YAML file of the scene consists of two sections. In the \texttt{Components} section, individual instances of \texttt{Component} subtypes are defined. They must have a unique name, and they should specify a graphic transformation, i.e. position, rotation and scale. This triplet of 2D vectors is composed into a \texttt{Transform} struct and passed into the \texttt{SvgDrawOp} as a transformation matrix. The \texttt{Nodes} section defines individual electrical nodes. A single node in this file is represented as a list of component-pin pairs, where the components are identified by their instance name in the \texttt{Components} section, and the pin is identified by its definition in the \texttt{ComponentConfiguration} of the given \texttt{Component} subtype.
