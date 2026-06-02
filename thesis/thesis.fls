@@ -518,6 +518,10 @@ INPUT ./img/mvvm.png
 INPUT ../frontend/ComponentManagement/Components/Led/Led.yaml
 INPUT ../frontend/ComponentManagement/Components/Led/Led.yaml
 INPUT ../frontend/ComponentManagement/Components/Led/Led.yaml
+INPUT /usr/share/texmf-dist/fonts/tfm/public/lm/ec-lmbx10.tfm
+INPUT ../frontend/Scenes/minimal.yaml
+INPUT ../frontend/Scenes/minimal.yaml
+INPUT ../frontend/Scenes/minimal.yaml
 INPUT ./ch2_implementation.tex
 INPUT ./ch2_implementation.tex
 OUTPUT ch2_implementation.aux

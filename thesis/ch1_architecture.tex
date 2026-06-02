@@ -173,5 +173,9 @@ The final form of the graph is achieved with creation of the scene. The YAML fil
 
 The creation of the scene is comprised of a series of parsers in the \texttt{Factory} directory. There is an interface for each of the file types, i.e. the scene, component configurations and SVG files. Each has exactly one implementation in the \texttt{Loaders} directory, using \texttt{YamlDotNet} and \texttt{SvgSkia} libraries. They are put together in the static \texttt{SceneFactory} class, where component subtypes and instances are finalized. The results is a complete \texttt{Scene} object with initialized \texttt{Component} instances and \texttt{ElectricalNode} lists. The \texttt{SceneFactory} is called by the \texttt{MainController} in the \texttt{Main} project, which passes the scene to the \texttt{CircuitCanvas} viewmodel.
 
+\lstinputlisting[language=yaml, caption={Scene example: minimal.yaml}, label={lst:scene}]{../frontend/Scenes/minimal.yaml}
+
+The example scene in the listing \ref{lst:scene} contains 2 LEDs, 1 button and 1 source of voltage. Source, which has one pin that is always driving, is connected to the 0th pin of the button, which reads a high value of the node. Both LEDs are connected to the 1st pin of the same button. Pressing the button will copy the digital state from pin 0 to pin 1, and thus lights up the LED.
+
 \subsection{The Arduino component and IPC}
 
