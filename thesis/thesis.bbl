@@ -19,6 +19,62 @@
 
 \refsection{0}
   \datalist[entry]{none/global//global/global/global}
+    \entry{arduino_sketch_specs}{online}{}{}
+      \field{sortinit}{1}
+      \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
+      \field{labeltitlesource}{title}
+      \field{title}{Sketch specification {|} Arduino Documentation}
+      \field{urlday}{25}
+      \field{urlmonth}{6}
+      \field{urlyear}{2026}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://docs.arduino.cc/arduino-cli/sketch-specification/
+      \endverb
+      \verb{url}
+      \verb https://docs.arduino.cc/arduino-cli/sketch-specification/
+      \endverb
+    \endentry
+    \entry{arduino_r3_smd_specs}{online}{}{}
+      \field{sortinit}{2}
+      \field{sortinithash}{8b555b3791beccb63322c22f3320aa9a}
+      \field{labeltitlesource}{title}
+      \field{abstract}{The Arduino {UNO} is the best board to get started with electronics and coding. If this is your first experience tinkering with the platform, the {UNO} is the most robust board you can start playing with…}
+      \field{title}{{UNO} R3 {SMD} {|} Arduino Documentation}
+      \field{urlday}{25}
+      \field{urlmonth}{6}
+      \field{urlyear}{2026}
+      \field{urldateera}{ce}
+      \verb{file}
+      \verb Snapshot:/home/touster/Zotero/storage/WM7MBU87/uno-rev3-smd.html:text/html
+      \endverb
+      \verb{urlraw}
+      \verb https://docs.arduino.cc/hardware/uno-rev3-smd/
+      \endverb
+      \verb{url}
+      \verb https://docs.arduino.cc/hardware/uno-rev3-smd/
+      \endverb
+    \endentry
+    \entry{arduino_digital_read}{online}{}{}
+      \field{sortinit}{3}
+      \field{sortinithash}{ad6fe7482ffbd7b9f99c9e8b5dccd3d7}
+      \field{labeltitlesource}{title}
+      \field{abstract}{Browse through hundreds of tutorials, datasheets, guides and other technical documentation to get started with Arduino products.}
+      \field{title}{{digitalRead}() {|} Arduino Documentation}
+      \field{urlday}{25}
+      \field{urlmonth}{6}
+      \field{urlyear}{2026}
+      \field{urldateera}{ce}
+      \verb{file}
+      \verb Snapshot:/home/touster/Zotero/storage/3FHGNMDJ/digitalread.html:text/html
+      \endverb
+      \verb{urlraw}
+      \verb https://docs.arduino.cc/language-reference/en/functions/digital-io/digitalread/
+      \endverb
+      \verb{url}
+      \verb https://docs.arduino.cc/language-reference/en/functions/digital-io/digitalread/
+      \endverb
+    \endentry
     \entry{fujimoto_parallel_2001}{inproceedings}{}{}
       \name{author}{1}{}{%
         {{hash=a7306c0bb4fa58444af214ba1498865c}{%
@@ -41,8 +97,8 @@
       \strng{authornamehash}{a7306c0bb4fa58444af214ba1498865c}
       \strng{authorfullhash}{a7306c0bb4fa58444af214ba1498865c}
       \strng{authorfullhashraw}{a7306c0bb4fa58444af214ba1498865c}
-      \field{sortinit}{1}
-      \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
+      \field{sortinit}{5}
+      \field{sortinithash}{20e9b4b0b173788c5dace24730f47d8c}
       \field{labelnamesource}{author}
       \field{labeltitlesource}{title}
       \field{abstract}{Originating from basic research conducted in the 1970’s and 1980’s, the parallel and distributed simulation field has matured over the last few decades. Today, operational systems have been fielded for applications such as military training, analysis of communication networks, and air traffic control systems, to mention a few. This tutorial gives an overview of technologies to distribute the execution of simulation programs over multiple computer systems. Particular emphasis is placed on synchronization (also called time management) algorithms as well as data distribution techniques.}
@@ -70,8 +126,8 @@
       \endverb
     \endentry
     \entry{avalonia_custom_controls}{online}{}{}
-      \field{sortinit}{2}
-      \field{sortinithash}{8b555b3791beccb63322c22f3320aa9a}
+      \field{sortinit}{6}
+      \field{sortinithash}{b33bc299efb3c36abec520a4c896a66d}
       \field{labeltitlesource}{title}
       \field{abstract}{Compare user controls, templated controls, and custom-drawn controls to pick the right approach.}
       \field{day}{20}
@@ -92,8 +148,8 @@
       \endverb
     \endentry
     \entry{avalonia-mvvm}{online}{}{}
-      \field{sortinit}{3}
-      \field{sortinithash}{ad6fe7482ffbd7b9f99c9e8b5dccd3d7}
+      \field{sortinit}{7}
+      \field{sortinithash}{108d0be1b1bee9773a1173443802c0a3}
       \field{labeltitlesource}{title}
       \field{abstract}{Separate {UI} from logic using the Model-View-{ViewModel} pattern with data binding.}
       \field{day}{20}
