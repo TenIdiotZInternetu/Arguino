@@ -318,3 +318,28 @@
 
 %%%%%%%%%%% C# syntax highlighting %%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%% Shell syntax highlighting %%%%%%%%%%%%%%%%
+
+\definecolor{sexe}{RGB}{17, 37, 64}
+\definecolor{sopt}{RGB}{153, 131, 20}
+\definecolor{sarg}{RGB}{8, 143, 161}
+
+\makeatletter
+
+\newcommand\language@shell{shell}
+
+\expandafter\expandafter\expandafter\lstdefinelanguage
+\expandafter{\language@shell}
+{
+  basicstyle=\footnotesize\ttfamily\bfseries\color{sexe},
+  moredelim=[s][\color{sopt}]{\ -}{\ },
+  moredelim=[s][\color{sopt}]{\ --}{\ }
+}
+
+\makeatother
+
+
+%%%%%%%%%%% Shell syntax highlighting %%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
