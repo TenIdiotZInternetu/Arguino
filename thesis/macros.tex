@@ -227,3 +227,104 @@
 
 %%%%%%%%%%% YAML syntax highlighting %%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%% C# syntax highlighting %%%%%%%%%%%%%%%%%%%
+
+% Edited version of https://gist.github.com/Cheesebaron/d840258a9c41619dbdf0
+
+\definecolor{slineno}{RGB}{131,148,150}
+\definecolor{ssymbol}{RGB}{44,55,58}
+\definecolor{scomment}{RGB}{13, 97, 4}
+\definecolor{base2}{RGB}{238,232,213}
+\definecolor{skeyword}{RGB}{24, 78, 143}
+\definecolor{sident}{RGB}{8, 143, 161}
+\definecolor{sstring}{RGB}{94, 130, 31}
+\definecolor{sdigit}{RGB}{211,54,130}
+\definecolor{sfunction}{RGB}{153, 131, 20}
+
+
+\newcommand\digitstyle{\color{sdigit}}
+\newcommand\symbolstyle{\color{ssymbol}}
+\makeatletter
+
+\newcommand\language@csharp{csharp}
+
+
+\newcommand{\ProcessDigit}[1]
+{%
+  \ifnum\lst@mode=\lst@Pmode\relax%
+   {\digitstyle #1}%
+  \else
+    #1%
+  \fi
+}
+
+\expandafter\expandafter\expandafter\lstdefinelanguage
+\expandafter{\language@csharp}
+{
+  language=[Sharp]C,
+  % frame=lr,
+  linewidth=160mm,
+  breaklines=true,
+  tabsize=4,
+  % numbers=left,
+  % numbersep=5pt,
+  % firstnumber=auto,
+  % numberstyle=\tiny\ttfamily\color{slineno},
+  rulecolor=\color{base2},
+  basicstyle=\footnotesize\ttfamily,
+  commentstyle=\color{scomment},
+  morecomment=[s][\color{scomment}]{/*+}{*/},
+  morecomment=[s][\color{scomment}]{/*-}{*/},
+  morekeywords={  abstract, event, new, struct,
+                as, explicit, null, switch,
+                base, extern, object, this,
+                bool, false, operator, throw,
+                break, finally, out, true,
+                byte, fixed, override, try,
+                case, float, params, typeof,
+                catch, for, private, uint,
+                char, foreach, protected, ulong,
+                checked, goto, public, unchecked,
+                class, if, readonly, unsafe,
+                const, implicit, ref, ushort,
+                continue, in, return, using,
+                decimal, int, sbyte, virtual,
+                default, interface, sealed, volatile,
+                delegate, internal, short, void,
+                do, is, sizeof, while,
+                double, lock, stackalloc,
+                else, long, static,
+                enum, namespace, string, var},
+  keywordstyle=\bfseries\color{skeyword},
+  showstringspaces=false,
+  stringstyle=\color{sstring},
+  identifierstyle=\color{sident},
+  extendedchars=true,
+  literate=
+    {0}{{{\ProcessDigit{0}}}}1
+    {1}{{{\ProcessDigit{1}}}}1
+    {2}{{{\ProcessDigit{2}}}}1
+    {3}{{{\ProcessDigit{3}}}}1
+    {4}{{{\ProcessDigit{4}}}}1
+    {5}{{{\ProcessDigit{5}}}}1
+    {6}{{{\ProcessDigit{6}}}}1
+    {7}{{{\ProcessDigit{7}}}}1
+    {8}{{{\ProcessDigit{8}}}}1
+    {9}{{{\ProcessDigit{9}}}}1
+    {\}}{{\symbolstyle{\}}}}1
+    {\{}{{\symbolstyle{\{}}}1
+    {(}{{\symbolstyle{(}}}1
+    {)}{{\symbolstyle{)}}}1
+    {=}{{\symbolstyle{$=$}}}1
+    {;}{{\symbolstyle{$;$}}}1
+    {>}{{\symbolstyle{$>$}}}1
+    {<}{{\symbolstyle{$<$}}}1
+    {\%}{{\symbolstyle{$\%$}}}1,
+  moredelim=[is][\color{sfunction}\bfseries]{\#}{\#}
+}
+\makeatother
+
+%%%%%%%%%%% C# syntax highlighting %%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
