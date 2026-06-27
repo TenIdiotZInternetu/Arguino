@@ -1,6 +1,74 @@
 \chapter{Developer documentation}
 
-\section{Compiling and running Arduino code}
+\section{Compiling and running the simulator with Arduino code}
+
+\subsection{Build process and usage examples}
+
+First make sure you comply with the software prerequisits from the section \ref{prerequisits}. Make sure your Boost libraries can be found by the CMake metabuild system from your development environment. For further information, please follow the Boost's getting started guide \cite{boost_get_started}. After that, we can preprocess the sketch, compile it with the simulator, and run the simulator together with the frontend.
+
+\subsubsection{Backend process}
+\begin{enumerate}
+    \item Run \texttt{preprocess.sh} with the sketch directory. On Windows, use the \texttt{preprocess.bat} script instead. For example:
+    
+    \hspace*{2em}\texttt{./preprocess.sh tests/buttons}.
+    
+    \item Build \texttt{backend/CMakeLists.txt}. Available targets are:
+    
+    \begin{description}
+        \item[\texttt{arguino-shared-memory.exe}] for IPC over shared memory
+        \item[\texttt{arguino-tcp.exe}] for IPC over TCP connection
+        \item[\texttt{arguino}] is an alias for the shared memory version (Default and preferred version).
+    \end{description}
+
+    \item Run \texttt{<build dir>/executable/<build target>}
+    
+\end{enumerate}
+
+
+\subsubsection{Frontend process}
+\begin{enumerate}
+    \item Build \texttt{frontend/gui.sln}.
+    \item Run the \texttt{Gui} executable with the desired scene. For example, in the \texttt{frontend} directory call:
+    
+    \hspace*{2em}\texttt{<build dir>/Gui.exe -s ./Scenes/buttons.yaml}.
+    
+    If you built the TCP version of the backend, be sure to add the flag \texttt{-i Tcp}.
+    
+\end{enumerate}
+
+For frontend and backend to communicate properly, it is necessary that they connect to the same IPC object. For TCP it is the port (\texttt{-p} option for both programs), and for shared memory it is the shared memory's object name (\texttt{-{}-shmem-name} option for both programs). These default to the same value for both of the aforementioned options, port \texttt{8888} and memory named \texttt{Arguino-ipc}.
+
+\subsection{Command-Line Arguments}
+Listed below are all the available command line options for the backend and frontend executables. Default values, if defined, are specified in the square brackets. Expected arguments are in the angle brackets. For arguments accepting only specific enumeration of values, all available values are listed in the angle brackets seperated by a vertical bar (\texttt{|}).
+
+
+\subsubsection{Backend}
+\begin{description}
+    \item[\texttt{-{}-log-simulator <path>}] Path to the log file for simulator events. [\texttt{./core.log}]
+    \item[\texttt{-{}-log-ipc <path>}] Path to the log file for Inter-Process Communication (IPC). [\texttt{./core\_ipc.log}]
+    \item[\texttt{-v, -{}-verbosity <Debug | Info | Warning | Error>}] Verbosity level of the log files. [\texttt{Info}]
+\end{description}
+
+\subsubsection{Frontend}
+\begin{description}
+    \item[\texttt{-s, -{}-scene <path>}] Path to the \texttt{.yaml} scene definition file. [\texttt{./scene.yaml}]
+    \item[\texttt{-c, -{}-components <path>}] Path to the directory containing component definitions. [\texttt{./ComponentManager/Components}]
+    \item[\texttt{-i, -{}-ipc <None | Tcp | Shmem>}] Inter-process communication technology utilized for connecting with the simulator. [\texttt{Shmem}]
+    \item[\texttt{-{}-log-circuit <path>}] Path to the log file for general circuitry events. [\texttt{./frontend.log}]
+    \item[\texttt{-{}-log-ipc <path>}] Path to the log file for IPC events. [\texttt{./frontend\_ipc.log}]
+    \item[\texttt{-v, -{}-verbosity <Debug | Info | Warning | Error>}] Verbosity level of the log files. [\texttt{Info}]
+\end{description}
+
+\subsubsection{Common for TCP usage}
+\begin{description}
+    \item[\texttt{-p, -{}-port <int>}] TCP port to listen to. [\texttt{8888}]
+\end{description}
+
+\subsubsection{Common for shared memory usage}
+\begin{description}
+    \item[\texttt{-{}-shmem-name <string>}] Name of the memory-mapped file. [\texttt{Arguino-ipc}]
+    \item[\texttt{-{}-shmem-size <int>}] Size of the memory-mapped region per buffer, specified in pages. [\texttt{1}]
+\end{description}
 
 \section{Defining components}
 
