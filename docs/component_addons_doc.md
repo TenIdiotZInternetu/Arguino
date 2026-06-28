@@ -1,14 +1,14 @@
 # Component Addons Documentation
-Extensibility of the GUI through custom components and circuits is an important part the project. Here are necessary steps and restriction required to create and use your own component.
+Extensibility of the GUI through custom components and circuits is an important part the project. Here are necessary steps and requirements to create and use your own component.
 
 ### Notation notes
 - YAML
-  - angle brackets must replaced by proper parameters, i.e. `name: <string>`
+  - angle brackets must be replaced by proper parameters, i.e. `name: <string>`
   - properties with question mark are optional, i.e. `optional?: ...`
   - Vector2 is represented as a string of 2 float values separated by a space, i.e. `vector: 7.27 6.9` 
 
 ## Defintions file structure
-All of the components must reside in one directory, referred to as "definitions directory". Each component is represented by exactle one directory, referred to as "component directory", placed in the definitions directory. The definitions directory must be supplied through the `--components | -c` command line argument.
+All of the components must reside in one directory, referred to as "definitions directory". Each component is represented by exactly one directory, referred to as "component directory", placed in the definitions directory. The definitions directory must be supplied through the `--components | -c` command line argument.
 
 These files must be present in the component directory:
 - C# behavior script
@@ -25,22 +25,27 @@ This file defines common properties of the custom component type.
 ```
 name: <string>
 description?: <string>
+imageSize?: <Vector2>
 pins?: <uint>
 pinNames?:
   - <string>
-  - <string>
+  - ...
+  - ...
 ```
 
-#### Name
-Name of the component type as displayed in the UI.
+#### name
+Name of the component type as displayed in the UI. (not used yet)
 
-#### Description
-Brief description of the component as displayed in the UI.
+#### description
+Brief description of the component as displayed in the UI. (not used yet)
 
-#### Pins
-Number of unnamed pins. These pins are identified by their 0-based index. This indexed is used in both the scene definition and in the component logic.
+#### imageSize
+Desired size of the component's sprites in pixels for default zoom level of the canvas. Defaults to <50, 50>.
 
-#### Pin names
+#### pins
+Number of unnamed pins. These pins are identified by their 0-based index in both the scene definition and in the component logic.
+
+#### pinNames
 List of unique names for each pin. These pins are identified by their given name in both the scene defintion and in the component logic.
 
 ## C# behavior script
@@ -127,23 +132,36 @@ This file component instances present in the scene, and how are their pins conne
 
 ```
 components:
-  <Instance name>:
-    type: <Type name>
-    position: <Vector2>
+  <Type name>:
+    <Instance name>:
+      position: <Vector2>
+      rotation?: <float>
+      scale?: <Vector2>
+    <Instance name>:
+      ...
 nodes:
   - [ <Instance name>.<Pin name>, ...]
   - ...
   - ...
 ```
 
-#### Components
-Dictionary of instances, where the key is a unique name given to the instance and value is an object with its properties.
+#### components
+Dictionary of component type objects. These objects are dictionaries of component instances of that type. These instances define properties of the individual components. 
 
-#### Type
+#### Type name
 String. Name of the component type. This must match the component directory name.
 
-#### Position
-Vector2. Coordinates on the circuit canvas, values rising right and down.
+#### Instance name
+String. Name of the component instance. It identifies the instance within the node definition and in the UI. It must unique across all instances within the components dictionary.
 
-#### Nodes
-List of lists, where the inner element is an instance-pin pair separated by dot. Instance name must present in the Components dictionary. Pin name must be present in the defintion configuration. In the case of unnamed pins, Pin name is simply its index.
+#### position
+Coordinates on the circuit canvas, with origin in the upper left corner.
+
+#### rotation
+Clockwise rotation angle in degrees on the circuit canvas.
+
+#### scale
+Relative scaling along x an y axis on the circuit canvas.
+
+#### nodes
+List of lists, where the inner element is an instance-pin pair separated by dot. Instance name must present in the components dictionary. Pin name must be present in the definition configuration. In the case of unnamed pins, pin name is simply its index.
