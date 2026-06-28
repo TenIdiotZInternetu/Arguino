@@ -206,7 +206,7 @@ However, no code is required in the body of the constructor. The constructor can
 \end{description}
 
 \section{Defining scenes}
-The scene YAML file describes component instances present in the scene, and how are their pins connected together in nodes. The path of this file is supplied through the \texttt{--scene | -s} command line argument. There are no restriction to where the scene file has to be placed. We use the same YAML notation as in specification of the component configuration (\ref{yaml_notation}).
+The scene YAML file describes component instances present in the scene, and how are their pins connected together in nodes. The path of this file is supplied through the \texttt{-s} command line argument. There are no restriction to where the scene file has to be placed. We use the same YAML notation as in specification of the component configuration (\ref{yaml_notation}).
 
 \pagebreak
 
@@ -250,3 +250,73 @@ nodes:
 
 
 \section{IPC interface}
+This section describes how to set up IPC communication of a custom frontend application with the backend simulator. The two processes can communicate together either via TCP connection or through shared memory. The only requirement for a TCP connection, is that the client on the frontend listens to the same port as the server on the backend. IPC over shared memory requires a few more considerations, so that the memory accesses match the memory layout of shared internal structure created by the backend. This structure is described in the subsection \ref{shmem_specs};
+
+The processes communicate using concrete events with up to 3 integer arguments. These events are encoded into a human readable text messages, seperated by a common delimeter. The messages are then sent over IPC.
+
+\subsection{Text message format}
+Individual messages are delimited by the semicolon character (\texttt{;}). The individual values within one message are delimited by the colon character (\texttt{:}). The integer values are written in decimal system, using the ASCII characters of the actual digits. The semantics of these values are better described in the chapter about architecture, subsection \ref{subsec:events}. The format of the message then looks as the following:
+
+\begin{lstlisting}[
+    caption={Format of an IPC text message},
+    literate={:}{{\color{Bittersweet}{:}\color{Black}}}1
+             {;}{{\color{Brown}{;}\color{Black}}}1
+]
+    <sim_time>:<lvt>:<event_type>:<arg1>:<arg2>:<arg3>;
+\end{lstlisting}
+
+\begin{description}
+    \item[\texttt{sim\_time}] Simulation time, 64-bit signed integer. Real time elapsed from the start of the backend's simulation represented in microseconds. The backend has no use for this value.
+    \item[\texttt{lvt}] Local virtual time, 64-bit signed integer. It describes an order in which the event occured, relative to other events.
+    \item[\texttt{event\_type}] A single character representing the type of the event. This type decides the action taken upon consuming the event. Recognized event types and their corresponding characters are described in the next subsection.
+    \item[\texttt{arg1, arg2, arg3}] 32-bit signed integers. Values have meaning depending on the event. Arguments not defined by the event type can be omitted. Make sure that the number of colons match the number of passed arguments.
+\end{description}
+
+For example, this next message encodes the \texttt{Write} event passing 2 arguments at the simulation time of 264 seconds:
+
+\begin{lstlisting}[
+    caption={Example of an IPC text message},
+    literate={:}{{\color{Bittersweet}{:}\color{Black}}}1
+             {;}{{\color{Brown}{;}\color{Black}}}1
+]
+    000264997488:0000016:W:08:1;
+\end{lstlisting}
+
+\xxx{Decide on whether to describe or remove the zero paddings}.
+
+\subsection{Recognized event types}
+
+\subsubsection{Write event}
+Signalizes digital value being written into a pin. If consumed by the backend, the value gets written to the internal \texttt{ArduinoState}. If consumed by the frontend, it should reflect the changes caused by the change of the pin's state. This event is produced by the backend on \texttt{digitalWrite} function call within the sketch.
+
+\begin{description}
+    \item[Encoding character:] \texttt{W}
+    \item[Arguments:] \hfill
+    \begin{description}
+        \item[1: Pin index] of the digital pin from the range 0--13.
+        \item[2: Value] 0 for the low value, 1 for the high value.
+    \end{description}
+\end{description}
+
+\subsubsection{Pinmode event}
+Signalizes change of a pin mode of a pin. If consumed by the backend the value gets written to the internal \texttt{Arduinostate}. If consumed by the frontend, it should change the behavior of the pin, such that only input pins are able to send the \texttt{Write} event. This event is produced by the backend on \texttt{pinMode} function call within the sketch.
+
+\begin{description}
+    \item[Encoding character:] \texttt{P}
+    \item[Arguments:] \hfill
+    \begin{description}
+        \item[1: Pin index] of the digital pin from the range 0--13.
+        \item[2: Mode] 0 for the output mode, 1 for the input mode.
+    \end{description}
+\end{description}
+
+\subsubsection{Reboot event}
+Produced by the backend, when the simulation has started over. Useful, when the backend process has be
+terminated and then executed again. At this point the frontend has to invalidate its current state and start again. Backend itself does no action upon consuming this event (it may force the reboot of the simulation in the future).
+
+\begin{description}
+    \item[Encoding character:] \texttt{R}
+    \item[Arguments:] None
+\end{description}
+
+\subsection{Shared memory specification} \label{shmem_specs}
