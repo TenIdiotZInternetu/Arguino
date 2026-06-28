@@ -77,7 +77,7 @@ Listed below are all the available command line options for the backend and fron
     \item[\texttt{-{}-shmem-size <int>}] Size of the memory-mapped region per buffer, specified in pages. [\texttt{1}]
 \end{description}
 
-\section{Defining components}
+\section{Defining components and scenes}
 Extensibility of the frontend through custom components and circuits is an important part the project. Here are necessary steps and requirements to create and use new components.
 
 \subsection{Required file structure}
@@ -91,15 +91,16 @@ All of the components must reside in one directory, referred to as \textit{defin
 
 The yaml file must have the same name as the component directory, i.e. \texttt{MyComponent/MyComponent.yaml}. The SVGs will be referenced in behavior script by their file name, excluding the .svg extension. For example \texttt{image.svg} will be referred to as \texttt{image}.
 
-\subsection{YAML configuration file specification}
-This file defines common properties of the custom component type.
-
 \subsubsection{Notes on used YAML notation} \label{yaml_notation}
+In the next subsections, we will describe the expected structures of the YAML files using this notation:
 \begin{itemize}
   \item angle brackets must be replaced by proper parameters, i.e. \texttt{name: <string>}
   \item properties with question mark are optional, i.e. \texttt{optional?: ...}
   \item Vector2 is represented as a string of 2 float values separated by a space, i.e. \texttt{vector: 7.27 6.9} 
 \end{itemize}
+
+\subsection{YAML configuration file specification}
+This file defines common properties of the custom component type.
 
 \begin{lstlisting}[language=yaml, caption={YAML configuration file structure}]
 name: <string>
@@ -205,8 +206,8 @@ However, no code is required in the body of the constructor. The constructor can
     Sets the pin to be not driving. Same as \texttt{SetValue(false)}.
 \end{description}
 
-\section{Defining scenes}
-The scene YAML file describes component instances present in the scene, and how are their pins connected together in nodes. The path of this file is supplied through the \texttt{-s} command line argument. There are no restriction to where the scene file has to be placed. We use the same YAML notation as in specification of the component configuration (\ref{yaml_notation}).
+\subsection{Defining scenes}
+The scene YAML file describes component instances present in the scene, and how are their pins connected together in nodes. The path of this file is supplied through the \texttt{-s} command line argument. There are no restriction to where the scene file has to be placed.
 
 \pagebreak
 
