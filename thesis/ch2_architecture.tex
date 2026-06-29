@@ -1,4 +1,4 @@
-\chapter{Architecture design}
+\chapter{Architecture design} \label{ch:architecture}
 
 \section{Architecture overview}
 
@@ -10,7 +10,7 @@ The whole project is divided into two main parts. The purpose of the backend is 
     \label{fig:architecture}
 \end{figure}
 
-The Figure \ref{fig:architecture} shows the most important systems in each process. The user coded is compiled together with the \texttt{executable} module of the backend. The declarations in the header \texttt{Arduino.h} prepended to the top of the \texttt{.ino} is implemented by a mock library \texttt{Arduino.cpp}. For each observable action an event is created and passed to the singleton \texttt{Simulator} class to compute and put into an event queue. The event is also communicated to the frontend process.
+The Figure \ref{fig:architecture} shows the most important systems in each process. The user code is compiled together with the \texttt{executable} module of the backend. The declarations in the header \texttt{Arduino.h} prepended to the top of the \texttt{.ino} is implemented by a mock library \texttt{Arduino.cpp}. For each observable action an event is created and passed to the singleton \texttt{Simulator} class to compute and put into an event queue. The event is also communicated to the frontend process.
 
 In the frontend the events are consumed by the \texttt{Arduino} component, one of several components predefined as part of the \texttt{ComponentManager} project. This project is responsible for loading user-defined components and scenes, which connect the components together in a circuit. The circuit is simulated in the same project. The user interface is implemented in the \texttt{Main} project using Avalonia UI as a framework. Interacting with the UI may invoke new events in the \texttt{Arduino} component. Those are sent back to the backend's event queue in the same manner as they were received.
 

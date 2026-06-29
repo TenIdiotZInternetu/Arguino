@@ -1,4 +1,4 @@
-\chapter{Developer documentation}
+\chapter{Developer documentation} \label{ch:docs}
 
 \section{Compiling and running the simulator with Arduino code}
 
@@ -99,7 +99,7 @@ In the next subsections, we will describe the expected structures of the YAML fi
   \item Vector2 is represented as a string of 2 float values separated by a space, i.e. \texttt{vector: 7.27 6.9} 
 \end{itemize}
 
-\subsection{YAML configuration file specification}
+\subsection{Component configuration file specification}
 This file defines common properties of the custom component type.
 
 \begin{lstlisting}[language=yaml, caption={YAML configuration file structure}]
@@ -121,8 +121,8 @@ pinNames?:
     \item[\texttt{pinNames}] List of unique names for each pin. These pins are identified by their given name in both the scene defintion and in the component logic.
 \end{description}
 
-\subsection{C\# behavior script specification}
-This C\# class will determine how the component interacts with the circuit. The file must be added to the \texttt{ComponentManagement.csproj} project. It must contain a class inheriting from the abstract \texttt{Component} class. In order to compile, the user's class must also define a constructor like this:
+\subsection{Component behavior script specification}
+How does the component interact with the rest of the circuit is described by the C\# class with the named the same as the component type. This class must inherit from the abstract \texttt{Component} class. The file containg the class must be added to the \texttt{ComponentManagement.csproj} project. In order to compile, the user's class must also define a constructor like this:
 
 \begin{lstlisting}[language=csharp]
     public #MyComponent#(string definitionPath) 
