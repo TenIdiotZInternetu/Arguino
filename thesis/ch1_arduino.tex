@@ -21,19 +21,19 @@ The digital pins can be manipulated using only these 3 functions:
 
 Pins are identified by their index. \texttt{mode} and \texttt{value}'s underlying type is also an integer, but it is preferred to use predefined constants, such as \texttt{INPUT}/\texttt{OUTPUT}, \texttt{HIGH}/\texttt{LOW} and such. Below is an example of a sketch from the Arduino's documentation, using only the described functions:
 
-\begin{lstlisting}[language=C, caption=Sketch example \cite{arduino_digital_read}]
+\begin{lstlisting}[language=csharp, caption=Sketch example \cite{arduino_digital_read}]
 int ledPin = 13;  // LED connected to digital pin 13
 int inPin = 7;    // pushbutton connected to digital pin 7
 int val = LOW;    // variable to store the read value
 
-void setup() {
-  pinMode(ledPin, OUTPUT);  // sets the digital pin 13 as output
-  pinMode(inPin, INPUT);    // sets the digital pin 7 as input
+void #setup#() {
+  #pinMode#(ledPin, OUTPUT);  // sets the digital pin 13 as output
+  #pinMode#(inPin, INPUT);    // sets the digital pin 7 as input
 }
 
-void loop() {
-  val = digitalRead(inPin);   // read the input pin
-  digitalWrite(ledPin, val);  // sets LED to the button's value
+void #loop#() {
+  val = #digitalRead#(inPin);   // read the input pin
+  #digitalWrite#(ledPin, val);  // sets LED to the button's value
 }
 \end{lstlisting}
 
