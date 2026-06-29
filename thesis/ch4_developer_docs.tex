@@ -46,7 +46,7 @@ First make sure you comply with the software prerequisits from the section \ref{
 For frontend and backend to communicate properly, it is necessary that they connect to the same IPC object. For TCP it is the port (\texttt{-p} option for both programs), and for shared memory it is the shared memory's object name (\texttt{-{}-shmem-name} option for both programs). These default to the same value for both of the aforementioned options, port \texttt{8888} and memory named \texttt{Arguino-ipc}.
 
 \subsection{Command-Line Arguments}
-Listed below are all the available command line options for the backend and frontend executables. Default values, if defined, are specified in the square brackets. Expected arguments are in the angle brackets. For arguments accepting only specific enumeration of values, all available values are listed in the angle brackets seperated by a vertical bar (\texttt{|}).
+Listed below are all the available command line options for the backend and frontend executables. Default values, if defined, are specified in the square brackets. Expected arguments are in the angle brackets. For arguments accepting only specific enumeration of values, all available values are listed in the angle brackets seperated by a vertical bar (\texttt{|}). In square brackets is the default value used, when the option is omitted.
 
 
 \subsubsection{Backend}
@@ -246,7 +246,7 @@ nodes:
     Relative scaling along x an y axis on the circuit canvas.
 
     \item[\texttt{nodes}]
-    List of lists. The inner list represents all pins connected to the same electrical node. Its element is an instance-pin pair separated by a dot. Instance name must bepresent in the components dictionary. Pin name must be present in the component's configuration. In the case of unnamed pins, pin name is simply its index.
+    List of lists. The inner list represents all pins connected to the same electrical node. Its element is an instance-pin pair separated by a dot. Instance name must be present in the components dictionary. Pin name must be present in the component's configuration. In the case of unnamed pins, pin name is simply its index.
 \end{description}
 
 
@@ -321,3 +321,27 @@ terminated and then executed again. At this point the frontend has to invalidate
 \end{description}
 
 \subsection{Shared memory specification} \label{shmem_specs}
+
+\subsubsection{Locating memory mapped file}
+On Linux, the mapped memory region is orchestrated by a proper shared memory object. It can be accessed either by a syscall, or by reading the \texttt{\textbackslash{}dev\textbackslash{}shm\textbackslash{}<shmem\_name>} virtual file.
+
+On Windows, the shared memory is emulated by the \texttt{Boost.interprocess} library via a memory mapped file. It can be located at the path specified by the \texttt{Common AppData} registry. For Windows Vista and newer, this path defaults to \texttt{C:\textbackslash{}ProgramData}. On this path, a \texttt{boost\_interprocess} directory is created. The memory mapped file, named the same as the shared memory object, can be found in one if its subdirectories. \cite{boost_shared_memory}
+
+In either case, the name of the read memory mapped file or shared memory object has to match the name given to the mapped region via the \texttt{-{-}shmem-name} flag of the backend command.
+
+\subsubsection{Memory layout}
+
+\begin{figure}
+    \includegraphics[width=\textwidth, keepaspectratio]{img/circular-buffer-memory.pdf}
+    \caption{Memory layout of the circular buffer}
+    \label{fig:circular-buffer-memory}
+\end{figure}
+
+The mapped memory region is split into 2 equal sections, both containg the same circular buffer data structure. So for a mapped region of size $n$ bytes, and for the start address of the region $s_a$, the second buffer is located on the memory address $s_a + n/2$ ($n$ is always even, as it is a multiple of a page size). Let's denote the start address of a buffer $s_b$
+
+The buffer itself has 2 control variables stored within it. Both are 64-bit unisgned integers representing an offset within the buffers data. The first, located at $s_b$, is the offset at which the producer will write the next chunk of data into the buffer. The second, located at $s_b + 8$, is the offset at which the next chunk of data will be read from the buffer, if present. From the address $s_b + 16$ until the next buffer, or the end of the mapped region, the actual data are stored. That means the actual capacity of data stored within one buffer is $n/2 - 16$.
+
+The data have no uniform size, structure or address alignment. The length of a message in the buffer must be deduced from the data within the message itself. In case of the text encoding, it is the message delimeter. A message can be located at the boundary of the data region. In that case the message is split so that very byte, until the very end of the region is filled, and the rest is written at $s_b + 16$ again. There are no gaps between the messages.
+
+The frontend process is responsible for consuming messages from the first buffer and producing them to the second one. As such, the consumer offset of the first buffer and the producer offset of the second buffer must be updated accordingly. The other two offsets must remain read only. The backend process has these roles reversed.
+
