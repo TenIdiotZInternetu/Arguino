@@ -5,10 +5,10 @@
 
 ## Current usage workflow:
   1. Run `preprocess.sh <test dir>`. For example `preprocess.sh tests/buttons`
-  2. Build `core/CMakeLists.txt`, target either `arguino` or `arguino-tcp.exe` (they are aliases)
+  2. Build `backend/CMakeLists.txt`, target either `arguino` or `arguino-tcp.exe` (they are aliases)
   3. In no specific order
-      - Run core as `<build dir>/executable/arguino`
-      - Build and run gui from the `gui` directory with specified scene. For example `<build dir>/Gui -s ./Scene/buttons.yaml`
+      - Run backend as `<build dir>/executable/arguino`
+      - Build and run gui from the `frontend` directory with specified scene. For example `<build dir>/Gui -s ./Scene/buttons.yaml`
 
 ## Command line arguments:
 ### Core

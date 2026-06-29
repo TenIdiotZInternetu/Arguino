@@ -102,19 +102,6 @@
 %%% of programs.
 \DefineVerbatimEnvironment{code}{Verbatim}{fontsize=\small, frame=single}
 
-% Settings for lstlisting -- program listing with syntax highlighting
-\ifcsname lstset\endcsname
-\lstset{
-  language=C++,
-  tabsize=2,
-  showstringspaces=false,
-  basicstyle=\footnotesize\tt\color{black!75},
-  identifierstyle=\bfseries\color{black},
-  commentstyle=\color{green!50!black},
-  stringstyle=\color{red!50!black},
-  keywordstyle=\color{blue!75!black}}
-\fi
-
 % Floating listings, used in the same way as the figure environment
 \ifcsname DeclareNewFloatType\endcsname
 \DeclareNewFloatType{listing}{}
@@ -181,6 +168,29 @@
 
 \fi
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%% Default listing format %%%%%%%%%%%%%%%%%%%
+
+\definecolor{gscomment}{RGB}{13, 97, 4}
+\definecolor{gsline}{RGB}{238,232,213}
+\definecolor{gslineno}{RGB}{131,148,150}
+
+
+\lstset{
+    frame=lr,
+    linewidth=160mm,
+    tabsize=4,
+    numbers=left,
+    numbersep=7pt,
+    firstnumber=auto,
+    numberstyle=\tiny\ttfamily\color{gslineno},
+    rulecolor=\color{gsline},
+    basicstyle=\footnotesize\ttfamily,
+    commentstyle=\color{gscomment},
+}
+
+%%%%%%%%%%% Default listing format %%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%% YAML syntax highlighting %%%%%%%%%%%%%%%%%
@@ -189,9 +199,11 @@
 
 % here is a macro expanding to the name of the language
 % (handy if you decide to change it further down the road)
-\newcommand\YAMLcolonstyle{\color{black}\mdseries\footnotesize}
-\newcommand\YAMLkeystyle{\color{black}\mdseries\footnotesize}
-\newcommand\YAMLvaluestyle{\color{brown}\bfseries\footnotesize}
+
+\definecolor{sbase}{RGB}{17, 37, 64}
+
+\newcommand\YAMLbasestyle{\ttfamily\color{sbase}\bfseries\footnotesize}
+\newcommand\YAMLvaluestyle{\ttfamily\color{brown}\mdseries\footnotesize}
 
 \makeatletter
 
@@ -202,28 +214,132 @@
 {
   keywords={true,false,null,y,n},
   keywordstyle=\color{darkgray}\bfseries,
-  basicstyle=\YAMLkeystyle,                                 % assuming a key comes first
+  basicstyle=\YAMLbasestyle,                                 % assuming a key comes first
   sensitive=false,
   comment=[l]{\#},
   morecomment=[s]{/*}{*/},
-  commentstyle=\color{purple}\ttfamily,
   stringstyle=\YAMLvaluestyle\ttfamily,
-  moredelim=[l][\color{orange}]{\&},
-  moredelim=[l][\color{magenta}]{*},
-  moredelim=**[il][\YAMLcolonstyle{:}\YAMLvaluestyle]{:},   % switch to value style at :
   morestring=[b]',
   morestring=[b]",
-  literate =    {---}{{\ProcessThreeDashes}}3
-                {>}{{\textcolor{red}\textgreater}}1     
-                {|}{{\textcolor{red}\textbar}}1 
-                {\ -\ }{{\mdseries\ -\ }}3,
+  literate = {:}{{\YAMLbasestyle}{:}{\YAMLvaluestyle}}1
+             {-\ }{{\YAMLbasestyle}{-\ }{\YAMLvaluestyle}}2
 }
 
 % switch to key style at EOL
-\lst@AddToHook{EveryLine}{\ifx\lst@language\language@yaml\YAMLkeystyle\fi}
+\lst@AddToHook{EveryLine}{\ifx\lst@language\language@yaml\YAMLbasestyle\fi}
 \makeatother
 
-\newcommand\ProcessThreeDashes{\llap{\color{cyan}\mdseries-{-}-}}
-
 %%%%%%%%%%% YAML syntax highlighting %%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%% C# syntax highlighting %%%%%%%%%%%%%%%%%%%
+
+% Edited version of https://gist.github.com/Cheesebaron/d840258a9c41619dbdf0
+
+\definecolor{ssymbol}{RGB}{44,55,58}
+\definecolor{skeyword}{RGB}{24, 78, 143}
+\definecolor{sident}{RGB}{23, 115, 128}
+\definecolor{sstring}{RGB}{94, 130, 31}
+\definecolor{sdigit}{RGB}{211,54,130}
+\definecolor{sfunction}{RGB}{153, 131, 20}
+
+
+\newcommand\digitstyle{\color{sdigit}}
+\newcommand\symbolstyle{\color{ssymbol}}
+\makeatletter
+
+\newcommand\language@csharp{csharp}
+
+
+\newcommand{\ProcessDigit}[1]
+{%
+  \ifnum\lst@mode=\lst@Pmode\relax%
+   {\digitstyle #1}%
+  \else
+    #1%
+  \fi
+}
+
+\expandafter\expandafter\expandafter\lstdefinelanguage
+\expandafter{\language@csharp}
+{
+  language=[Sharp]C,
+  morecomment=[s]{/*+}{*/},
+  morecomment=[s]{/*-}{*/},
+  morekeywords={  abstract, event, new, struct,
+                as, explicit, null, switch,
+                base, extern, object, this,
+                bool, false, operator, throw,
+                break, finally, out, true,
+                byte, fixed, override, try,
+                case, float, params, typeof,
+                catch, for, private, uint,
+                char, foreach, protected, ulong,
+                checked, goto, public, unchecked,
+                class, if, readonly, unsafe,
+                const, implicit, ref, ushort,
+                continue, in, return, using,
+                decimal, int, sbyte, virtual,
+                default, interface, sealed, volatile,
+                delegate, internal, short, void,
+                do, is, sizeof, while,
+                double, lock, stackalloc,
+                else, long, static,
+                enum, namespace, string, var},
+  keywordstyle=\bfseries\color{skeyword},
+  showstringspaces=false,
+  stringstyle=\color{sstring},
+  identifierstyle=\color{sident},
+  extendedchars=true,
+  literate=
+    {0}{{{\ProcessDigit{0}}}}1
+    {1}{{{\ProcessDigit{1}}}}1
+    {2}{{{\ProcessDigit{2}}}}1
+    {3}{{{\ProcessDigit{3}}}}1
+    {4}{{{\ProcessDigit{4}}}}1
+    {5}{{{\ProcessDigit{5}}}}1
+    {6}{{{\ProcessDigit{6}}}}1
+    {7}{{{\ProcessDigit{7}}}}1
+    {8}{{{\ProcessDigit{8}}}}1
+    {9}{{{\ProcessDigit{9}}}}1
+    {\}}{{\symbolstyle{\}}}}1
+    {\{}{{\symbolstyle{\{}}}1
+    {(}{{\symbolstyle{(}}}1
+    {)}{{\symbolstyle{)}}}1
+    {=}{{\symbolstyle{$=$}}}1
+    {;}{{\symbolstyle{$;$}}}1
+    {>}{{\symbolstyle{$>$}}}1
+    {<}{{\symbolstyle{$<$}}}1
+    {\%}{{\symbolstyle{$\%$}}}1,
+  moredelim=[is][\color{sfunction}\bfseries]{\#}{\#}
+}
+\makeatother
+
+%%%%%%%%%%% C# syntax highlighting %%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%% Shell syntax highlighting %%%%%%%%%%%%%%%%
+
+\definecolor{sexe}{RGB}{17, 37, 64}
+\definecolor{sopt}{RGB}{153, 131, 20}
+\definecolor{sarg}{RGB}{8, 143, 161}
+
+\makeatletter
+
+\newcommand\language@shell{shell}
+
+\expandafter\expandafter\expandafter\lstdefinelanguage
+\expandafter{\language@shell}
+{
+  basicstyle=\footnotesize\ttfamily\bfseries\color{sexe},
+  moredelim=[s][\color{sopt}]{\ -}{\ },
+  moredelim=[s][\color{sopt}]{\ --}{\ }
+}
+
+\makeatother
+
+
+%%%%%%%%%%% Shell syntax highlighting %%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

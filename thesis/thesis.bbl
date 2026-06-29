@@ -169,6 +169,44 @@
       \verb https://docs.avaloniaui.net/docs/fundamentals/the-mvvm-pattern
       \endverb
     \endentry
+    \entry{boost_get_started}{online}{}{}
+      \field{sortinit}{1}
+      \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
+      \field{labeltitlesource}{title}
+      \field{title}{Boost User Guide - Getting started}
+      \field{urlday}{27}
+      \field{urlmonth}{6}
+      \field{urlyear}{2026}
+      \field{urldateera}{ce}
+      \verb{file}
+      \verb Boost:/home/touster/Zotero/storage/C5IT2SWH/getting-started.html:text/html
+      \endverb
+      \verb{urlraw}
+      \verb https://www.boost.org/doc/user-guide/getting-started.html
+      \endverb
+      \verb{url}
+      \verb https://www.boost.org/doc/user-guide/getting-started.html
+      \endverb
+    \endentry
+    \entry{boost_shared_memory}{online}{}{}
+      \field{sortinit}{1}
+      \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
+      \field{labeltitlesource}{title}
+      \field{title}{Sharing memory between processes}
+      \field{urlday}{29}
+      \field{urlmonth}{6}
+      \field{urlyear}{2026}
+      \field{urldateera}{ce}
+      \verb{file}
+      \verb Sharing memory between processes:/home/touster/Zotero/storage/YAY5CY3P/sharedmemorybetweenprocesses.html:text/html
+      \endverb
+      \verb{urlraw}
+      \verb https://www.boost.org/doc/libs/latest/doc/html/interprocess/sharedmemorybetweenprocesses.html
+      \endverb
+      \verb{url}
+      \verb https://www.boost.org/doc/libs/latest/doc/html/interprocess/sharedmemorybetweenprocesses.html
+      \endverb
+    \endentry
   \enddatalist
 \endrefsection
 \endinput

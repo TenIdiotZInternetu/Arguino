@@ -1,4 +1,4 @@
-\chapter{Introduction to Arduino programming}
+\chapter{Introduction to Arduino programming} \label{ch:arduino}
 
 \section{Sketches}
 
@@ -21,19 +21,19 @@ The digital pins can be manipulated using only these 3 functions:
 
 Pins are identified by their index. \texttt{mode} and \texttt{value}'s underlying type is also an integer, but it is preferred to use predefined constants, such as \texttt{INPUT}/\texttt{OUTPUT}, \texttt{HIGH}/\texttt{LOW} and such. Below is an example of a sketch from the Arduino's documentation, using only the described functions:
 
-\begin{lstlisting}[language=C, caption=Sketch example \cite{arduino_digital_read}]
+\begin{lstlisting}[language=csharp, caption=Sketch example \cite{arduino_digital_read}]
 int ledPin = 13;  // LED connected to digital pin 13
 int inPin = 7;    // pushbutton connected to digital pin 7
 int val = LOW;    // variable to store the read value
 
-void setup() {
-  pinMode(ledPin, OUTPUT);  // sets the digital pin 13 as output
-  pinMode(inPin, INPUT);    // sets the digital pin 7 as input
+void #setup#() {
+  #pinMode#(ledPin, OUTPUT);  // sets the digital pin 13 as output
+  #pinMode#(inPin, INPUT);    // sets the digital pin 7 as input
 }
 
-void loop() {
-  val = digitalRead(inPin);   // read the input pin
-  digitalWrite(ledPin, val);  // sets LED to the button's value
+void #loop#() {
+  val = #digitalRead#(inPin);   // read the input pin
+  #digitalWrite#(ledPin, val);  // sets LED to the button's value
 }
 \end{lstlisting}
 
@@ -47,7 +47,7 @@ In our case, we include the entire preprocessed sketch in our simulator project 
 
 The entire process from preprocessing to compilation, can be orchestrated with the use of \texttt{arduino-cli} command line application. We will use it to preprocess the \texttt{.ino} for us, so that we end up with a clean C++ file we can include in our project. 
 
-\section{Specific goals of the thesis}
+\section{Specific goals of the thesis} \label{sec:goals}
 
 \subsubsection{Target platforms:}
 \begin{itemize}
@@ -55,12 +55,13 @@ The entire process from preprocessing to compilation, can be orchestrated with t
     \item Windows 10 or higher (64-bit)
 \end{itemize}
 
-\subsubsection{Software prerequisits:}
+\subsubsection{Software prerequisits:} \label{prerequisits}
 \begin{itemize}
     \item Minimal system requirements of Avalonia UI
     \item arduino-cli
-    \item .NET 9 runtime or higher
+    \item .NET 9 SDK or higher
     \item C++ compiler
+    \item CMake
     \item C++ Boost libraries:
     \begin{itemize}
         \item asio
@@ -77,7 +78,7 @@ The entire process from preprocessing to compilation, can be orchestrated with t
     \item Compiles and runs any valid \texttt{Arduino UNO R3 SMD} sketch, preprocessed with the \texttt{arduino-cli} tool, containing only symbols mentioned above.
     \item Reflects behavior of the above functions in an internal Arduino state. Logs changes of this state in a text file.
     \item Integrates an interprocess communication mechanism for exchanging data with an external GUI application.
-    \item The events incoming from a GUI application must be resolved in a manner, that preserves the continuity of operations.
+    \item The events incoming from a GUI application must be resolved in a manner, that preserves the continuity of events.
 \end{itemize}
 
 \subsubsection{GUI functional requirements}
@@ -90,5 +91,5 @@ The entire process from preprocessing to compilation, can be orchestrated with t
     \item Predefines LED, button, voltage source and Arduino components, and a scene which utilizes these components.
     \item The changes to the simulator's internal state must be immediately reflected on visual components connected to the Arduino in the scene.
     \item The scene is able to be zoomed and panned. The visuals of the components must be rendered using vector graphics.
-    \item Multiple interactable component may be pressed at once, with behavior expected from the source code of the sketch.
+    \item Multiple interactable components may be pressed at once, with behavior expected from the source code of the sketch.
 \end{itemize}
