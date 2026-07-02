@@ -19,7 +19,7 @@ bool ArduinoState::get_digital(pin_t pin) const
 bool ArduinoState::set_digital(pin_t pin, digital_t value)
 {
     _digitalPins[pin] = value;
-    return true;
+    return true;  // TODO: Check ranges
 }
 
 PinMode ArduinoState::get_pin_mode(pin_t pin) const
