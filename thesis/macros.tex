@@ -243,6 +243,7 @@
 \definecolor{sstring}{RGB}{94, 130, 31}
 \definecolor{sdigit}{RGB}{211,54,130}
 \definecolor{sfunction}{RGB}{153, 131, 20}
+\definecolor{sclass}{RGB}{25, 138, 13}
 
 
 \newcommand\digitstyle{\color{sdigit}}
@@ -287,7 +288,7 @@
                 double, lock, stackalloc,
                 else, long, static,
                 enum, namespace, string, var},
-  keywordstyle=\bfseries\color{skeyword},
+  keywordstyle=\color{skeyword},
   showstringspaces=false,
   stringstyle=\color{sstring},
   identifierstyle=\color{sident},
@@ -306,13 +307,14 @@
     {\}}{{\symbolstyle{\}}}}1
     {\{}{{\symbolstyle{\{}}}1
     {(}{{\symbolstyle{(}}}1
-    {)}{{\symbolstyle{)}}}1
-    {=}{{\symbolstyle{$=$}}}1
-    {;}{{\symbolstyle{$;$}}}1
-    {>}{{\symbolstyle{$>$}}}1
-    {<}{{\symbolstyle{$<$}}}1
-    {\%}{{\symbolstyle{$\%$}}}1,
-  moredelim=[is][\color{sfunction}\bfseries]{\#}{\#}
+    {)}{{\symbolstyle{)}}}1,
+    % {=}{{\symbolstyle{$=$}}}1
+    % {;}{{\symbolstyle{$;$}}}1
+    % {>}{{\symbolstyle{$>$}}}1
+    % {<}{{\symbolstyle{$<$}}}1
+    % {\%}{{\symbolstyle{$\%$}}}1,
+  moredelim=[is][\color{sfunction}\bfseries]{\#}{\#},
+  moredelim=[is][\color{sclass}\bfseries]{$}{$}
 }
 \makeatother
 

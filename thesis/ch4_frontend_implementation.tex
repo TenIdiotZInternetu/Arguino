@@ -6,6 +6,27 @@
 
 \subsection{\texttt{ElectricalNode} class}
 
+\begin{lstlisting}[language=csharp]
+public class $ElectricalNode$ {
+    public uint DrivingPins { get; private set; } = 0;
+    public $DigitalState$ State => DrivingPins > 0 ?
+                                 DigitalState.High : DigitalState.Low;
+
+    public bool IsHigh => State == DigitalState.High;
+    public bool IsLow => State == DigitalState.Low;
+
+    public event $Action$<$ElectricalNode$, $DigitalState$>?
+        StateChangedEvent;
+
+    private $List$<$Pin$> _pins = new();
+
+    public void #AddPin#($Pin$ pin) { ... }
+    public void #RemovePin#($Pin$ pin) { ... }
+    private void #Propagate#($Pin$ sourcePin, bool beganDriving) { ... }
+}
+    
+\end{lstlisting}
+
 \subsection{\texttt{Component} abstract class}
 
 \subsection{\texttt{SceneFactory} static class}
