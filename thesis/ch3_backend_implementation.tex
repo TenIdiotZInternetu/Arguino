@@ -141,6 +141,40 @@ class $EventQueue$ {
 
 \subsection{\texttt{Arduino.cpp}}
 
+\begin{lstlisting}[language=csharp, caption={\texttt{Arduino.hpp}}]
+using namespace arguino::simulator;
+
+void #digitalWrite#(uint8_t pin, uint8_t val)
+{
+    if ($Simulator$::#state#().#get_digital#(pin) == val) return;
+
+    $Simulator$::#handle_event#(
+        $Event$::#write#(pin, val == HIGH)
+    );
+}
+
+int #digitalRead#(uint8_t pin)
+{
+    $Simulator$::#handle_events#();
+    return $Simulator$::#state#().#get_digital#(pin);
+}
+
+unsigned long #millis#()
+{
+    return $std$::#floor#($Simulator$::#state#().#get_time#() / 1000);
+}
+
+void #pinMode#(uint8_t pin, uint8_t mode)
+{
+    $PinMode$ pinMode = mode == OUTPUT ? $PinMode$::Out : $PinMode$::In;
+    if ($Simulator$::#state#().#get_pin_mode#(pin) == pinMode) return;
+
+    $Simulator$::#handle_event#(
+        $Event$::#set_pinmode#(pin, pinMode)
+    );
+}
+\end{lstlisting}
+
 \section{Executable module}
 
 \subsection{\texttt{main.cpp}}
