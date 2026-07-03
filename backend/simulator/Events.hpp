@@ -18,7 +18,7 @@ struct Event {
     int64_t timestampMicros;  // TODO: size_t
     int64_t localVirtualTime;
     std::function<void()> action;
-    std::function<void()> reverseAction;
+    std::function<void()> reverseAction;  // TODO remove reverse actions
 
     // TODO: Use std::variant instead
     static constexpr int MAX_ARGS = 3;
