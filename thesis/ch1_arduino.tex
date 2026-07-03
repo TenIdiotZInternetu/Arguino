@@ -10,7 +10,7 @@ The essential functions that an Arduino programmer has to define in their sketch
 
 \section{Arduino board interface}
 
-The target board \texttt{Arduino Uno R3 SMD} provides 6 analog and 14 digital general purpose pins, some of which can be used for I2C and SPI protocol communication, or PWM modulation. The most simple to use and simulate are the digital pins for general purpose I/O, so this thesis focuses exlucively on using these pins as such \cite{arduino_r3_smd_specs}.
+The target board \texttt{Arduino Uno R3 SMD} provides 6 analog and 14 digital general purpose pins, some of which can be used for I2C and SPI protocol communication, or PWM modulation. The most simple to use and simulate are the digital pins for general purpose I/O, so this thesis focuses exlucively on using these pins as such. \cite{arduino_r3_smd_specs}
 
 The digital pins can be manipulated using only these 3 functions:
 \begin{itemize}
@@ -46,50 +46,3 @@ It is also at this where we steer away from the standard compilation process, an
 In our case, we include the entire preprocessed sketch in our simulator project written in C++, and compile it as whole for the instruction set of the host machine. This executable will implement mock functions declared in the \texttt{Arduino.h}, arduino's internal state, and a way to communicate the change of state to an external GUI application.
 
 The entire process from preprocessing to compilation, can be orchestrated with the use of \texttt{arduino-cli} command line application. We will use it to preprocess the \texttt{.ino} for us, so that we end up with a clean C++ file we can include in our project. 
-
-\section{Specific goals of the thesis} \label{sec:goals}
-
-\subsubsection{Target platforms:}
-\begin{itemize}
-    \item Linux (x86-64)
-    \item Windows 10 or higher (64-bit)
-\end{itemize}
-
-\subsubsection{Software prerequisits:} \label{prerequisits}
-\begin{itemize}
-    \item Minimal system requirements of Avalonia UI
-    \item arduino-cli
-    \item .NET 9 SDK or higher
-    \item C++ compiler
-    \item CMake
-    \item C++ Boost libraries:
-    \begin{itemize}
-        \item asio
-        \item interprocess
-        \item program\_options
-    \end{itemize}
-\end{itemize}
-
-\subsubsection{Simulator functional requirements}
-\begin{itemize}
-    \item Defines platform independent constants and macros from \texttt{Arduino.h}.
-    \item Implements \texttt{digitalWrite}, \texttt{digitalRead}, \texttt{pinMode} and \texttt{millis} functions from \texttt{Arduino.h}.
-    \item Declares and calls \texttt{setup} and \texttt{loop} functions with the behavior expected on an Arduino machine.
-    \item Compiles and runs any valid \texttt{Arduino UNO R3 SMD} sketch, preprocessed with the \texttt{arduino-cli} tool, containing only symbols mentioned above.
-    \item Reflects behavior of the above functions in an internal Arduino state. Logs changes of this state in a text file.
-    \item Integrates an interprocess communication mechanism for exchanging data with an external GUI application.
-    \item The events incoming from a GUI application must be resolved in a manner, that preserves the continuity of events.
-\end{itemize}
-
-\subsubsection{GUI functional requirements}
-\begin{itemize}
-    \item The application must stay responsive during debugging of the simulator process.
-    \item The application must be able to connect to the interprocess mechanism of the simulator.
-    \item Simulates simplified digital circuits. Exact physical properties, like voltages and currents might not be implemented. Built-in components may be implicitly connected to ground.
-    \item Implements mechanism for defining custom components and visuals with \texttt{.yaml}, \texttt{.cs} and \texttt{.svg} files. These components include interactive controls, such as buttons.
-    \item Implements mechanism for defining a circuit (scene) using the custom components.
-    \item Predefines LED, button, voltage source and Arduino components, and a scene which utilizes these components.
-    \item The changes to the simulator's internal state must be immediately reflected on visual components connected to the Arduino in the scene.
-    \item The scene is able to be zoomed and panned. The visuals of the components must be rendered using vector graphics.
-    \item Multiple interactable components may be pressed at once, with behavior expected from the source code of the sketch.
-\end{itemize}
