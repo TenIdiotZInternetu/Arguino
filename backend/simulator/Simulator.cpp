@@ -9,8 +9,8 @@ void Simulator::init(std::function<void(const Event&)> eventCallback, logger_ptr
     s_instance = new Simulator();
     s_instance->f_eventCallback = eventCallback;
     s_instance->_logger = logger == nullptr  //
-        ? std::make_shared<logger::DummyLogger>()
-        : logger;
+                            ? std::make_shared<logger::DummyLogger>()
+                            : logger;
 }
 
 void Simulator::handle_event(Event event)
@@ -18,7 +18,7 @@ void Simulator::handle_event(Event event)
     auto& queue = s_instance->_eventQueue;
     queue.enqueue_local(event);
 
-    do {
+    do {  // TODO: replace by handle_events() and get rid of id?
         queue.execute_next_event();
     } while (event.id() != queue.last_executed_event().id());
 

@@ -35,7 +35,7 @@ int digitalRead(uint8_t pin)
 
 unsigned long millis()
 {
-    return std::floor(Simulator::state().get_time() / 1000);
+    return std::floor(Simulator::state().get_time() / 1000);  // TODO: simulation_time()
 }
 
 void pinMode(uint8_t pin, uint8_t mode)

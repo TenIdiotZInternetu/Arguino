@@ -23,7 +23,7 @@ class EventQueue {
     std::queue<Event> _remoteEvents;
     std::queue<Event> _processedEvents;
 
-    int64_t _nextLvt;
+    int64_t _nextLvt;  // TODO: I hate this implementation
     int64_t _lastLvt;
     int64_t _maxGvtFallback;
 

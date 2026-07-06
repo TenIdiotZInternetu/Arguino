@@ -2,6 +2,17 @@
 
 \section{Simulator module}
 
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\textwidth,keepaspectratio]{./img/uml/b_simulator.pdf}
+    \caption{\texttt{Simulator} module architecture}
+    \label{fig:sim_module}
+\end{figure}
+
+The \texttt{Simulator} class is initialized by the \texttt{main.cpp}, and its pointer is stored as a static field of the class itself, making it a singleton. It owns both the \texttt{ArduinoState} and \texttt{EventQueue} objects and provides access to them through its static classes. Namely \texttt{handle\_event} is called by the \texttt{Arduino.cpp}, passing events to the queue and consuming all events that are already waiting. 
+
+The events are created with static factory classes of the \texttt{Event} struct. In these, lambda functions are being created, utilizing the \texttt{Simulator}'s \texttt{state()} method, which provides direct access to the \texttt{ArduinoState}.
+
 \subsection{\texttt{ArduinoState} class}
 
 \begin{lstlisting}[language=csharp, caption={\texttt{ArduinoState} class}]
@@ -38,6 +49,13 @@ class $ArduinoState$ {
 };
 \end{lstlisting}
 
+The class holds the digital states and modes of pins in \texttt{std::array}s. Sizes of these arrays match the specification of the \texttt{Arduino UNO R3 SMD} board. The analog pins also stored in this class are not utilized at the point of writing this thesis. 
+The pins can be read and modified with setters and getters analagous to those in \texttt{Arduino.h}, but instead of integers, the paramters are of types defined in \texttt{SimulatorTypes.hpp}. Namely \texttt{digital\_t} is \texttt{bool}, \texttt{analog\_t} is \texttt{double}, \texttt{pin\_t} is \texttt{uint8\_t} and \texttt{PinMode} is an enum attaining values \texttt{In} and \texttt{Out}.
+
+The parameterless overload return reference to an entire array. This was particularly useful when processing snapshots, before events were implemented. The setter methods return bool indicating success of the operation. Currently all methods always indicate success, but to achieve higher quality of life for users, warnings and errors should be logged instead of crashing the simulator immediately, e.g. when accessing pins outside of array's range.
+
+The \texttt{\_timer} owned by this class represents the simulation time. The \texttt{Timer} class is not described in detail in this thesis as it was originally designed for a different project, and a lot of its features are not interesing for this particular work. Under the hood it uses \texttt{std::chrono} library. The \texttt{deltaTime()} method returns microseconds passed from the timer's last step. The timers of this thesis are stepped exclusively at its intialization.
+
 \subsection{\texttt{Simulator} singleton class}
 
 \begin{lstlisting}[language=csharp, caption={\texttt{Simulator} class}]
@@ -63,12 +81,10 @@ class $Simulator$ {
 
     static void #log_debug#($std$::$string$&& str) 
         { s_instance->_logger->#log_debug#($std$::#move#(str)); }
-    static void #log_info#($std$::$string$&& str) 
-        { s_instance->_logger->#log_info#($std$::#move#(str)); }
-    static void #log_warning#($std$::$string$&& str) 
-        { s_instance->_logger->#log_warning#($std$::#move#(str)); }
-    static void #log_error#($std$::$string$&& str) 
-        { s_instance->_logger->#log_error#($std$::#move#(str)); }
+    static void #log_info#($std$::$string$&& str) { ... }
+    static void #log_warning#($std$::$string$&& str) { ... }
+    static void #log_error#($std$::$string$&& str) { ... }
+
    private:
     static $Simulator$* s_instance;
     $event_callback_fnct$ f_eventCallback;
@@ -78,6 +94,34 @@ class $Simulator$ {
     $Timer$ _timer;
 };
 \end{lstlisting}
+
+The singleton's instance is created on the heap within the static \texttt{init} and its pointer stored in the \texttt{s\_instance} member. The \texttt{eventCallback} paramater of this method must be set to the handler, that should be called upon event consumption. In this our implementation that is the \texttt{on\_event} function from \texttt{ipcAdapter.hpp}. This callback is stored into \texttt{f\_eventCallback}.
+
+\texttt{state} and \texttt{queue} methods are used to access the objects owned by the \texttt{Simulator}. But queue is more typically accessed through the \texttt{handle\_event} and \texttt{handle\_events} calls. They both consume all remote events waiting in the queue, but the \texttt{handle\_event} variant also puts another event in the queue before starting the consumption.
+
+The \texttt{Simulator} also owns a \texttt{Timer}, this one representing the real time passed. At the moment, both timers show roughly the same time, but it is anticipated, that the simulation timer could be manipulated by the user in the future versions. Lastly, the \texttt{Simulator} class holds a shared pointer to a logger. It also exposes shortcut methods for passing log messages of different verbosity to the logger. This logger is used for any for messages unrelated to the IPC.
+
+\subsubsection{\texttt{handle\_event} method} \label{sssec:handle-event}
+
+\begin{lstlisting}[language=csharp, caption={\texttt{Simulator::handle\_event} method}]
+void $Simulator$::#handle_event#($Event$ event)
+{
+    auto& queue = s_instance->_eventQueue;
+    queue.#enqueue_local#(event);
+
+    do {
+        queue.#execute_next_event#();
+    } while (event.#id#() != queue.#last_executed_event#().#id#());
+
+    s_instance->#f_eventCallback#(event);
+}
+\end{lstlisting}
+
+The event is enqueued to the local event queue, and all remote events with lower LVT are consumed. To check that the local event has been consumed, we had to add a unique identifier member to the \texttt{Event} struct distinguishing events. This \texttt{id} is compared to the \texttt{id} of the previously consumed event, and the while loop is stopped when these two match. We couldn't use the LVT value as, even though it is unique for local events, it doesn't have to be unique across processes. In some frontend implementations, remote events can actually have higher LVT than the local ones.
+
+Due to the semantics of LVT, we ensure that every remote event that occured before the local event has been consumed. The exception are events that already occured remotely, but haven't been fast enough to reach the backend's event queue. This can occur with TCP connection, or with very frequent \texttt{Arduino.h} calls in the sketch. These events will most likely be still consumed in the next call of \texttt{handle\_event}. But for full correctness more synchronization techniques should be implemented, depending on the use case.
+
+When the local event has finally been consumed, it is signalled to the IPC through the \texttt{f\_eventCallback}.
 
 \subsection{\texttt{Event} struct}
 
@@ -110,6 +154,27 @@ struct $Event$ {
 };
 \end{lstlisting}
 
+The members of the \texttt{Event} struct mostly match the event specification in subsections \ref{subsec:events}. The additions are the \texttt{id} and \texttt{action} members. We already justified the use \texttt{id} member in the previous section. It is assigned in the constructor from the static \texttt{s\_nextEventId}, which is then incremented. The \texttt{action} is assigned as a lambda function from within the static factory methods. This lambda is executed during the \texttt{EventQueue}'s \texttt{execute\_next\_event} call.
+
+\subsubsection{Write event}
+
+\begin{lstlisting}[language=csharp, caption={\texttt{Write} event factory}]
+$Event$ $Event$::#write#($pin_t$ pin, $digital_t$ value)
+{
+    $Event$ event($Type$::Write, pin, value);
+    event.action = [=]() {
+        $Simulator$::#state#().#set_digital#(pin, value);
+        $Simulator$::#log_info#($std$::#format#(
+            "Written value {} to pin {}", value, pin));
+    };
+    return event;
+}
+\end{lstlisting}
+
+The above is an example on how the factory methods should look like. The constructor takes a type and variadic arguments corresponding to that type. the constructor is statically asserted to not accept more than 3 variadic arguments. The action is defined as a lambda, with call to the \texttt{Simulator}'s \texttt{state} getter, modifying its values. The outcome is then logged through the \texttt{Simulator}'s logger. 
+
+At this point, the LVT of the event is not known. That is the responsibility of the scheduling entity. For local events it is the \texttt{EventQueue}, for remote events it is IPC, which has to decode LVT from incoming message.
+
 \subsection{\texttt{EventQueue} class}
 
 \begin{lstlisting}[language=csharp, caption={\texttt{EventQueue} class}]
@@ -132,16 +197,44 @@ class $EventQueue$ {
     $std$::$queue$<$Event$> _processedEvents;
     int64_t _nextLvt;
     int64_t _lastLvt;
-    int64_t _maxGvtFallback;
 
     void #clear#();
     size_t #earliest_queue_lvt#(const $std$::$queue$<$Event$>& queue);
 };
 \end{lstlisting}
 
+The event queue is in reality two queues \xxx{lie}. One storing local and one storing remote events. As we only have two threads running concurrently in the backend, this simplifies the synchronization significantly. We also completely avoid locking the structure in order to prevent race conditions. These queues are populated with the public \texttt{enqueue\_local} and \texttt{enqueue\_remote} methods.
+
+\xxx{nextLvt, processedEvents}
+
+\subsubsection{\texttt{execute\_next\_event} method}
+
+\begin{lstlisting}[language=csharp, caption={\texttt{execute\_next\_event} method}]
+void $EventQueue$::#execute_next_event#()
+{
+    auto& queueAhead = 
+        (#earliest_queue_lvt#(_localEvents) < 
+         #earliest_queue_lvt#(_remoteEvents))
+         ? _localEvents
+         : _remoteEvents;
+
+    $Event$ processedEvent = queueAhead.#front#();
+    queueAhead.#pop#();
+
+    processedEvent.#action#();
+    _nextLvt = $std$::#max#(
+        _nextLvt, processedEvent.localVirtualTime + 1);
+    _processedEvents.#push#(processedEvent);
+}
+\end{lstlisting}
+
+Whichever event that has the minimal LVT of both queues has to be executed next. That is to preserve the semantics of LVT, such that every event with higher LVT is the consequence of an event with lower LVT. We expect that the queues are sorted by the LVT of their events, from lowest to highest. For local events that is given by sequential execution of the sketch. For remote events this is given by the IPC technologies we've chosen. TCP guarantees that data are received in the same order as they were sent. In the shared memory approach, we deliberately write and store messages in a sequential order. So to determine the next event, all we have to do is peek at the first element of both of the queues, and select the one with lower LVT. That is ultimately how \texttt{queueAhead} is obtained.
+
+The event is then popped from the queue. The \texttt{action} lambda stored within it is finally executed. The event can now be considered consumed. Then the \texttt{\_nextLvt} is decided. If the consumed event has the highest encountered LVT yet, we simply increment this value. If it does not, we don't change the value, as it would mean the subsequent events would technically occur in the past.
+
 \subsection{\texttt{Arduino.cpp}}
 
-\begin{lstlisting}[language=csharp, caption={\texttt{Arduino.hpp}}]
+\begin{lstlisting}[language=csharp, caption={\texttt{Arduino.cpp}}]
 using namespace arguino::simulator;
 
 void #digitalWrite#(uint8_t pin, uint8_t val)
@@ -174,6 +267,14 @@ void #pinMode#(uint8_t pin, uint8_t mode)
     );
 }
 \end{lstlisting}
+
+At last, we implement the four functions specified in the goals of the thesis. \texttt{millis} simply takes the simulation time and divides it by 1000 to get the elapsed milliseconds. The \texttt{digitalWrite} and \texttt{pinMode} functions are implemented using the \texttt{handle\_event} call with the corresponding event factory passed as an argument. If the argument for these events doesn't differ from the current value stored in \texttt{ArduinoState}, we exit the function early. In sketches with these functions in the outermost \texttt{loop} scope, which is actually a common pattern, the condition can save millions of redundant events and log messages.
+
+The \texttt{digitalRead} call consumes all waiting events, and then simply reads the pin of \texttt{ArduinoState}. Out of the four functions, this is the only one that can be problematic with regard to delayed event reception described in the \texttt{handle\_event} method (\ref{sssec:handle-event}), as it is the only one dependant on previous \texttt{Arduino.h} calls. It is possible for \texttt{digitalRead} to return a state outdated by a few microseconds. 
+
+A proposed solution is to add an event serving as a kind of condition variable. This event would be sent to the frontend and the same event would be sent back after any necessary frontend changes would have been resolved. Until then, the backend's simulation thread would remain in a spin lock, pausing the simulation timer, handling remote events and checking for the expected synchronization event. Only then the function would return a value and the execution of the sketch would continue.
+
+This proposal haven't been implemented at the time of writing the thesis due to time concerns. This incorrect behavior hasn't been yet observed with the provided tests, and it probably won't be noticed on simpler sketches of a target user audience.
 
 \section{Executable module}
 
