@@ -6,7 +6,7 @@ The Arduino programs are commonly referred to as \textit{sketches}. A sketch is 
 
 The Arduino programming language, in which \texttt{.ino} files are written, is a C++ dialect with very subtle differences, mostly concerning linking of files and ommitting function declarations. Bodies of function definitions and variable declarations can be considered as a perfectly valid C/C++ code. 
 
-The essential functions that an Arduino programmer has to define in their sketch are \texttt{void setup()} and \texttt{void loop()}. The \texttt{setup()} function is called once, when the program is booted. That is when the Arduino board is powered up, the program is uploaded to it, or when the reset button is pressed. The \texttt{loop()} function is called in a loop indefinitely. This is the proper place to define any interations with the board, detecting inputs, updating timers, etc.
+The essential functions that an Arduino programmer has to define in their sketch are \texttt{void setup()} and \texttt{void loop()}. The \texttt{setup()} function is called once, when the program is booted. That is when the Arduino board is powered up, the program is uploaded to it, or when the reset button is pressed. The \texttt{loop()} function is called in a loop indefinitely. This is the proper place to define any interactions with the board, detecting inputs, updating timers, etc.
 
 \section{Arduino board interface}
 
@@ -15,7 +15,7 @@ The target board \texttt{Arduino Uno R3 SMD} provides 6 analog and 14 digital ge
 The digital pins can be manipulated using only these 3 functions:
 \begin{itemize}
     \item \texttt{void pinMode(pin, mode)} - configures specified pin either as an input or an output
-    \item \texttt{value digitalRead(pin)} - reads the voltage on the pin, stores it as a digitla value, either 1 or 0
+    \item \texttt{value digitalRead(pin)} - reads the voltage on the pin, stores it as a digital value, either 1 or 0
     \item \texttt{void digitalWrite(pin, value)} - when set to output, sets the voltage of the pin to corresponding value. If set to input, current driven components may not work correctly, since the current is suppressed by an internal pull-up resistor. 
 \end{itemize}
 
