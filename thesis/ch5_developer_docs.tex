@@ -135,7 +135,7 @@ pinNames?:
     \item[\texttt{pinNames}] List of unique names for each pin. These pins are identified by their given name in both the scene defintion and in the component logic.
 \end{description}
 
-\lstinputlisting[language=yaml, caption={Component configuration example: Led.yaml}]{../frontend/ComponentManagement/Components/Led/Led.yaml}
+\lstinputlisting[language=yaml, caption={Component configuration example: \texttt{Led.yaml}}]{../frontend/ComponentManagement/Components/Led/Led.yaml}
 
 \subsection{Component behavior script specification}
 How does the component interact with the rest of the circuit is described by the C\# class with the named the same as the component type. This class must inherit from the abstract \texttt{Component} class. The file containg the class must be added to the \texttt{ComponentManagement.csproj} project. In order to compile, the user's class must also define a constructor like this:
@@ -263,7 +263,7 @@ nodes:
     List of lists. The inner list represents all pins connected to the same electrical node. Its element is an instance-pin pair separated by a dot. Instance name must be present in the components dictionary. Pin name must be present in the component's configuration. In the case of unnamed pins, pin name is simply its index.
 \end{description}
 
-\lstinputlisting[language=yaml, caption={Scene example: minimal.yaml}, label={lst:scene}]{../frontend/Scenes/minimal.yaml}
+\lstinputlisting[language=yaml, caption={Scene example: \texttt{minimal.scene.yaml}}, label={lst:scene}]{../tests/minimal.scene.yaml}
 
 The example scene in the listing \ref{lst:scene} contains 2 LEDs, 1 button and 1 source of voltage. Source, which has one pin that is always driving, is connected to the 0th pin of the button, which reads a high value of the node. Both LEDs are connected to the 1st pin of the same button. Pressing the button will copy the digital state from pin 0 to pin 1, pin 1 becomes driving, and thus lights up the LEDs.
 

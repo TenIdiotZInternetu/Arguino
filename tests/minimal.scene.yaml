@@ -1,0 +1,16 @@
+Components:
+  Led:
+    Led1:
+      Position: 100 100
+    Led2:
+      Position: 200 100
+  Button:
+    Btn:
+      Position: 100 200
+  Vcc:
+    Source:
+      Position: 125 300
+Nodes:
+  - [Source.0, Btn.0]
+  - [Led1.cathode, Btn.1]
+  - [Led2.cathode, Btn.1]
