@@ -222,6 +222,60 @@ However, no code is required in the body of the constructor. The constructor can
     Sets the pin to be not driving. Same as \texttt{SetValue(false)}.
 \end{description}
 
+\begin{lstlisting}[language=csharp, caption={\texttt{Button.cs}}]
+public class $Button$ : $Component$ {
+    private const string SPRITE_BUTTON_UP =  "buttonUp";
+    private const string SPRITE_BUTTON_DOWN =  "buttonDown";
+    
+    private bool _isPushed = false;
+
+    public $Button$(string definitionPath) : base(definitionPath) {}
+
+    internal override void #OnInitialized#() {
+        #UpdateSprite#(SPRITE_BUTTON_UP);
+    }
+
+    public override void #OnPinStateChanged#($Pin$ pin) 
+        => #UpdatePins#();
+
+    public override void #OnControlPress#($Vector2$ cursorPosition) {
+        _isPushed = true;
+        #UpdateSprite#(SPRITE_BUTTON_DOWN);
+        #UpdatePins#();
+    }
+
+    public override void #OnControlRelease#() {
+        _isPushed = false;
+        #UpdateSprite#(SPRITE_BUTTON_UP);
+        #UpdatePins#();
+    }
+
+    private void #UpdatePins#() {
+        #UpdatePin#(#GetPin#(0)!);
+        #UpdatePin#(#GetPin#(1)!);
+    }
+
+    private void #UpdatePin#($Pin$ pin) {
+        $Pin$ otherPin = #GetPin#(1 - pin.Id)!;
+
+        if (otherPin.IsHigh && _isPushed) {
+            pin.#SetHigh#();
+        }
+        else {
+            pin.#SetLow#();
+        }
+    }
+}
+\end{lstlisting}
+
+In the example above, we have defined a behavior of a \texttt{Button} component. The component's configuration specifies two unnamed pins, and component's directory contains 2 SVG files, \texttt{buttonUp.svg} and \texttt{buttonDown.svg}. The pins are in the general mode, since we didn't specify their mode explicitly.
+
+In the overridden \texttt{OnInitialized} we set the \texttt{buttonUp} image as the default sprite. In the overridden \texttt{OnControlPress} and \texttt{OnControlRelease} methods we update the internal state of the button: whether it is pressed or not. We change the actively displayed sprite accordingly.
+
+\texttt{UpdatePins} is a helper method specific to this component. For both of the unnamed pins (retrieved by the \texttt{GetPin} method) it checks whether the value of the pin should be changed. A pin is set to be driving (\texttt{SetHigh} method), if the button is pushed, and the other pin reads a high value. We have to be careful, just because a pin reads a high value, it doesn't mean we want to set it to driving. Once a state of a node drops back to low, we want states of both pins drop back to low as well, regardless of whether the button is pushed or not. \footnotemark This update method is called everytime a button is pressed, released, or a value on of its pins changes (\texttt{OnPinStateChanged} override).
+
+\footnotetext{Unless, of course, the node at the other side is also high. That means the pin was, and will stay driving}
+
 \subsection{Defining scenes} \label{subsec:scene_spec}
 The scene YAML file describes component instances present in the scene, and how are their pins connected together in nodes. The path of this file is supplied through the \texttt{-s} command line argument. There are no restriction to where the scene file has to be placed.
 
