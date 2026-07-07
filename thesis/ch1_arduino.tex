@@ -13,13 +13,13 @@ The essential functions that an Arduino programmer has to define in their sketch
 The target board \texttt{Arduino Uno R3 SMD} provides 6 analog and 14 digital general purpose pins, some of which can be used for I2C and SPI protocol communication, or PWM modulation. The most simple to use and simulate are the digital pins for general purpose I/O, so this thesis focuses exlucively on using these pins as such. \cite{arduino_r3_smd_specs}
 
 The digital pins can be manipulated using only these 3 functions:
-\begin{itemize}
-    \item \texttt{void pinMode(pin, mode)} - configures specified pin either as an input or an output
-    \item \texttt{value digitalRead(pin)} - reads the voltage on the pin, stores it as a digital value, either 1 or 0
-    \item \texttt{void digitalWrite(pin, value)} - when set to output, sets the voltage of the pin to corresponding value. If set to input, current driven components may not work correctly, since the current is suppressed by an internal pull-up resistor. 
-\end{itemize}
+\begin{description}
+    \item[\texttt{void pinMode(pin, mode)}] configures specified pin either as an input or an output
+    \item[\texttt{value digitalRead(pin)}] reads the voltage on the pin, stores it as a digital value, either 1 or 0
+    \item[\texttt{void digitalWrite(pin, value)}] when set to output, sets the voltage of the pin to corresponding value.
+\end{description}
 
-Pins are identified by their index. \texttt{mode} and \texttt{value}'s underlying type is also an integer, but it is preferred to use predefined constants, such as \texttt{INPUT}/\texttt{OUTPUT}, \texttt{HIGH}/\texttt{LOW} and such. Below is an example of a sketch from the Arduino's documentation, using only the described functions:
+Pins are identified by their integer index. \texttt{mode} and \texttt{value}'s underlying type is also an integer, but it is preferred to use predefined constants, such as \texttt{INPUT}/\texttt{OUTPUT}, \texttt{HIGH}/\texttt{LOW} and such. Below is an example of a sketch from the Arduino's documentation, using only the described functions:
 
 \begin{lstlisting}[language=csharp, caption=Sketch example \cite{arduino_digital_read}]
 int ledPin = 13;  // LED connected to digital pin 13
