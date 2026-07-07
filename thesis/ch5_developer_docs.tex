@@ -74,7 +74,7 @@ Listed below are all the available command line options for the backend and fron
 \subsubsection{Common for shared memory usage}
 \begin{description}
     \item[\texttt{-{}-shmem-name <string>}] Name of the memory-mapped file. [\texttt{Arguino-ipc}]
-    \item[\texttt{-{}-shmem-size <int>}] Size of the memory-mapped region per buffer, specified in pages. [\texttt{1}]
+    \item[\texttt{-{}-shmem-size <int>}] Size of the memory-mapped region per circular buffer, specified in pages (usually $page = 4096B$). [\texttt{1}]
 \end{description}
 
 \section{Defining components and scenes} \label{sec:component_spec}
