@@ -1,6 +1,6 @@
 \chapter{Introduction to Arduino programming} \label{ch:arduino}
 
-\section{Sketches}
+\section{Sketches} \label{sec:sketches}
 
 The Arduino programs are commonly referred to as \textit{sketches}. A sketch is not a single file, but an entire directory, usually populated by files with the \texttt{.ino} extension, contaning the source code of the program. \texttt{.cpp}, \texttt{.c}, \texttt{.S} (assembly files), and header files like \texttt{.h} are also accepted as files contaning source code. Every sketch must contain a \texttt{.ino} file with a file name matching the sketch root directory name \cite{arduino_sketch_specs}.
 
@@ -8,7 +8,7 @@ The Arduino programming language, in which \texttt{.ino} files are written, is a
 
 The essential functions that an Arduino programmer has to define in their sketch are \texttt{void setup()} and \texttt{void loop()}. The \texttt{setup()} function is called once, when the program is booted. That is when the Arduino board is powered up, the program is uploaded to it, or when the reset button is pressed. The \texttt{loop()} function is called in a loop indefinitely. This is the proper place to define any interactions with the board, detecting inputs, updating timers, etc.
 
-\section{Arduino board interface}
+\section{Arduino board interface} \label{sec:arduino_io}
 
 The target board \texttt{Arduino Uno R3 SMD} provides 6 analog and 14 digital general purpose pins, some of which can be used for I2C and SPI protocol communication, or PWM modulation. The most simple to use and simulate are the digital pins for general purpose I/O, so this thesis focuses exlucively on using these pins as such. \cite{arduino_r3_smd_specs}
 
@@ -37,7 +37,7 @@ void #loop#() {
 }
 \end{lstlisting}
 
-\section{Build process}
+\section{Build process} \label{sec:arduino_build}
 
 Before the code is compiled, all \texttt{.ino} go through a simple preprocessing stage. \texttt{\#line} directives are added. These link to the original line and file, when the code is debugged. All files are concatenated together, function declarations are generated at the top, and the \texttt{Arduino.h} is included. This header file is crucial as it declares the \texttt{void} and \texttt{loop} functions, functions for manipulating pins, common constants and mathematical functions, etc. At this point the sketch becomes a complete C++ source code.
 

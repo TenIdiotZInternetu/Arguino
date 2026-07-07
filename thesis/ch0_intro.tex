@@ -7,6 +7,33 @@ Goal of this work is to skip the emulation process and create a working Arduino 
 
 Bundled with this simulator is a graphic application for creating and testing logical circuits. This GUI is written with Avalonia framework and will contain Arduino as it's main component. The point of this application is to attach to the running Arduino simulator and visualize the expected Arduino behavior with user's code on a given circuit. We want to give the user the power to compose their own circuits, and define the behavior and looks of their components. Additionally, the user will be able to debug their program, while the GUI is running, using their preferred IDE and C++ debugger, providing real-time feedback and inspection when stepping through the code.
 
+\subsubsection{Structure of the thesis}
+
+This thesis starts with a brief introduction of technologies we've chosen for achieving our vision from the introduction. Then we lay down very specific goals and requirements, we want to address in this very thesis, using the mentioned technologies. In chapter \ref{ch:arduino} we introduce the reader to programming for Arduino boards. We show what is required from Arduino programs (\ref{sec:sketches}), how they access the board's I/O (\ref{sec:arduino_io}), and how are they built (\ref{sec:arduino_build}).
+
+In chapter \ref{ch:architecture} we provide a high level look on the core systems of the work. We show why it is required to split the work into 2 applications (or more accurately processes) and we expose the reader to the world of inter-process communication (\ref{sec:ipc}). We show how it can be achieved using TCP connection (\ref{subsec:ipc_tcp}), shared memory (\ref{subsec:ipc_shmem}) and events (\ref{subsec:events}), and what kind of problems had to be taken into consideration (\ref{subsec:ipc_considerations}). Then we delve into more details on how the individual projects and classes have been implemented in chapters \ref{ch:backend} and \ref{ch:frontend}.
+
+Finally, the chapter \ref{ch:docs} consists of specifics on how to simulate Arduino code using the applications we developed for this thesis (\ref{sec:usage}). We specify how to create custom components and scenes for the circuit simulator (\ref{sec:component_spec}). And in the very end, we specify what interprocess communication protocols we have created for interacting with the simulator's backend, so that any other user interface can potentially be connected to it (\ref{sec:ipc_spec}).
+
+\section{Technologies used}
+
+\subsubsection{C++, CMake, Boost}
+
+For technical reasons described in the subsection \ref{subsec:ipc_considerations}, the work is split into two processes: the frontend and the backend. The backend is written in C++, as it is almost identical to the language used for Arduino sketches (see \ref{sec:arduino_build}). This makes the build process of the user's code much simpler. In the C++ project we use Boost libraries that provide useful abstractions for communicating with other processes (\texttt{asio}, \texttt{interprocess}) and parsing command line arguments (\texttt{program\_options}). We use CMake as our metabuild system of choice, as it is the one we are the most familiar with.
+
+\subsubsection{C\#}
+ 
+The frontend is written in C\# from the .NET 9 Software development kit. We consider the language to be more convenient for writing many of the essential systems than its C++ counterpart. That includes handling the graphics, the user interactions, abstraction and parsing numerous configuration files. We also believe the language will be more comfortable for users that wish to extend the simulator with their own components. Libraries are also much easier to set up and compile thanks to NuGet.
+
+\subsubsection{Avalonia UI}
+
+For the GUI we decided to use Avalonia UI. Avalonia is a popular open-source cross-platform .NET framework, used by major companies like JetBrains or Unity. It is based on the Microsoft's WPF framework utilising the same XAML markup language and many of the same core principles. We chose it specifically because neither WPF or its cross-platform successor MAUI are available on Linux, one of our target platforms.
+
+\subsubsection{SVG}
+
+We want to render the circuit's components using vector graphics, as they don't deform, no matter how much scaled they are. This is crucial, since we also want to render the components in different sizes and under different zoom levels. The most common file format for vector graphics is SVG, so this is format we will require supplied for custom components. Avalonia provides a sufficient support for rendering vector graphics using SkiaSharp under the hood, as all of its built-in controls are rendered using this framework.
+
+
 \section{Specific goals of the thesis} \label{sec:goals}
 
 \subsubsection{Target platforms:}
@@ -15,10 +42,10 @@ Bundled with this simulator is a graphic application for creating and testing lo
     \item Windows 10 or higher (64-bit)
 \end{itemize}
 
-\subsubsection{Software prerequisits:} \label{prerequisits}
+\subsubsection{Software prerequisites:} \label{prerequisits}
 \begin{itemize}
-    \item Minimal system requirements of Avalonia UI
-    \item arduino-cli
+    \item arduino-cli \footnote{See section \ref{sec:arduino_build}}
+    \item Minimal system requirements of Avalonia UI \footnote{See \url{https://docs.avaloniaui.net/docs/supported-platforms}}
     \item .NET 9 SDK or higher
     \item C++ compiler
     \item CMake
@@ -34,7 +61,8 @@ Bundled with this simulator is a graphic application for creating and testing lo
 \begin{itemize}
     \item Defines platform independent constants and macros from \texttt{Arduino.h}.
     \item Implements \texttt{digitalWrite}, \texttt{digitalRead}, \texttt{pinMode} and \texttt{millis} functions from \texttt{Arduino.h}.
-    \item Declares and calls \texttt{setup} and \texttt{loop} functions with the behavior expected on an Arduino machine.
+    \item Declares and calls \texttt{setup} and \texttt{loop} functions with the behavior expected on an Arduino machine. 
+    \footnote{The significance of the mentioned functions is described in detail in the chapter \ref{ch:arduino}}
     \item Compiles and runs any valid \texttt{Arduino UNO R3 SMD} sketch, preprocessed with the \texttt{arduino-cli} tool, containing only symbols mentioned above.
     \item Reflects behavior of the above functions in an internal Arduino state. Logs changes of this state in a text file.
     \item Integrates an interprocess communication mechanism for exchanging data with an external GUI application.
