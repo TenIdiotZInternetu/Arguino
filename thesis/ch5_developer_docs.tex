@@ -2,6 +2,17 @@
 
 \section{Compiling and running the simulator with Arduino code}
 
+\subsection{Repository file structure}
+
+For this section it is useful to know, where are the important files located within the source code repository. For a detailed overview of the repository directories, see \ref{attch:repo}. These are some of the directories and files located in the root of the repository:
+
+\begin{description}
+    \item[\texttt{backend}] contains source code of the backend simulation. The main \texttt{CMakeLists.txt} file is located here. It is also recommended to put the build directory here. The \texttt{CMakeLists} specifying the build targets and the \texttt{main()} function can be found within \texttt{backend/executable}.
+    \item[\texttt{frontend}] contains source code of the frontend GUI and component management. The \texttt{Gui.sln} solution file is located here. The \texttt{Program.cs} with the \texttt{Main()} function is located within the \texttt{frontend/Main} directory. The build directory will be also located here, if not stated otherwise. The components definition directory is on the path \texttt{frontend/ComponentManagement/Components}. This path must be specified using \texttt{-c <path>} command line argument, if \texttt{frontend} is not the current working directory.
+    \item[\texttt{tests}] contains example sketches and scenes used for testing both the backend and frontend.
+    \item[\texttt{preprocess.sh}, \texttt{preprocess.bat}] shell scripts performing basic sketch preprocessing using \texttt{arduino-cli}. 
+\end{description}
+
 \subsection{Build process and usage examples}
 
 First make sure you comply with the software prerequisites from the section \ref{prerequisits}. Make sure your Boost libraries can be found by the CMake metabuild system from your development environment. For further information, please follow the Boost's getting started guide \cite{boost_get_started}. After that, we can preprocess the sketch, compile it with the simulator, and run the simulator together with the frontend.
@@ -34,10 +45,10 @@ First make sure you comply with the software prerequisites from the section \ref
 \subsubsection{Frontend process}
 \begin{enumerate}
     \item Build \texttt{frontend/gui.sln}.
-    \item Run the \texttt{Gui} executable\footnotemark with the desired scene. For example, in the \texttt{frontend} directory call:
+    \item Run the \texttt{Gui} executable\footnotemark with the desired scene. For example, executing from the \texttt{frontend} directory:
     
     \begin{lstlisting}[language=shell]
-    <build dir>/Gui -s ./Scenes/buttons.yaml. 
+    <build dir>/Gui -s ../tests/buttons.scene.yaml
     \end{lstlisting}
     
     If you built the TCP version of the backend, be sure to add the flag \texttt{-i Tcp}.
