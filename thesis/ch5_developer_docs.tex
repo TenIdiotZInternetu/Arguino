@@ -17,26 +17,27 @@ First make sure you comply with the software prerequisites from the section \ref
     \item Build \texttt{backend/CMakeLists.txt}. Available targets are:
     
     \begin{description}
-        \item[\texttt{arguino-shared-memory.exe}] for IPC over shared memory
-        \item[\texttt{arguino-tcp.exe}] for IPC over TCP connection
+        \item[\texttt{arguino-shared-memory}] for IPC over shared memory
+        \item[\texttt{arguino-tcp}] for IPC over TCP connection
         \item[\texttt{arguino}] is an alias for the shared memory version (Default and preferred version).
     \end{description}
 
-    \item Run
+    \item Run \footnotemark
     \begin{lstlisting}[language=shell]
     <build dir>/executable/<build target>
     \end{lstlisting}
     
 \end{enumerate}
 
+\footnotetext{On Windows, the \texttt{.exe} extension is usually appended, i.e. \texttt{.../<build target>.exe}.}
 
 \subsubsection{Frontend process}
 \begin{enumerate}
     \item Build \texttt{frontend/gui.sln}.
-    \item Run the \texttt{Gui} executable with the desired scene. For example, in the \texttt{frontend} directory call:
+    \item Run the \texttt{Gui} executable\footnotemark with the desired scene. For example, in the \texttt{frontend} directory call:
     
     \begin{lstlisting}[language=shell]
-    <build dir>/Gui.exe -s ./Scenes/buttons.yaml.
+    <build dir>/Gui -s ./Scenes/buttons.yaml. 
     \end{lstlisting}
     
     If you built the TCP version of the backend, be sure to add the flag \texttt{-i Tcp}.
@@ -44,6 +45,8 @@ First make sure you comply with the software prerequisites from the section \ref
 \end{enumerate}
 
 For frontend and backend to communicate properly, it is necessary that they connect to the same IPC object. For TCP it is the port (\texttt{-p} option for both programs), and for shared memory it is the shared memory's object name (\texttt{-{}-shmem-name} option for both programs). These default to the same value for both of the aforementioned options, port \texttt{8888} and memory named \texttt{Arguino-ipc}.
+
+\footnotetext{\texttt{Gui.exe} on Windows}
 
 \subsection{Command-Line Arguments}
 Listed below are all the available command line options for the backend and frontend executables. Default values, if defined, are specified in the square brackets. Expected arguments are in the angle brackets. For arguments accepting only specific enumeration of values, all available values are listed in the angle brackets seperated by a vertical bar (\texttt{|}). In square brackets is the default value used, when the option is omitted.
@@ -344,7 +347,7 @@ The mapped memory region is split into 2 equal sections, both containg the same 
 
 The buffer itself has 2 control variables stored within it. Both are 64-bit unisgned integers representing an offset within the buffers data. The first, located at $s_b$, is the offset at which the producer will write the next chunk of data into the buffer. The second, located at $s_b + 8$, is the offset at which the next chunk of data will be read from the buffer, if present. From the address $s_b + 16$ until the next buffer, or the end of the mapped region, the actual data are stored. That means the actual capacity of data stored within one buffer is $n/2 - 16$.
 
-The data have no uniform size, structure or address alignment. The length of a message in the buffer must be deduced from the data within the message itself. In case of the text encoding, it is the message delimeter. A message can be located at the boundary of the data region. In that case the message is split so that very byte, until the very end of the region is filled, and the rest is written at $s_b + 16$ again. There are no gaps between the messages.
+The data have no uniform size, structure or address alignment. The length of a message in the buffer must be deduced from the data within the message itself. In case of the text encoding, it is the message delimeter. A message can be located at the boundary of the data region. In that case the message is split so that every byte until the very end of the region is filled, and the rest is written at $s_b + 16$ again. There are no gaps between the messages.
 
 The frontend process is responsible for consuming messages from the first buffer and producing them to the second one. As such, the consumer offset of the first buffer and the producer offset of the second buffer must be updated accordingly. The other two offsets must remain read only. The backend process has these roles reversed.
 
