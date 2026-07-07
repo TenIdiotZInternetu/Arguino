@@ -1,15 +1,15 @@
 \chapter{User documentation} \label{ch:docs}
 
-\section{Compiling and running the simulator with Arduino code}
+\section{Compiling and running the simulator with Arduino code} \label{sec:usage}
 
 \subsection{Repository file structure}
 
 For this section it is useful to know, where are the important files located within the source code repository. For a detailed overview of the repository directories, see \ref{attch:repo}. These are some of the directories and files located in the root of the repository:
 
 \begin{description}
-    \item[\texttt{backend}] contains source code of the backend simulation. The main \texttt{CMakeLists.txt} file is located here. It is also recommended to put the build directory here. The \texttt{CMakeLists} specifying the build targets and the \texttt{main()} function can be found within \texttt{backend/executable}.
-    \item[\texttt{frontend}] contains source code of the frontend GUI and component management. The \texttt{Gui.sln} solution file is located here. The \texttt{Program.cs} with the \texttt{Main()} function is located within the \texttt{frontend/Main} directory. The build directory will be also located here, if not stated otherwise. The components definition directory is on the path \texttt{frontend/ComponentManagement/Components}. This path must be specified using \texttt{-c <path>} command line argument, if \texttt{frontend} is not the current working directory.
-    \item[\texttt{tests}] contains example sketches and scenes used for testing both the backend and frontend.
+    \item[\texttt{backend/}] contains source code of the backend simulation. The main \texttt{CMakeLists.txt} file is located here. It is also recommended to put the build directory here. The \texttt{CMakeLists} specifying the build targets and the \texttt{main()} function can be found within \texttt{backend/executable}.
+    \item[\texttt{frontend/}] contains source code of the frontend GUI and component management. The \texttt{Gui.sln} solution file is located here. The \texttt{Program.cs} with the \texttt{Main()} function is located within the \texttt{frontend/Main} directory. The build directory will be also located here, if not stated otherwise. The components definition directory is on the path \texttt{frontend/ComponentManagement/Components}. This path must be specified using \texttt{-c <path>} command line argument, if \texttt{frontend} is not the current working directory.
+    \item[\texttt{tests/}] contains example sketches and scenes used for testing both the backend and frontend.
     \item[\texttt{preprocess.sh}, \texttt{preprocess.bat}] shell scripts performing basic sketch preprocessing using \texttt{arduino-cli}. 
 \end{description}
 

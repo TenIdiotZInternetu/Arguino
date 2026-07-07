@@ -144,11 +144,11 @@
 
 %%% Tables used in the thesis (consider if this is needed)
 %%% In mathematical theses, it could be better to move the list of tables to the beginning of the thesis.
-\listoftables
+% \listoftables
 
 %%% Abbreviations used in the thesis, if any, including their explanation
 %%% In mathematical theses, it could be better to move the list of abbreviations to the beginning of the thesis.
-\chapwithtoc{List of Abbreviations}
+% \chapwithtoc{List of Abbreviations}
 
 %%% Doctoral theses must contain a list of author's publications
 \ifx\ThesisType\TypePhD
@@ -169,5 +169,43 @@
 \chapter{Attachments}
 
 \section{Source code repository} \label{attch:repo}
+
+The file attachment \texttt{thesis.zip} contains the repository with the source code in its entirety. The repository is equivalent with the public git repository found at the URL \url{https://github.com/TenIdiotZInternetu/Arguino} at the tag \xxx{add tag}.
+
+The file structure of the repository is as follows:
+\begin{description}
+	\item[\texttt{.vscode/}] contains the files:
+		\begin{description}
+			\item[\texttt{launch.json}] specifies backend debug configurations using the \texttt{cppdbg} VS Code extension.
+			\item[\texttt{settings.json}] specifies backend source and build directories using the \texttt{CMakeTools} VS Code extension.
+		\end{description}
+	\item[\texttt{backend}/] contains the source code for the backend application. Each directory corresponds to a single module described in the chapter \ref{ch:backend}, with the exception of two:
+		\begin{description}
+			\item[\texttt{libs/}] contains the two utilities modules: \texttt{logger} and \texttt{timer}.
+			\item[\texttt{.vscode/}] contains the setup equivalent to the \texttt{.vscode} directory in the root of the repository. 
+		\end{description}
+		Other files in this directory are:
+		\begin{description}
+			\item[\texttt{.clang-format}] specification of the automatic code formatting.
+			\item[\texttt{.gitignore}] exclusion of build files.
+			\item[\texttt{CMakeLists.txt}] main metabuild specification for the backend. References CMake files in the module subdirectories.
+			\item[\texttt{CMakePresets.json}] build configurations using Clang on Linux and MSVC on Windows.
+			\item[\texttt{vcpkg.json}] specifies Vcpkg dependencies for the Boost libraries.
+		\end{description}
+	\item[\texttt{docs/}] Contains year project specification and other documentation:
+		\begin{description}
+			\item[\texttt{RP\_Specifikacia.odt}, \texttt{RP\_Specifikacia.pdf}] final year project specification in Slovak language.
+			\item[\texttt{specification-draft.md}] rough version of the year project specification in English language. Contains the original vision and expectations for the project.
+			\item[\texttt{component\_addons\_doc.md}] contains specification of custom components and scenes configuration in the scope of the section \ref{sec:component_spec}.
+		\end{description}
+	\item[\texttt{frontend/}] contains the source code for the frontend application. Each directory corresponds to a single project described in the chapter \ref{ch:frontend}. The remaining files are \texttt{.gitignore} and the \texttt{gui.sln} .NET solution file.
+	\item[\texttt{res/}] contains assets used in source code unrelated context, e.g. screenshots.
+	\item[\texttt{tests/}] contains example sketches and scenes used for testing both the frontend and the backend.
+	\item[\texttt{thesis/}] contains source files for this document, e.g. \texttt{.tex} files, bibliography files and figures.
+	\item[\texttt{.gitignore}] excludes build and Visual Studio files
+	\item[\texttt{README.md}] describes the usage and build process of both the backend and the frontend in the scope of the section \ref{sec:usage}.
+	\item[\texttt{preprocess.sh}] shell script performing basic sketch preprocessing using \texttt{arduino-cli}. For use on Linux.
+	\item[\texttt{preprocess.bat}] same as \texttt{preprocess.sh} but for the use on Windows. 
+\end{description}
 
 \end{document}
