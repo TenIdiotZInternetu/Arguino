@@ -5,7 +5,7 @@
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=\textwidth,keepaspectratio]{./img/uml/b_simulator.pdf}
-    \caption{\texttt{Simulator} module architecture}
+    \caption{\texttt{simulator} module architecture}
     \label{fig:sim_module}
 \end{figure}
 
@@ -278,6 +278,13 @@ This proposal haven't been implemented at the time of writing the thesis due to 
 
 \section{Executable module}
 
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\textwidth,keepaspectratio]{./img/uml/b_executable.pdf}
+    \caption{\texttt{executable} module architecture}
+    \label{fig:exe_module}
+\end{figure}
+
 \subsection{\texttt{main.cpp}}
 
 \begin{lstlisting}[language=csharp, caption={\texttt{main.cpp}}]
@@ -549,6 +556,13 @@ bool #decode_event#(const $std$::$string$& message, $Event$& event)
 
 \section{TCP Server module}
 
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\textwidth,keepaspectratio]{./img/uml/b_tcpserver.pdf}
+    \caption{\texttt{tcp-server} module architecture}
+    \label{fig:tcp_module}
+\end{figure}
+
 \subsection{\texttt{TcpServer} class}
 
 \begin{lstlisting}[language=csharp, caption={\texttt{TcpServer} class}]
@@ -632,6 +646,13 @@ class $ConnectionHandler$ :
 \end{lstlisting}
 
 \section{Shared Memory module}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\textwidth,keepaspectratio]{./img/uml/b_sharedmemory.pdf}
+    \caption{\texttt{shared-memory} module architecture}
+    \label{fig:shmem_module}
+\end{figure}
 
 \subsection{\texttt{MemoryRegion} class}
 
