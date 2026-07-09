@@ -95,11 +95,11 @@ class $Simulator$ {
 };
 \end{lstlisting}
 
-The singleton's instance is created on the heap within the static \texttt{init} and its pointer stored in the \texttt{s\_instance} member. The \texttt{eventCallback} paramater of this method must be set to the handler, that should be called upon event consumption. In this our implementation that is the \texttt{on\_event} function from \texttt{ipcAdapter.hpp}. This callback is stored into \texttt{f\_eventCallback}.
+The singleton's instance is created on the heap within the static \texttt{init} method and its pointer stored in the \texttt{s\_instance} member. The \texttt{eventCallback} paramater of this method must be set to the handler, that should be called upon event consumption. In our implementation that is the \texttt{on\_event} function from \texttt{ipcAdapter.hpp}. This callback is stored into \texttt{f\_eventCallback}.
 
-\texttt{state} and \texttt{queue} methods are used to access the objects owned by the \texttt{Simulator}. But queue is more typically accessed through the \texttt{handle\_event} and \texttt{handle\_events} calls. They both consume all remote events waiting in the queue, but the \texttt{handle\_event} variant also puts another event in the queue before starting the consumption.
+\texttt{state} and \texttt{queue} methods are used to access the objects owned by the \texttt{Simulator}. But the queue is more typically accessed through the \texttt{handle\_event} and \texttt{handle\_events} calls. They both consume all remote events waiting in the queue. The \texttt{handle\_event} variant also puts a local event in the queue and consumes after all remote events with lower LVT.
 
-The \texttt{Simulator} also owns a \texttt{Timer}, this one representing the real time passed. At the moment, both timers show roughly the same time, but it is anticipated, that the simulation timer could be manipulated by the user in the future versions. Lastly, the \texttt{Simulator} class holds a shared pointer to a logger. It also exposes shortcut methods for passing log messages of different verbosity to the logger. This logger is used for any for messages unrelated to the IPC.
+The \texttt{Simulator} also owns a \texttt{Timer}, this one representing the real time passed. At the moment, both timers show roughly the same time, but it is anticipated, that the simulation timer could be manipulated by the user in the future versions of the project. Lastly, the \texttt{Simulator} class holds a shared pointer to a logger. It also exposes shortcut methods for passing log messages of different verbosity to the logger. This particular logger is used for any messages unrelated to the IPC.
 
 \subsubsection{\texttt{handle\_event} method} \label{sssec:handle-event}
 
@@ -117,7 +117,7 @@ void $Simulator$::#handle_event#($Event$ event)
 }
 \end{lstlisting}
 
-The event is enqueued to the local event queue, and all remote events with lower LVT are consumed. To check that the local event has been consumed, we had to add a unique identifier member to the \texttt{Event} struct distinguishing events. This \texttt{id} is compared to the \texttt{id} of the previously consumed event, and the while loop is stopped when these two match. We couldn't use the LVT value as, even though it is unique for local events, it doesn't have to be unique across processes. In some frontend implementations, remote events can actually have higher LVT than the local ones.
+The event is enqueued to the local event queue, and all remote events with lower LVT are consumed. To check that the local event has been consumed, we had to add a unique identifier member to the \texttt{Event} struct distinguishing different event instances. This \texttt{id} is compared to the \texttt{id} of the previously consumed event, and the while loop is stopped when these two match. We couldn't use the LVT value as, even though it is unique for local events, it doesn't have to be unique across processes. In some frontend implementations, remote events can actually have higher LVT than the local ones.
 
 Due to the semantics of LVT, we ensure that every remote event that occured before the local event has been consumed. The exception are events that already occured remotely, but haven't been fast enough to reach the backend's event queue. This can occur with TCP connection, or with very frequent \texttt{Arduino.h} calls in the sketch. These events will most likely be still consumed in the next call of \texttt{handle\_event}. But for full correctness more synchronization techniques should be implemented, depending on the use case.
 
@@ -154,7 +154,7 @@ struct $Event$ {
 };
 \end{lstlisting}
 
-The members of the \texttt{Event} struct mostly match the event specification in subsections \ref{subsec:events}. The additions are the \texttt{id} and \texttt{action} members. We already justified the use \texttt{id} member in the previous section. It is assigned in the constructor from the static \texttt{s\_nextEventId}, which is then incremented. The \texttt{action} is assigned as a lambda function from within the static factory methods. This lambda is executed during the \texttt{EventQueue}'s \texttt{execute\_next\_event} call.
+The members of the \texttt{Event} struct mostly match the event specification in the subsection \ref{subsec:events}. The additions are the \texttt{id} and \texttt{action} members. We already justified the use \texttt{id} member in the previous section. It is assigned in the constructor from the static \texttt{s\_nextEventId}, which is then incremented. The \texttt{action} is assigned as a lambda function from within the static factory methods. This lambda is executed during the \texttt{EventQueue}'s \texttt{execute\_next\_event} call.
 
 \subsubsection{Write event}
 
@@ -173,7 +173,7 @@ $Event$ $Event$::#write#($pin_t$ pin, $digital_t$ value)
 
 The above is an example on how the factory methods should look like. The constructor takes a type and variadic arguments corresponding to that type. the constructor is statically asserted to not accept more than 3 variadic arguments. The action is defined as a lambda, with call to the \texttt{Simulator}'s \texttt{state} getter, modifying its values. The outcome is then logged through the \texttt{Simulator}'s logger. 
 
-At this point, the LVT of the event is not known. That is the responsibility of the scheduling entity. For local events it is the \texttt{EventQueue}, for remote events it is IPC, which has to decode LVT from incoming message.
+At this point, the LVT of the event is not known. That is the responsibility of the scheduling entity. For local events it is the \texttt{EventQueue}, for remote events it is IPC, which has to decode LVT from an incoming message.
 
 \subsection{\texttt{EventQueue} class}
 
@@ -272,7 +272,7 @@ At last, we implement the four functions specified in the goals of the thesis. \
 
 The \texttt{digitalRead} call consumes all waiting events, and then simply reads the pin of \texttt{ArduinoState}. Out of the four functions, this is the only one that can be problematic with regard to delayed event reception described in the \texttt{handle\_event} method (\ref{sssec:handle-event}), as it is the only one dependant on previous \texttt{Arduino.h} calls. It is possible for \texttt{digitalRead} to return a state outdated by a few microseconds. 
 
-A proposed solution is to add an event serving as a kind of condition variable. This event would be sent to the frontend and the same event would be sent back after any necessary frontend changes would have been resolved. Until then, the backend's simulation thread would remain in a spin lock, pausing the simulation timer, handling remote events and checking for the expected synchronization event. Only then the function would return a value and the execution of the sketch would continue.
+A proposed solution is to add an event serving as a kind of condition variable. This event would be sent to the frontend and the same event would be sent back after any necessary frontend changes would have been resolved. Until then, the backend's simulation thread would remain in a spin lock, pausing the simulation timer, handling remote events and checking for the expected synchronization event. Only then the function would return a value and the execution of the sketch would resume.
 
 This proposal haven't been implemented at the time of writing the thesis due to time concerns. This incorrect behavior hasn't been yet observed with the provided tests, and it probably won't be noticed on simpler sketches of a target user audience.
 
@@ -284,6 +284,10 @@ This proposal haven't been implemented at the time of writing the thesis due to 
     \caption{\texttt{executable} module architecture}
     \label{fig:exe_module}
 \end{figure}
+
+The \texttt{executable} module puts all the systems together and compiles into an executable file. \texttt{sketch.cpp} doesn't come with the source code. It has to be preprocessed from the sketch user wishes to simulate. \texttt{main.cpp} defines how the sketch is used, and orders the IPC adapter to use it in context of the used IPC mechanism.
+
+Two execution targets are provided in the CMake configuration, one for each IPC mechanism. They differ in which IPC adapter implementation is used, and which program options are supported with that implementation. The also differ in whether the \texttt{tcp-server} or the \texttt{shared-memory} module is linked with the executable.
 
 \subsection{\texttt{main.cpp}}
 
@@ -322,18 +326,24 @@ void #simulator_loop#()
 int #main#(int argc, char** argv)
 {
     options = #parse_arguments#(argc, argv);
-    #init_simulator#(on_event);
+    #init_simulator#(#on_event#);
     #run_simulator_with_ipc#(#simulator_loop#, options);
 }
 \end{lstlisting}
+
+The \texttt{main} function of the C++ project parses the command line arguments, initializes the Simulator singleton, defines the simulation \texttt{loop} and let's the IPC adapter handle the rest. The \texttt{on\_event} function passed to \texttt{init\_simulator} is included from \texttt{ipcAdapter.hpp} and implemented by the adapter chosen via CMake execution target. Simulation logger and it's verbosity are created in the \texttt{init\_simulator} as well.
+
+The \texttt{simulator\_loop} calls the the required functions included from \texttt{sketch.cpp}: the \texttt{setup} function once and the \texttt{loop} function in an infinite while loop. The \textit{Reboot} event is sent as the very first event of each simulation. This is useful when the frontend keeps running, but backend is being restarted or recompiled with a different sketch. The lack of such an event would preserve the frontend state of the old simulation, and it would get desynchronized very quickly.
+
+The command line arguments are parsed using the \texttt{boost::program\_options} library. The values in their expected data types are stored in the \texttt{ProgramOptions} struct. An instance of this struct is stored statically in the \texttt{main.cpp} file, and passed down to the IPC adapter by reference.
 
 \subsection{\texttt{ipcAdapter.hpp}}
 
 \begin{lstlisting}[language=csharp, caption={\texttt{ipc\_adapter.hpp}}]
 using $logger_t$ = logger::$FileLogger$;
 using $loop_fnct$ = $std$::$function$<void()>;
-using $init_fnct$ = $std$::$function$<void(
-    arguino::simulator::$Simulator$::$event_callback_fnct$)>;
+using $init_fnct$ = $std$::$function$<
+    void(arguino::simulator::$Simulator$::$event_callback_fnct$)>;
 
 static $std$::$shared_ptr$<$logger_t$> IpcLogger;
 
@@ -355,133 +365,30 @@ inline void #init_ipc_logger#(const $ProgramOptions$& options)
 }
 \end{lstlisting}
 
-\subsection{\texttt{tcpAdapter.cpp}}
+The reposonsibility of the \texttt{run\_simulator\_with\_ipc} method is to initialize the classes used for IPC and store them in the implementing \texttt{.cpp} file. That typically involves creating a new thread for listening to messages incoming from the frontend process. This thread has to be joined at some point after the simulation loop. That is why we pass the loop function as an argument, to be invoked at the right time.
 
-\begin{lstlisting}[language=csharp, caption={\texttt{tcp\_adapter.cpp}}]
-using namespace arguino::simulator;
-using $tcp_server_t$ = arguino::tcp::$TcpServer$;
-static $std$::$unique_ptr$<$tcp_server_t$> _tcpServer;
+The \texttt{on\_event} function is passed to the \texttt{Simulator} and is called every time a local event is consumed. The event is encoded into a message using the function included from \texttt{encoder.hpp}. The message can be then transmitted over the IPC, which has already been initialized before the very first local event is created.
 
-void #on_event#(const $Event$& event)
-{
-    auto message = #encode_event#(event);
-    if (message == UNKNOWN_EVENT) {
-        IpcLogger->#log_error#(
-            "Encountered unknown event type; skipping.");
-        return;
-    }
+The \texttt{init\_ipc\_logger} function is already defined as it provides the IPC logging setup common for any adapter. We call this function at the beginning of each \texttt{run\_simulator\_with\_ipc} definition.
 
-    IpcLogger->#log_debug#("Enqueuing message " + message);
-    _tcpServer->#post_message#(message);
-}
-
-static void #on_received_tcp_message#(const $std$::$string$ message)
-{
-    $Event$ event;
-    if (#decode_event#(message, event)) {
-        $Simulator$::#queue#().#enqueue_remote#(event);
-    }
-    else {
-        IpcLogger->#log_error#(
-            "Could not decode event from message " + message);
-    }
-}
-
-static void #run_tcp#() { _tcpServer->#launch#(); }
-
-void #run_simulator_with_ipc#(
-    $loop_fnct$ loopFunction, 
-    const $ProgramOptions$& options)
-{
-    #init_ipc_logger#(options);
-    _tcpServer = $std$::#make_unique#<$tcp_server_t$>(
-        options.TcpPort, on_received_tcp_message, IpcLogger);
-
-    $std$::$thread$ tcp_thread(#run_tcp#);
-    IpcLogger->#log_info#("Tcp Server launched");
-    loopFunction();
-    tcp_thread.#join#();
-}
-\end{lstlisting}
-
-\subsection{\texttt{shmemAdapter.cpp}}
-
-\begin{lstlisting}[language=csharp, caption={\texttt{shmem\_adapter.cpp}}]
-using namespace arguino::shmem;
-using namespace arguino::simulator;
-
-constexpr uint8_t MESSAGE_DELIMETER = ';';
-static $TwoWayBuffer$* _shmem;
-
-void #on_event#(const $Event$& event)
-{
-    auto message = #encode_event#(event);
-    if (message == UNKNOWN_EVENT) {
-        IpcLogger->#log_error#(
-            "Encountered unknown event type while encoding.");
-        return;
-    }
-
-    if (!_shmem->#write#(message + ';')) {
-        IpcLogger->#log_error#(
-            "Could not write to shared memory buffer, "
-            "not enough available space.");
-    }
-    else {
-        IpcLogger->#log_debug#(
-            "Written message to producer buffer: " + message);
-    }
-}
-
-static void #run_shmem_consumer#()
-{
-    while (true) {
-        while (!_shmem->#consumer#().#is_empty#()) {
-            $std$::$vector$<uint8_t> data = 
-                _shmem->#consumer#().#consume_until#(
-                    MESSAGE_DELIMETER);
-            if (data.#empty#()) {
-                IpcLogger->#log_error#(
-                    "A span of incoming message could not "
-                    "be determined, skipping.");
-                continue;
-            }
-
-            $std$::$string$ message(data.#begin#(), data.#end#());
-            IpcLogger->#log_debug#(
-                "Read message from consumer buffer: " + message);
-
-            $Event$ event;
-            if (#decode_event#(message, event)) {
-                $Simulator$::#queue#().#enqueue_remote#(event);
-            }
-            else {
-                IpcLogger->#log_error#(
-                    "Could not decode event from message " + message);
-            }
-        }
-    }
-}
-
-void #run_simulator_with_ipc#(
-    $loop_fnct$ loopFunction, 
-    const $ProgramOptions$& options)
-{
-    #init_ipc_logger#(options);
-    _shmem = new $TwoWayBuffer$(
-        options.ShmemName, options.ShmemSizePages);
-
-    $std$::$thread$ consumer_thread(#run_shmem_consumer#);
-    IpcLogger->#log_info#("Shared memory buffer intitialized.");
-
-    loopFunction();
-    consumer_thread.#join#();
-}
-\end{lstlisting}
+Implementations are located in the \texttt{ipc} directory of the \texttt{executable} module. But we should first understand how were the IPC mechanisms implemented, we moved the adapter documentations to their respective chapters (subsections \ref{subsec:tcpadapter} and \ref{subsec:shmemadapter})
 
 \subsection{\texttt{textEncoder.cpp}}
 
-\begin{lstlisting}[language=csharp, caption={\texttt{encoder.cpp}}]
+\begin{lstlisting}[language=csharp, caption={\texttt{encoder.hpp}}]
+constexpr char UNKNOWN_EVENT[] = "UNKNOWN";
+
+$std$::$string$ #encode_event#(
+    const arguino::simulator::$Event$& event);
+bool #decode_event#(
+    const $std$::$string$& message, 
+    arguino::simulator::$Event$& event);
+\end{lstlisting}
+
+The \texttt{encoder.hpp} declares a function that encodes local events into messages, and decodes messages into remote events \texttt{decode\_event} outputs the result event as a reference parameter. Its return value indicates success of the operation. That is, whether or not was the received message in a valid a format. The \texttt{UNKNOWN\_EVENT} constant is used to identify undefined event types.
+\footnote{This can occur when implementing new events, but forgetting to add new cases in encoding. This should never happen with the source code attached with this thesis.}
+
+\begin{lstlisting}[language=csharp, caption={\texttt{textEncoder.cpp}}]
 using namespace arguino::simulator;
 
 constexpr char PART_DELIMETER = ':';
@@ -553,6 +460,12 @@ bool #decode_event#(const $std$::$string$& message, $Event$& event)
     return true;
 }
 \end{lstlisting}
+
+At the time of writing this thesis, \texttt{textEncoder.cpp} is the only encoder implementation. It handles human readable messages, the format of which is described in more detail in the section \ref{sec:msg_format}. The message is divided into 3 to 6 parts delimited by a colon, the first 2 of which are common for every event type. Hence the constant string formats for each of the types. \texttt{encode\_message} identifies the type, fills the event values into the respective format, and its done.
+
+\texttt{decode\_message} has to manually split the message into substrings and parse each substring individually. First we decode arguments in a loop. then we decode the type encoding character, and based on that we call the appropriate factory method with the right arguments. In the end we decode the timestamps from the common parts.
+
+At each of these parts we can encounter a value that doesn't conform to its expected data type or a known event type, and the decoding fails. Then we have to return \texttt{false}. At this point, the event can be already partially initialized, but it is the responsibility of the caller to discard this instance, and fall into some fail state.
 
 \section{TCP Server module}
 
@@ -643,6 +556,55 @@ class $ConnectionHandler$ :
     void #write_from_queue#();
     void #disconnect#();
 };
+\end{lstlisting}
+
+\subsection{\texttt{tcpAdapter.cpp}} \label{subsec:tcpadapter}
+
+\begin{lstlisting}[language=csharp, caption={\texttt{tcp\_adapter.cpp}}]
+using namespace arguino::simulator;
+using $tcp_server_t$ = arguino::tcp::$TcpServer$;
+static $std$::$unique_ptr$<$tcp_server_t$> _tcpServer;
+
+void #on_event#(const $Event$& event)
+{
+    auto message = #encode_event#(event);
+    if (message == UNKNOWN_EVENT) {
+        IpcLogger->#log_error#(
+            "Encountered unknown event type; skipping.");
+        return;
+    }
+
+    IpcLogger->#log_debug#("Enqueuing message " + message);
+    _tcpServer->#post_message#(message);
+}
+
+static void #on_received_tcp_message#(const $std$::$string$ message)
+{
+    $Event$ event;
+    if (#decode_event#(message, event)) {
+        $Simulator$::#queue#().#enqueue_remote#(event);
+    }
+    else {
+        IpcLogger->#log_error#(
+            "Could not decode event from message " + message);
+    }
+}
+
+static void #run_tcp#() { _tcpServer->#launch#(); }
+
+void #run_simulator_with_ipc#(
+    $loop_fnct$ loopFunction, 
+    const $ProgramOptions$& options)
+{
+    #init_ipc_logger#(options);
+    _tcpServer = $std$::#make_unique#<$tcp_server_t$>(
+        options.TcpPort, on_received_tcp_message, IpcLogger);
+
+    $std$::$thread$ tcp_thread(#run_tcp#);
+    IpcLogger->#log_info#("Tcp Server launched");
+    loopFunction();
+    tcp_thread.#join#();
+}
 \end{lstlisting}
 
 \section{Shared Memory module}
@@ -763,4 +725,79 @@ class $TwoWayBuffer$ {
     $CircularBuffer$ _producer;
     $CircularBuffer$ _consumer;
 };
+\end{lstlisting}
+
+\subsection{\texttt{shmemAdapter.cpp}} \label{subsec:shmemadapter}
+
+\begin{lstlisting}[language=csharp, caption={\texttt{shmem\_adapter.cpp}}]
+using namespace arguino::shmem;
+using namespace arguino::simulator;
+
+constexpr uint8_t MESSAGE_DELIMETER = ';';
+static $TwoWayBuffer$* _shmem;
+
+void #on_event#(const $Event$& event)
+{
+    auto message = #encode_event#(event);
+    if (message == UNKNOWN_EVENT) {
+        IpcLogger->#log_error#(
+            "Encountered unknown event type while encoding.");
+        return;
+    }
+
+    if (!_shmem->#write#(message + ';')) {
+        IpcLogger->#log_error#(
+            "Could not write to shared memory buffer, "
+            "not enough available space.");
+    }
+    else {
+        IpcLogger->#log_debug#(
+            "Written message to producer buffer: " + message);
+    }
+}
+
+static void #run_shmem_consumer#()
+{
+    while (true) {
+        while (!_shmem->#consumer#().#is_empty#()) {
+            $std$::$vector$<uint8_t> data = 
+                _shmem->#consumer#().#consume_until#(
+                    MESSAGE_DELIMETER);
+            if (data.#empty#()) {
+                IpcLogger->#log_error#(
+                    "A span of incoming message could not "
+                    "be determined, skipping.");
+                continue;
+            }
+
+            $std$::$string$ message(data.#begin#(), data.#end#());
+            IpcLogger->#log_debug#(
+                "Read message from consumer buffer: " + message);
+
+            $Event$ event;
+            if (#decode_event#(message, event)) {
+                $Simulator$::#queue#().#enqueue_remote#(event);
+            }
+            else {
+                IpcLogger->#log_error#(
+                    "Could not decode event from message " + message);
+            }
+        }
+    }
+}
+
+void #run_simulator_with_ipc#(
+    $loop_fnct$ loopFunction, 
+    const $ProgramOptions$& options)
+{
+    #init_ipc_logger#(options);
+    _shmem = new $TwoWayBuffer$(
+        options.ShmemName, options.ShmemSizePages);
+
+    $std$::$thread$ consumer_thread(#run_shmem_consumer#);
+    IpcLogger->#log_info#("Shared memory buffer intitialized.");
+
+    loopFunction();
+    consumer_thread.#join#();
+}
 \end{lstlisting}

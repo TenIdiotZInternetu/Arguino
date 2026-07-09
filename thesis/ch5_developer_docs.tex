@@ -326,7 +326,7 @@ This section describes how to set up IPC communication of a custom frontend appl
 
 The processes communicate using concrete events with up to 3 integer arguments. These events are encoded into a human readable text messages, seperated by a common delimeter. The messages are then sent over IPC.
 
-\subsection{Text message format}
+\subsection{Text message format} \label{sec:msg_format}
 Individual messages are delimited by the semicolon character (\texttt{;}). The individual values within one message are delimited by the colon character (\texttt{:}). The integer values are written in decimal system, using the ASCII characters of the actual digits. The semantics of these values are better described in the chapter about architecture, subsection \ref{subsec:events}. The format of the message then looks as the following:
 
 \begin{lstlisting}[
