@@ -14,7 +14,7 @@ static TwoWayBuffer* _shmem;
 
 void on_event(const Event& event)
 {
-    auto message = encode_event(event);
+    auto message = encode_event(event);  // TODO - move to .hpp?
     if (message == UNKNOWN_EVENT) {
         IpcLogger->log_error("Encountered unknown event type while encoding.");
         return;
@@ -34,7 +34,7 @@ static void run_shmem_consumer()
 {
     // TODO Use IPC semaphore
     while (true) {
-        while (!_shmem->consumer().is_empty()) {
+        while (!_shmem->consumer().is_empty()) {  // TODO - invert
             std::vector<uint8_t> data = _shmem->consume_until(MESSAGE_DELIMETER);
             if (data.empty()) {
                 IpcLogger->log_error(

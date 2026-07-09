@@ -71,6 +71,7 @@ struct CircularBuffer::iterator_t {
         : _parent(parent), offset(offset)
     {}
 
+    // TODO: Use uint64_t instead of size_t
     size_t offset;
 
     reference operator*();
@@ -116,6 +117,7 @@ inline bool CircularBuffer::write(const TRange& data)
         std::memcpy(&*begin(), lastBytes.data(), lastBytes.size());
     }
 
+    // TODO - barrier
     write_producer(producer_it() + bytes.size());
     return true;
 }

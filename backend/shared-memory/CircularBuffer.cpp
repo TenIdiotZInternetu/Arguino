@@ -44,10 +44,12 @@ std::vector<uint8_t> CircularBuffer::consume_until(uint8_t delimeter)
         std::memcpy(&result[firstBytesLength], &*begin(), lastBytesLength);
     }
 
+    // TODO - barrier
     write_consumer(delimeterIt + 1);
     return result;
 }
 
+// TODO: define begin as consumer and end as consumer, so it can be used in ranged for
 CircularBuffer::iterator_t CircularBuffer::begin()
 {
     return iterator_t(this, 0);
