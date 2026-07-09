@@ -616,6 +616,10 @@ void #run_simulator_with_ipc#(
     \label{fig:shmem_module}
 \end{figure}
 
+The \texttt{shmemAdapter.cpp} holds a \texttt{TwoWayBuffer} object. It represents the two circular buffers, one producing and one consuming. It creates the OS-level memory mapped object using the \texttt{boost::interprocess} library, and splits it into two regions of the same size, one for each buffer. 
+
+The \texttt{CircularBuffer} class implements the data structure of the buffer itself. It was designed deliberately for use with shared memory. It holds the \texttt{MemoryRegion} instance, which abstracts away the low level details of accessing the shared memory directly. We defined a forward iterator for the \texttt{CircularBuffer} to simplify the manupilation of its actual data.
+
 \subsection{\texttt{MemoryRegion} class}
 
 \begin{lstlisting}[language=csharp, caption={\texttt{MemoryRegion} class}]
