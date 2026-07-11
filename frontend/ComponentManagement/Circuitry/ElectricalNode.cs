@@ -10,6 +10,7 @@ public class ElectricalNode {
     public bool IsHigh => State == DigitalState.High;
     public bool IsLow => State == DigitalState.Low;
 
+    // TODO - Never invoked?
     public event Action<ElectricalNode, DigitalState>? StateChangedEvent;
 
     private List<Pin> _pins = new();

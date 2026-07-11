@@ -1,12 +1,22 @@
 \chapter{Frontend implementation} \label{ch:frontend}
 
-\section{Component Management project}
+\subsubsection{Note on the \texttt{event} keyword}
+
+Until now we've been talking about events exclusively in the context of IPC. But since C\# defines it's own \texttt{event} keyword, used multiple times in the frontend's code, using the two different meanings can be confusing. So for the duration of this chapter, we will write \textit{event} (in italics) every time we talk about the C\#'s keyword and the associated patterns. The notation of the IPC event and \texttt{Event} structs remains unchanged.
+
+\section{Component Management project - Circuitry and Scenes}
+
+Classes of the \texttt{Circuitry} and \texttt{Scenes} directories are a tightly coupled system, encapsulating the core logic of the frontend. The \texttt{Scene} classes comprises of nothing more than a list of components and a list of electrical nodes. Components of the same electrical node interact with each other through the interface of pins. These can either listen to changes of digital state on the node, or they could assert a high state to it (driving).
+
+\texttt{Component} is the class overridden by user in order to create a custom component. It holds the \texttt{ComponentConfiguration} struct statically. This struct contains the metadata of the \texttt{Component} subtype, available sprites and pin identifiers. Each \texttt{Component} instance owns a set of \texttt{Pin} instances necessary to define a custom logic.
+
+Components, sprites and nodes of a scene are created by the static \texttt{SceneFactory} class and its loader interfaces. These are documentated in detail in the section \ref{sec:f_factory}.
 
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=\textwidth,keepaspectratio]{./img/uml/f_Scenes.pdf}
-    \caption{\texttt{Scenes} and \texttt{Circuitry} architecture fo the \texttt{ComponentManagement} project}
-    \label{fig:shmem_module}
+    \caption{\texttt{Scenes} and \texttt{Circuitry} architecture of the \texttt{ComponentManagement} project}
+    \label{fig:cm_project_circuitry_and_scenes}
 \end{figure}
 
 \subsection{\texttt{Pin} class}
@@ -70,6 +80,16 @@ public class $Pin$
 }
 \end{lstlisting}
 
+\texttt{IsDriving} and \texttt{State} are the most important properties of the \texttt{Pin}. \texttt{State} is a read only getter property, that evaluates based on the state of the node it is connected to (if any). \texttt{IsDriving} can be changed by the owner \texttt{Component} by using either \texttt{SetHigh}, \texttt{SetLow} or \texttt{SetValue} methods. For read only pins, these methods trigger a warning, and the value isn't changed. If the value is different from before these methods were called, the \textit{DrivingChangedEvent} is invoked. This notifies the connected node to update its internal driving pins counter.
+
+By default, the pin is not connected to any node. \texttt{ConnectToNode} method is called within the \texttt{ElectricalNode} to change that. In this method, the pin is added to the node's list of pins. The \texttt{NotifyStateChanged} method is called by the node, when its state changes. The method is also called right after the pin has been succesfully connected or disconnected.
+
+The \texttt{Disconnect} method is implemented for cases, when \texttt{ConnectToNode} is called while, the pin is already connected to a different node. Or when such a request comes from the GUI. But at the time of writing this thesis, such mechanisms haven't been implemented yet. The pin is ever connected only once during the initialization of a node in the \texttt{SceneFactory}. These changes in connection are signaled by \textit{PinConnectedEvent} and \textit{PinDisconnectedEvent}.
+
+If \texttt{NotifyStateChanged} is by any chance invoked on a write only pin, it triggers a warning, and the change isn't signalled to the component. The change is also not signalled when the pin is driving. In all other cases, pin's \textit{StateChangedEvent} is invoked. This \textit{event} is subscribed to by the parent \texttt{Component}, which handles it with its \texttt{OnPinStateChanged} virtual method.
+
+The \texttt{PinPrototype} record struct is used to encapsulate the identifiers of pins on a given \texttt{Component} subtype. It holds only the \texttt{id} and \texttt{name} values and has no logic on its own. The prototypes are parsed from the component configuration file, and are held in the static \texttt{ComponentConfiguration} member of the \texttt{Component} subtype. They are passed to the \texttt{Pin}'s constructor during the completion of \texttt{Component} instances.
+
 \subsection{\texttt{ElectricalNode} class}
 
 \begin{lstlisting}[language=csharp, caption={\texttt{ElectricalNode} class}]
@@ -82,9 +102,6 @@ public class $ElectricalNode$ {
     public bool IsHigh => State == DigitalState.High;
     public bool IsLow => State == DigitalState.Low;
 
-    public event $Action$<$ElectricalNode$, $DigitalState$>?
-        StateChangedEvent;
-
     private $List$<$Pin$> _pins = new();
 
     public void #AddPin#($Pin$ pin) { ... }
@@ -93,6 +110,14 @@ public class $ElectricalNode$ {
     { ... }
 }
 \end{lstlisting}
+
+The \texttt{ElectricalNode} holds a reference to all of its connected pins a list. Its digital state is determined by how many of its connected pins are driving. It is low if this value is zero, high otherwise.
+
+The pins of the node are modified using the \texttt{AddPin} and \texttt{RemovePin} methods. Inside these methods, the \texttt{ConnectToNode} and \texttt{Disconnect} methods are called on the pin passed in the argument. The \texttt{DrivingPins} count is updated. While the pin is connected, the \texttt{Propagate} method is either subscribed or unsubscribed from the pin's \textit{StateChangedEvent}.
+
+The \texttt{Propagate} method updates the \texttt{DrivingPins} counter. If the state has been changed by this update \footnotemark, the \texttt{NotifyStateChanged} is called on all pins connected to the node, except the one that triggered the change. 
+
+\footnotetext{I.e. when the counter changed from 0 to 1 or vice versa.}
 
 \subsection{\texttt{Component} abstract class}
 
@@ -139,6 +164,29 @@ public abstract class $Component$ {
 }
 \end{lstlisting}
 
+The instance of \texttt{Component} class is identified by both name of its instance and the name of its type. It holds the \texttt{Transform} (position, rotation and scale within the scene), the currently rendered sprite, and instances of its pins. Reference to a pin is acquired through the \texttt{GetPin} methods, identified either by its name or id. The rendered sprite can be changed with the \texttt{UpdateSprite}, which also identifies sprite by its name, or its reference. These methods invoke the \textit{SpriteChangedEvent}, which is listened to from the \texttt{ComponentControl}. This updates its visuals in the Avalonia UI window.
+
+The user should define the logic of their custom type through the virtual methods. Not all of them need to implemented, so they cannot be made abstract. The \texttt{OnControlPress} and \texttt{OnControlRelease} are called from the \texttt{ComponentControl}. The \texttt{OnInitialized} is called from the \texttt{SceneFactory} once the component instance has been completed. \texttt{OnPinConnected}, \texttt{OnPinDisconnected} and \texttt{OnPinStateChanged} are subcribed to the appropriate \textit{events} in their pin instances. The semantics and proper definition of these methods is better described in the subsection \ref{subsec:specs_component_class}.
+
+The \texttt{ComponentConfiguration} structs are stored statically inside the class as a dictionary, with component type name as the key. They store the metadata, but more importantly the pin prototypes from which pin instances are created, and the dictionary of compiled sprites, with the SVG file name as the key (excluding the \texttt{.svg} extension). 
+
+The pins are instantiated in the \texttt{InitPins} method, by passing the \texttt{PinPrototype} to the \texttt{Pin} constructor. Its \textit{events} are subscribed to here.
+
+\begin{lstlisting}[language=csharp, caption={\texttt{ComponentConfiguration.cs}}]
+public record $ComponentConfiguration$() {
+    public static readonly $Vector2$ DEFAULT_IMAGE_SIZE = new(50, 50); 
+
+    public required string Name;
+    public required string ComponentPath;
+    
+    public string Description = "";
+    public $Vector2$ ImageSize = DEFAULT_IMAGE_SIZE;
+    public $List$<$PinPrototype$> Pins = [];
+    public $Dictionary$<string, $SKSvg$> Sprites = [];
+}
+\end{lstlisting}
+
+\section{Component Management project - Scene factory} \label{sec:f_factory}
 
 \subsection{\texttt{SceneFactory} static class}
 
@@ -146,7 +194,7 @@ public abstract class $Component$ {
     \centering
     \includegraphics[width=\textwidth,keepaspectratio]{./img/uml/f_Factory.pdf}
     \caption{\texttt{Factory} architecture of the \texttt{ComponentManagement} project}
-    \label{fig:shmem_module}
+    \label{fig:cm_project_factory}
 \end{figure}
 
 \begin{lstlisting}[language=csharp, caption={\texttt{SceneFactory} class}]
@@ -274,7 +322,7 @@ public class $YamlSceneLoader$ : $ISceneLoader$ {
     \centering
     \includegraphics[width=\textwidth,keepaspectratio]{./img/uml/f_Main.pdf}
     \caption{\texttt{Main} project architecture}
-    \label{fig:shmem_module}
+    \label{fig:main_project}
 \end{figure}
 
 \subsection{\texttt{Program.cs}, \texttt{App.axaml} and \texttt{MainWindow.axaml}}
@@ -379,7 +427,7 @@ public class $SvgDrawOp$($SKSvg$ Svg, $SKMatrix$ Transform) :
     \centering
     \includegraphics[width=\textwidth,keepaspectratio]{./img/uml/f_IPC.pdf}
     \caption{\texttt{IpcAdapter} project architecture}
-    \label{fig:shmem_module}
+    \label{fig:ipc_project}
 \end{figure}
 
 \subsection{\texttt{Event} struct}
@@ -457,7 +505,7 @@ public class $TextEncoder$ : $IEncoder$
     \centering
     \includegraphics[width=\textwidth,keepaspectratio]{./img/uml/f_Tcp.pdf}
     \caption{\texttt{tcpAdapter} project architecture}
-    \label{fig:shmem_module}
+    \label{fig:tcp_project}
 \end{figure}
 
 \subsection{\texttt{TcpClient} class}
@@ -533,7 +581,7 @@ public class $TcpMessageHandler$ : $IIpcAdapter$ {
     \centering
     \includegraphics[width=\textwidth,keepaspectratio]{./img/uml/f_Shmem.pdf}
     \caption{\texttt{SharedMemoryAdapter} project architecture}
-    \label{fig:shmem_module}
+    \label{fig:shmem_project}
 \end{figure}
 
 \subsection{\texttt{CircularBuffer} class}

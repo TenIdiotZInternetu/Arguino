@@ -137,7 +137,7 @@ pinNames?:
 
 \lstinputlisting[language=yaml, caption={Component configuration example: \texttt{Led.yaml}}]{../frontend/ComponentManagement/Components/Led/Led.yaml}
 
-\subsection{Component behavior script specification}
+\subsection{Component behavior script specification} \label{subsec:specs_component_class}
 How does the component interact with the rest of the circuit is described by the C\# class with the named the same as the component type. This class must inherit from the abstract \texttt{Component} class. The file containg the class must be added to the \texttt{ComponentManagement.csproj} project. In order to compile, the user's class must also define a constructor like this:
 
 \begin{lstlisting}[language=csharp]
