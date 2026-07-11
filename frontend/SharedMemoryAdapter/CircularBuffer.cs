@@ -44,7 +44,6 @@ public class CircularBuffer {
         long bytesUntilBufferEnd = BufferSize - ProducerOffset;
 
         if (data.Length < bytesUntilBufferEnd) {
-            // TODO: Potentially slow?
             _mappedRegion.WriteArray(BUFFER_LOCATION + ProducerOffset, data.ToArray(), 0, data.Length);
         }
         else {

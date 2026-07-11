@@ -2,6 +2,13 @@
 
 \section{Component Management project}
 
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\textwidth,keepaspectratio]{./img/uml/f_Scenes.pdf}
+    \caption{\texttt{Scenes} and \texttt{Circuitry} architecture fo the \texttt{ComponentManagement} project}
+    \label{fig:shmem_module}
+\end{figure}
+
 \subsection{\texttt{Pin} class}
 
 \begin{lstlisting}[language=csharp, caption={\texttt{Pin} class}]
@@ -132,7 +139,15 @@ public abstract class $Component$ {
 }
 \end{lstlisting}
 
+
 \subsection{\texttt{SceneFactory} static class}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\textwidth,keepaspectratio]{./img/uml/f_Factory.pdf}
+    \caption{\texttt{Factory} architecture of the \texttt{ComponentManagement} project}
+    \label{fig:shmem_module}
+\end{figure}
 
 \begin{lstlisting}[language=csharp, caption={\texttt{SceneFactory} class}]
 public class $SceneFactory$ {
@@ -255,6 +270,13 @@ public class $YamlSceneLoader$ : $ISceneLoader$ {
 
 \section{Main project with Avalonia UI}
 
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\textwidth,keepaspectratio]{./img/uml/f_Main.pdf}
+    \caption{\texttt{Main} project architecture}
+    \label{fig:shmem_module}
+\end{figure}
+
 \subsection{\texttt{Program.cs}, \texttt{App.axaml} and \texttt{MainWindow.axaml}}
 
 \subsection{\texttt{MainController} static class}
@@ -353,6 +375,13 @@ public class $SvgDrawOp$($SKSvg$ Svg, $SKMatrix$ Transform) :
 
 \section{IPC Adapter project}
 
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\textwidth,keepaspectratio]{./img/uml/f_IPC.pdf}
+    \caption{\texttt{IpcAdapter} project architecture}
+    \label{fig:shmem_module}
+\end{figure}
+
 \subsection{\texttt{Event} struct}
 
 \begin{lstlisting}[language=csharp, caption={\texttt{Event} struct}]
@@ -424,6 +453,13 @@ public class $TextEncoder$ : $IEncoder$
 
 \section{TCP Adapter project}
 
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\textwidth,keepaspectratio]{./img/uml/f_Tcp.pdf}
+    \caption{\texttt{tcpAdapter} project architecture}
+    \label{fig:shmem_module}
+\end{figure}
+
 \subsection{\texttt{TcpClient} class}
 
 \begin{lstlisting}[language=csharp, caption={\texttt{TcpClient} class}]
@@ -492,6 +528,13 @@ public class $TcpMessageHandler$ : $IIpcAdapter$ {
 \end{lstlisting}
 
 \section{Shared Memory Adapter project}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\textwidth,keepaspectratio]{./img/uml/f_Shmem.pdf}
+    \caption{\texttt{SharedMemoryAdapter} project architecture}
+    \label{fig:shmem_module}
+\end{figure}
 
 \subsection{\texttt{CircularBuffer} class}
 
