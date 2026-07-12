@@ -21,7 +21,7 @@ public static class MainController {
     public static CommandLineArguments Arguments { get; private set; } = null!;
     public static MainWindow MainWindow { get; private set; } = null!;
     public static Scene Scene { get; private set; } = null!;
-    public static TcpMessageHandler Adapter { get; private set; } = null!;
+    public static TcpMessageHandler Adapter { get; private set; } = null!; // TODO - Remove
     public static Stopwatch GlobalTimer { get; private set; } = null!;
     
     public static ILogger Logger { get; private set; } = null!;

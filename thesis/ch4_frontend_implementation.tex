@@ -4,7 +4,7 @@
 
 Until now we've been talking about events exclusively in the context of IPC. But since C\# defines it's own \texttt{event} keyword, used multiple times in the frontend's code, using the two different meanings can be confusing. So for the duration of this chapter, we will write \textit{event} (in italics) every time we talk about the C\#'s keyword and the associated patterns. The notation of the IPC event and \texttt{Event} structs remains unchanged.
 
-\section{Component Management project - Circuitry and Scenes}
+\section{Component Management project - Circuitry and Scenes} \label{sec:cm_project_circuitry_and_scenes}
 
 Classes of the \texttt{Circuitry} and \texttt{Scenes} directories are a tightly coupled system, encapsulating the core logic of the frontend. The \texttt{Scene} classes comprises of nothing more than a list of components and a list of electrical nodes. Components of the same electrical node interact with each other through the interface of pins. These can either listen to changes of digital state on the node, or they could assert a high state to it (driving).
 
@@ -318,6 +318,14 @@ public class $YamlSceneLoader$ : $ISceneLoader$ {
 
 \section{Main project with Avalonia UI}
 
+The \texttt{Main} project has been imlemented with the MVVM architecture in mind. The only model of the application is the \texttt{Component} class from the \texttt{Component Management} project (see \ref{sec:cm_project_circuitry_and_scenes}).
+
+The views and viewmodel files are put in separate direcories. Views consist of \texttt{.axaml} files and the codebehind \texttt{.axaml.cs} files. These codebehind files contain a partial class with the name of control, inheriting from Avalonia's \texttt{UserControl}. These can be used to write logic for the views as well, but we delibarately left them empty. The only exception is the \texttt{App.axaml.cs}, which has to call the \texttt{MainController} once the UI is initialized.
+
+The \texttt{.axaml} files define the visual tree of the application. The root of this application is \texttt{App.axaml}, which owns the main window and includes some default styles from \texttt{Styles/General.axaml}. Our application doesn't create any other windows, everything is situated in the \texttt{MainWindow.axaml} and its controls.
+
+The \texttt{MainController} intializes the majority of the application. It invokes the \texttt{SceneFactory} and populates the \texttt{CircuitCanvas} viewmodel with the parsed scene. Then it chooses the IPC implementation based on the command line arguments, and the passes the IPC instance to the \texttt{Arduino} component.
+
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=\textwidth,keepaspectratio]{./img/uml/f_Main.pdf}
@@ -326,6 +334,42 @@ public class $YamlSceneLoader$ : $ISceneLoader$ {
 \end{figure}
 
 \subsection{\texttt{Program.cs}, \texttt{App.axaml} and \texttt{MainWindow.axaml}}
+
+The project has been created from an Avalonia UI template, which includes these files described in this subsection. The entry point file \texttt{Program.cs} with the \texttt{Main} function has remained unchanged. It only builds the Avalonia application using \texttt{App} class and nothing else.
+
+The \texttt{App} class is defined by the \texttt{App.axaml} and \texttt{App.axaml.cs} files. The \texttt{.axaml} consists of nothing else but the \texttt{<Application.Style>} element, which includes styles from the \texttt{Styles/General.axaml}. It dominantly defines background colors for panels and canvases.
+
+Much more important is the \texttt{App} codebehind. It  overrides the method \texttt{OnFrameworkInitializationCompleted} inherited from the Avalonia's \texttt{Application} class. This is where we create the instance of \texttt{MainWindow} class and set it to be the first only window opened by the application. The we call our \texttt{MainController}. \xxx{lifetimes}
+
+\begin{lstlisting}[language=csharp, caption={\texttt{OnFrameworkInitializationCompleted} method}]
+    public override void #OnFrameworkInitializationCompleted#() {
+        $MainWindow$ mainWindow = new $MainWindow$();
+        
+        if (ApplicationLifetime is 
+            $IClassicDesktopStyleApplicationLifetime$ desktop) 
+        {
+            desktop.MainWindow = mainWindow;
+            $MainController$.#InitApp#(desktop);
+        } else {
+            throw new $NotImplementedException$(
+                "Only Desktop style applications are supported");
+        }
+
+        base.#OnFrameworkInitializationCompleted#();
+    }
+\end{lstlisting}
+
+Layouts of views (more accurately controls) are defined by so called panels. Panels are designed to contain other controls in an organized manner. The layout of the \texttt{MainWindow} uses the \texttt{Grid} panel. It works very similarly to how the grid display method works in CSS. The cells of the grid are merged into bigger wholes, and contain another panels. Between these wholes are placed elements called \texttt{GridSplitter}, that can resize the wholes by dragging them with a cursor.
+
+The grid has been prepared such that menu bar and tool bar would be at the top, inspector of components would be on the left, the circuit canvas at the bottom, and the log messages would be displayed at the bottom. Out of these, only the circuit canvas has yet been implemented.
+
+\begin{figure}
+    \includegraphics[width=\textwidth, keepaspectratio]{./img/window.png}
+    \caption{The \texttt{MainWindow} layout}
+    \label{fig:main_window}
+\end{figure}
+
+The timer visible in the main window simply shows the time elapse from the start of the frontend application. It is implemented by the user control \texttt{Timer} consisting of a single text block. Its viewmodel utilizes the .NET's \texttt{Stopwatch} and Avalonia's \texttt{DispatcherTimer} objects, to periodically update the text. In future this view should be used to display the simulation time retrieved from backend.
 
 \subsection{\texttt{MainController} static class}
 
@@ -340,20 +384,127 @@ public static class $MainController$ {
 
     public static event $Action$? AppInitializedEvent;
     private static bool _isInitialized = false;
-    
+
     public static void #InitApp#(
         $IClassicDesktopStyleApplicationLifetime$ desktop) { ... }
 
     private static $ILogger$ #InitLogger#(
         string path, 
         $LogLevel$ verbosity) { ... }
-
     private static void #InitScene#() { ... }
     private static void #InitArduino#() { ... }
 }
 \end{lstlisting}
 
-\subsection{\texttt{ComponentControl} templated control}
+This class initializes all the important systems and brings them together. It stores a reference to the \texttt{MainWindow} from the desktop lifetime, so that we can access the visual tree. Then it parses and stores the program options with the \texttt{CommandLineArguments} struct, implemented with the \texttt{CommandLineParser} NuGet package. After that it initialzies loggers, the scene, the IPC and \texttt{Arduino} component if present in the scene.
+
+\subsubsection{\texttt{InitScene} function}
+
+\begin{lstlisting}[language=csharp, caption={\texttt{InitScene} function}]
+    private static void #InitScene#() {
+        var SceneFactory = new $SceneFactory$(
+            Arguments.ScenePath, Arguments.ComponentsPath);
+        Scene = SceneFactory.#LoadResources#();
+
+        var canvas = new $CircuitCanvas$();
+        foreach (var comp in Scene.ComponentsMap.Values) {
+            canvas.Components.#Add#(comp);
+        }
+        
+        MainWindow.CircuitCanvas.DataContext = canvas;
+    }
+\end{lstlisting}
+
+The scene is created by the \texttt{SceneFactory} from the files specified in the command line argument. Then the \texttt{CircuitCanvas} viewmodel is created, and its \texttt{Components} property is populated with the components from the scene. Then the viewmodel is set to be the data context for the \texttt{CircuitCanvas} view. But what does setting a data context mean?
+
+As we mentioned at the beginning of this section, all the views have a codebehind with a partial class named after the view. The other parts of this class are generated during compilation of the \texttt{.axaml} file. The XAML knows the name of the partial class it should generate thanks to the mandatory \texttt{x:Class} attribute in the root element of the control.
+
+We never explicitly defined a \texttt{CircuitCanvas} property in the \texttt{MainWindow} codebehind. Instead we added the attribute \texttt{x:Name="CircuitCanvas"} to the concrete \texttt{CircuitCanvas} XAML element. This tells the XAML compiler to generate the property with the given name in the \texttt{MainWindow} class, and populate it automatically with the concrete instance during Avalonia initialization. That is with all the properties set either through the codebehind, or through the attributes on the XAML element itself. \cite{avalonia_name_generator}
+
+\texttt{DataContext} is a property inherent to all the controls. It can be an instance of any one class, with which the control exchanges data through binding. That means, the control can change properties automatically when the values of the binded property changes. And in the other way, the property of the data context automatically updates when a user interacts with control. \footnotemark 
+In the MVVM architecure, data contexts are the best way to bind views to their viewmodels. \cite{avalonia_data_context} The type of the \texttt{DataContext} must be set to match the type of the view model in XAML. This can be done in more than one way. We do it by adding the \texttt{x:DataType} attribute to the root element of \texttt{CircuitCanvas.axaml}. The code below shows a minimal XAML example of how these two steps have been done.
+
+\xxx{syntax highlight}
+\begin{lstlisting}[caption={Data context setup in XAML}]
+<Window xmlns:uc="clr-namespace:Gui.Views.UserControls"
+        x:Class="Gui.Views.MainWindow"
+        Title="Main">
+
+    <uc:CircuitCanvas x:Name="CircuitCanvas"/>
+
+</Window>
+
+<UserControl xmlns:vm="clr-namespace:Gui.ViewModels"
+             x:Class="Gui.Views.UserControls.CircuitCanvas"
+             x:DataType="vm:CircuitCanvas">
+
+    <ItemsControl ItemsSource="{Binding Components}">
+        ...
+    </ItemsControl>
+    
+</UserControl>
+
+\end{lstlisting}
+
+\footnotetext{That is when the properties of the data context class are set properly. For example by implementing the \texttt{INotifyPropertyChanged} interface or using the attributes from \texttt{CommunityToolkit.Mvvm} NuGet package \cite{avalonia_inotifychanged}. In our case with \texttt{CircuitCanvas}, we used the \texttt{ObservableCollection} class from the same package, to store the \texttt{Component} instances in. }
+
+\subsubsection{\texttt{InitArduino} function}
+
+\begin{lstlisting}[language=csharp, caption={\texttt{InitArduino} function}]
+    private static void #InitArduino#() {
+        $Arduino$? arduino;
+        
+        if (Arguments.IpcType == $IpcType$::None) {
+            Logger.#LogInfo#(
+                "IPC type not specified. " + 
+                "Skipping connection to simulator..");
+            return;
+        }
+        
+        try {
+            arduino = Scene.ComponentsMap.#First#(
+                c => c.Value.TypeName == nameof($Arduino$))
+                .Value as $Arduino$;
+        }
+        catch ($InvalidOperationException$) {
+            Logger.#LogWarning#(
+                "Arduino not found in the scene. " + 
+                "Skipping connection to simulator.");
+            return;
+        }
+        
+        $ILogger$ ipcLogger = #InitLogger#(
+            Arguments.IpcLogFile, Arguments.Verbosity);
+        $IEncoder$ encoder = new $TextEncoder$();
+        $IIpcAdapter$? ipc = null;
+
+        try {
+            if (Arguments.IpcType == $IpcType$::Tcp) {
+                var tcpClient = new $TcpClient$(Arguments.TcpPort);
+                ipc = new $TcpMessageHandler$(
+                    tcpClient, encoder, ipcLogger);
+            }
+            if (Arguments.IpcType == $IpcType$::Shmem) {
+                ipc = new $TwoWayBuffer$(
+                    Arguments.ShmemName, Arguments.ShmemSize, 
+                    encoder, ipcLogger);
+            }
+
+            $Task$::#Run#(ipc!.ConnectAsync);
+            arduino?.#ConnectToSimulator#(ipc);
+        }
+        catch ($Exception$ e) {
+            ipcLogger.#LogError#(
+                "Error during IPC initialization: " + e.Message);
+        }
+    }
+\end{lstlisting}
+
+First we try to find the \texttt{Arduino} component in the scene. It is perfectly valid to have a scene without Arduino, so we only throw a warning and skip the rest of the initilazition. With the way this is handled, only one Arduino can reasonably work in a scene. A better implementation, would be to initialize the Arduino with IPC inside the component itself, and get the IPC arguments like port or shared memory name from extra properties in the scene file. That way, it would be possible to have multiple Arduino components in the scene, each connected to its own simulator. But the approach has not been properly tested. Since the IPC arguments are at moment passed through the command line, we can only have one Arduino anyway.
+
+Subsequently the IPC logger, the text encoder and the IPC adapter is initialized. The \texttt{IIpcAdapter} implementation is chosen based on the \texttt{IpcType} option from the command line arguments. If the chosen type is \texttt{None}, the function is skipped completely. After instantiating the adapter, we perodically try to connect to it in a new task, and immediately send it to the \texttt{Arduino} component. Once the adapter connects (if ever), the component will be able to react to the incoming events.
+
+\subsection{\texttt{ComponentControl} custom control}
 
 \xxx{Adjust Alt key behavior}
 \begin{lstlisting}[language=csharp, caption={\texttt{ComponentControl} class}]
@@ -361,11 +512,12 @@ public class $ComponentControl$ : $Control$ {
     private $Component$ _component = null!;
     private bool _pressHeld = false;
 
-    public static readonly $DirectProperty$<$ComponentControl$, 
-        $Component$ > ComponentProperty = 
-        $AvaloniaProperty$.$RegisterDirect$<$ComponentControl$, 
-        $Component$>(nameof(Component), o => o.Component, 
-        (o, v) => o.Component = v);
+    public static readonly $DirectProperty$<
+        $ComponentControl$, $Component$> ComponentProperty = 
+            $AvaloniaProperty$
+            .#RegisterDirect#<$ComponentControl$, $Component$>
+                (nameof(Component), o => o.Component,
+                 (o, v) => o.Component = v);
 
     public $Component$ Component {
         get => _component;
@@ -375,31 +527,35 @@ public class $ComponentControl$ : $Control$ {
 
     public $ComponentControl$() { ... }
 
+    public override void #Render#($DrawingContext$ context) { ... }
+    private void #InvalidateVisual#($SKSvg$ _) => #InvalidateVisual#();
+
     protected override void #OnPropertyChanged#(
         $AvaloniaPropertyChangedEventArgs$ change) { ... }
-
     private void #HandleComponentChanged#(
         $AvaloniaPropertyChangedEventArgs$ change) { ... }
 
-    public override void #Render#($DrawingContext$ context) { ... }
-    
     protected override void #OnPointerPressed#(
         $PointerPressedEventArgs$ e) { ... }
-
     protected override void #OnPointerReleased#(
         $PointerReleasedEventArgs$ e) { ... }
-    
     protected override void #OnAttachedToVisualTree#(
         $VisualTreeAttachmentEventArgs$ e) { ... }
-
     protected override void #OnDetachedFromVisualTree#(
         $VisualTreeAttachmentEventArgs$ e) { ... }
-
     private void #OnGlobalKeyUp#(object? _, $KeyEventArgs$ e) { ... }
-
-    private void #InvalidateVisual#($SKSvg$ _) => #InvalidateVisual#();
 }
 \end{lstlisting}
+
+The \texttt{ComponentControl} wires up the elements of the circuit canvas to the \texttt{Component} class in the \texttt{Component Management} project. The class inherites from \texttt{Control}, in order to override its \texttt{Render} method, and respond to Avalonia \textit{events}. The \texttt{InvalidateVisual} method is called when the sprite of the \texttt{Component} changes. It notifies the Avalonia renderer, that it is time to redraw the control. The \texttt{Render} method is then called, using the new sprite is used.
+
+\texttt{OnPointerPressed} and \texttt{OnPointerReleased} are tied to the components \texttt{OnControlPress} and \texttt{OnControlRelease} methods. These are called when the user clicks the control on the canvas with their mouse. \texttt{OnAttachedToVisualTree} and \texttt{OnDetachedFromVisualTree} are used here, to subcribe to the global Alt key \textit{event}. The Alt key modifies whether should the control be still pressed, when the pointer is released.
+
+We need to specify which \texttt{Component} instance is tied to this control from \texttt{CircuitCanvas} view. I.e. we need to define a property, we can setup from the canvas' XAML, that we can then access from the control. Unfortunately, Avalonia is very obtuse with its property system, and requires quite a lot of boilerplate.
+
+First we define the \texttt{\_component} backing field. Then a we define a static \texttt{DirectProperty} field, intialized by the \texttt{RegisterDirect} method, templated by the type of the control and type of the backing field. Then we define a regular property with getter and setter. The setter must contain the \texttt{SetAndRaise} in order to notify the control when its value changes. The property is passed to \texttt{RegisterDirect} and \texttt{DirectProperty} is passed to \texttt{SetAndRaise}. Then, once the value of the property changes through XAML binding, the \texttt{OnPropertyChanged} method is called. From the argument of this call we determine the property changed was our \texttt{Component}, and we can subscribe or unsubscribe from its \textit{SpriteChangedEvent}.
+
+We used direct properties since they are the most performant and appropriate for read only values (we don't change the \texttt{Component} from the control itself). There are more types of propreties appropriate for different use cases. \cite{avalonia_properties}
 
 \subsection{\texttt{SvgDrawOp} drawing operation}
 
@@ -419,7 +575,96 @@ public class $SvgDrawOp$($SKSvg$ Svg, $SKMatrix$ Transform) :
 }
 \end{lstlisting}
 
+The \texttt{SvgDrawOp} is used within the \texttt{Render} method of \texttt{ComponentControl}. It takes the compiled SVG of the \texttt{Component} as an argument, as well as its \texttt{Transform} converted into a transformation matrix. This conversion is done through an extension method within the \texttt{GeometryExtensions} class. The method creates elementary 3x3 translation, rotation and scale matrices and multiplies them together. \texttt{SKMatrix}, the type of the transformation matrix, comes from the \texttt{SkiaSharp} library. The same one that defines the SVG type, and many other systems used by the Avalonia's rendering pipeline.
+\footnote{\texttt{SkiaSharp} is the C\# API of \texttt{Skia}, an open source 2D graphics engine. It is owned by Google and is used in some of their products like Chrome or Android for rendering PDFs, shaders and vector graphics. \cite{skia} The API is implemented in many more popular languages. }
+
+\subsubsection{\texttt{HitTest} method}
+
+\begin{lstlisting}[language=csharp, caption={\texttt{HitTest} method}]
+    public bool #HitTest#($Point$ p) {
+        $SKPoint$ point = p.#ToSKPoint#();
+        $SKPoint$ localSpacePoint = 
+            Transform.#Invert#().#MapPoint#(point);
+        return _hitBox.#Contains#(localSpacePoint);
+    }
+\end{lstlisting}
+
+This method is called during pointer \textit{events}, e.g. when the user clicks on the canvas. It checks whether or not is the pointer located on top of the control. We use this in order to trigger the \texttt{OnPointerPressed} and \texttt{OnPointerReleased} handlers of the \texttt{ComponentControl}. 
+
+The argument \texttt{p} is the location of the pointer relative to the circuit canvas. The \texttt{\_hitBox} is given by the SVG. It is the rectangle in which the picure is inscribed. We described its coordinates in the local space of the picture. The rectangle's left corner is located in the origin of the local space, and its dimensions are given by \texttt{ImageSize} property we specified in the component's configuration. Using the inverse of the tranformation matrix, we can map \texttt{p} from the space of the canvas, to the picture's local space. If it lies within the \texttt{\_hitBox} area, we consider it a hit.
+
+\subsubsection{\texttt{Render} method}
+
+\begin{lstlisting}[language=csharp, caption={\texttt{Render} method}]
+    public void #Render#($ImmediateDrawingContext$ context) {
+        var leaseFeature = context.#TryGetFeature#<
+            $ISkiaSharpApiLeaseFeature$>();
+
+        if (leaseFeature == null) {
+            throw new $Exception$("LEASE");
+        }
+
+        using var lease = leaseFeature.#Lease#();
+        var canvas = lease.SkCanvas;
+        canvas.#Save#();
+ 
+        canvas.#Concat#(ref Transform);
+        canvas.#DrawPicture#(Svg.Picture);
+        canvas.#Restore#();
+    }
+\end{lstlisting}
+
+The method takes \texttt{ImmediateDrawingContext} as an argument, which is passed down from the argument of the \texttt{Render} method of \texttt{Control}. It defines the environment in which the picture is going to be drawn. We need to access the \texttt{SkiaSharp} canvas, upon which the Avalonia's drawing contexts are built and render their own vector graphics. We use it to draw our own \texttt{SKSvg} sprite. We do that by obtaining the SkiaSharp API lease from the context's features. \footnotemark
+
+The Skia canvas coordinates are already in the vector space of the parent control (the \texttt{CircuitCanvas}). This was achieved by multiplying the original space of the main window by a transformation matrix of each predecessor of this control on the visual tree. So we can just multiply the tranformation matrix of the canvas with the transformation matrix of the control, in order to place it on the canvas with the right translation, rotation and scale. The \texttt{Concat} method does exactly that. Then we rasterise the picture with the \texttt{DrawPicture} method.
+
+We need to call \texttt{Save} and \texttt{Restore} methods, because the same canvas will be used for many more controls on the visual tree, we can't leave it in the local space of our control.
+
+About \texttt{Save}: "This call saves the current matrix, clip, and draw filter, and pushes a copy onto a private stack. Subsequent calls to translate, scale, rotate, skew, concatenate or clipping path or drawing filter all operate on this copy. When the balancing call to Restore() is made, the previous matrix, clipping, and drawing filters are restored." \cite{skiasharp_save}
+
+\footnotetext{The notion of features and leases is specific to Avalonia, and at the time of writing the thesis doesn't seem to be properly documented. The usage has been inspired by the Avalonia's sample projects \cite{avalonia_samples}}
+
 \subsection{\texttt{CircuitCanvas} user control}
+
+\begin{lstlisting}[caption={\texttt{CircuitCanvas} view}]
+    <Panel ClipToBounds="False">
+        <ZoomBorder Stretch="Fill" 
+                    ClipToBounds="True" 
+                    EnableDoubleClickZoom="False">
+
+            <ItemsControl ItemsSource="{Binding Components}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <Canvas ClipToBounds="False"/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+    
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate DataType="scenes:Component" >
+                        <tcontrol:ComponentControl 
+                            Component="{Binding}"/>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+            
+        </ZoomBorder>
+    </Panel>
+\end{lstlisting}
+
+The \texttt{CircuitCanvas} is a user control, that contains component controls as its children. Those are stored in a collection, in a data context (viewmodel) of the \texttt{CircuitCanvas}. How the items of this collection are laid out is defined by the \texttt{ItemsControl} element. It inserts certain elements into the visual tree for each of the items in the collection. It binds to the collection, and provides two properties: \texttt{ItemsPanel} and \texttt{ItemTemplate}.
+
+\texttt{ItemsPanel} describes the layout of the container in which the items will be drawn. We want to freely choose the exact coordinates of where our components should be drawn to. So we chose to use \texttt{Canvas}, a type of panel made exactly for that purpose. \texttt{ItemTemplate} describes how should the individual items be styled. This could be a text box, another panel, or our custom drawn \texttt{ComponentControl}. The control must be enclosed in a \texttt{DataTemplate} element. The data type of the collection's item is specified through its \texttt{DataType} property. Using the \texttt{Binding} keyword, we assing each of the collection's elements to one of the controls.
+
+The \texttt{ZoomBorder} element from the \texttt{PanAndZoom} NuGet package allows us to freely pan and zoom its child element using the mouse buttons. Unfortunately this moves with the entire \texttt{Canvas} element. And because of how this panel is implemented, children located outside of its bounds are never rendered. I.e. any elements with at least one negative coordinate, and elements with coordinates greater than the size of the canvas in its unzoomed state. The canvas fills the entirety of its parent's space, so more elements can fit into it by resizing the panel, but if course its is not an ideal solution. We made numerous unsuccessful attempts to fix the canvas in one place, and instead concatenate the tranformations of components and the transformation of the \texttt{ZoomBorder}. It always resulted in ugly glitches.
+
+The viewmodel of the canvas itself is very simple. It contains just one property of the \texttt{ObservableCollection} type from the \texttt{CommunityToolkit.Mvvm} package. It ensures that every time an item is added, removed or modified within the collection, the properties binding to this collection are properly notified.
+
+\begin{lstlisting}[language=csharp, caption={\texttt{CircuitCanvas} viewmodel}]
+public class $CircuitCanvas$ : $ObservableObject$ {
+    public $ObservableCollection$<$Component$> 
+        Components { get; } = new();
+}
+\end{lstlisting}
 
 \section{IPC Adapter project}
 
