@@ -342,21 +342,21 @@ The \texttt{App} class is defined by the \texttt{App.axaml} and \texttt{App.axam
 Much more important is the \texttt{App} codebehind. It  overrides the method \texttt{OnFrameworkInitializationCompleted} inherited from the Avalonia's \texttt{Application} class. This is where we create the instance of \texttt{MainWindow} class and set it to be the first only window opened by the application. The we call our \texttt{MainController}. \xxx{lifetimes}
 
 \begin{lstlisting}[language=csharp, caption={\texttt{OnFrameworkInitializationCompleted} method}]
-    public override void #OnFrameworkInitializationCompleted#() {
-        $MainWindow$ mainWindow = new $MainWindow$();
-        
-        if (ApplicationLifetime is 
-            $IClassicDesktopStyleApplicationLifetime$ desktop) 
-        {
-            desktop.MainWindow = mainWindow;
-            $MainController$.#InitApp#(desktop);
-        } else {
-            throw new $NotImplementedException$(
-                "Only Desktop style applications are supported");
-        }
-
-        base.#OnFrameworkInitializationCompleted#();
+public override void #OnFrameworkInitializationCompleted#() {
+    $MainWindow$ mainWindow = new $MainWindow$();
+    
+    if (ApplicationLifetime is 
+        $IClassicDesktopStyleApplicationLifetime$ desktop) 
+    {
+        desktop.MainWindow = mainWindow;
+        $MainController$.#InitApp#(desktop);
+    } else {
+        throw new $NotImplementedException$(
+            "Only Desktop style applications are supported");
     }
+
+    base.#OnFrameworkInitializationCompleted#();
+}
 \end{lstlisting}
 
 Layouts of views (more accurately controls) are defined by so called panels. Panels are designed to contain other controls in an organized manner. The layout of the \texttt{MainWindow} uses the \texttt{Grid} panel. It works very similarly to how the grid display method works in CSS. The cells of the grid are merged into bigger wholes, and contain another panels. Between these wholes are placed elements called \texttt{GridSplitter}, that can resize the wholes by dragging them with a cursor.
@@ -401,18 +401,18 @@ This class initializes all the important systems and brings them together. It st
 \subsubsection{\texttt{InitScene} function}
 
 \begin{lstlisting}[language=csharp, caption={\texttt{InitScene} function}]
-    private static void #InitScene#() {
-        var SceneFactory = new $SceneFactory$(
-            Arguments.ScenePath, Arguments.ComponentsPath);
-        Scene = SceneFactory.#LoadResources#();
+private static void #InitScene#() {
+    var SceneFactory = new $SceneFactory$(
+        Arguments.ScenePath, Arguments.ComponentsPath);
+    Scene = SceneFactory.#LoadResources#();
 
-        var canvas = new $CircuitCanvas$();
-        foreach (var comp in Scene.ComponentsMap.Values) {
-            canvas.Components.#Add#(comp);
-        }
-        
-        MainWindow.CircuitCanvas.DataContext = canvas;
+    var canvas = new $CircuitCanvas$();
+    foreach (var comp in Scene.ComponentsMap.Values) {
+        canvas.Components.#Add#(comp);
     }
+    
+    MainWindow.CircuitCanvas.DataContext = canvas;
+}
 \end{lstlisting}
 
 The scene is created by the \texttt{SceneFactory} from the files specified in the command line argument. Then the \texttt{CircuitCanvas} viewmodel is created, and its \texttt{Components} property is populated with the components from the scene. Then the viewmodel is set to be the data context for the \texttt{CircuitCanvas} view. But what does setting a data context mean?
@@ -451,53 +451,53 @@ In the MVVM architecure, data contexts are the best way to bind views to their v
 \subsubsection{\texttt{InitArduino} function}
 
 \begin{lstlisting}[language=csharp, caption={\texttt{InitArduino} function}]
-    private static void #InitArduino#() {
-        $Arduino$? arduino;
-        
-        if (Arguments.IpcType == $IpcType$::None) {
-            Logger.#LogInfo#(
-                "IPC type not specified. " + 
-                "Skipping connection to simulator..");
-            return;
-        }
-        
-        try {
-            arduino = Scene.ComponentsMap.#First#(
-                c => c.Value.TypeName == nameof($Arduino$))
-                .Value as $Arduino$;
-        }
-        catch ($InvalidOperationException$) {
-            Logger.#LogWarning#(
-                "Arduino not found in the scene. " + 
-                "Skipping connection to simulator.");
-            return;
-        }
-        
-        $ILogger$ ipcLogger = #InitLogger#(
-            Arguments.IpcLogFile, Arguments.Verbosity);
-        $IEncoder$ encoder = new $TextEncoder$();
-        $IIpcAdapter$? ipc = null;
-
-        try {
-            if (Arguments.IpcType == $IpcType$::Tcp) {
-                var tcpClient = new $TcpClient$(Arguments.TcpPort);
-                ipc = new $TcpMessageHandler$(
-                    tcpClient, encoder, ipcLogger);
-            }
-            if (Arguments.IpcType == $IpcType$::Shmem) {
-                ipc = new $TwoWayBuffer$(
-                    Arguments.ShmemName, Arguments.ShmemSize, 
-                    encoder, ipcLogger);
-            }
-
-            $Task$::#Run#(ipc!.ConnectAsync);
-            arduino?.#ConnectToSimulator#(ipc);
-        }
-        catch ($Exception$ e) {
-            ipcLogger.#LogError#(
-                "Error during IPC initialization: " + e.Message);
-        }
+private static void #InitArduino#() {
+    $Arduino$? arduino;
+    
+    if (Arguments.IpcType == $IpcType$::None) {
+        Logger.#LogInfo#(
+            "IPC type not specified. " + 
+            "Skipping connection to simulator..");
+        return;
     }
+    
+    try {
+        arduino = Scene.ComponentsMap.#First#(
+            c => c.Value.TypeName == nameof($Arduino$))
+            .Value as $Arduino$;
+    }
+    catch ($InvalidOperationException$) {
+        Logger.#LogWarning#(
+            "Arduino not found in the scene. " + 
+            "Skipping connection to simulator.");
+        return;
+    }
+    
+    $ILogger$ ipcLogger = #InitLogger#(
+        Arguments.IpcLogFile, Arguments.Verbosity);
+    $IEncoder$ encoder = new $TextEncoder$();
+    $IIpcAdapter$? ipc = null;
+
+    try {
+        if (Arguments.IpcType == $IpcType$::Tcp) {
+            var tcpClient = new $TcpClient$(Arguments.TcpPort);
+            ipc = new $TcpMessageHandler$(
+                tcpClient, encoder, ipcLogger);
+        }
+        if (Arguments.IpcType == $IpcType$::Shmem) {
+            ipc = new $TwoWayBuffer$(
+                Arguments.ShmemName, Arguments.ShmemSize, 
+                encoder, ipcLogger);
+        }
+
+        $Task$::#Run#(ipc!.ConnectAsync);
+        arduino?.#ConnectToSimulator#(ipc);
+    }
+    catch ($Exception$ e) {
+        ipcLogger.#LogError#(
+            "Error during IPC initialization: " + e.Message);
+    }
+}
 \end{lstlisting}
 
 First we try to find the \texttt{Arduino} component in the scene. It is perfectly valid to have a scene without Arduino, so we only throw a warning and skip the rest of the initilazition. With the way this is handled, only one Arduino can reasonably work in a scene. A better implementation, would be to initialize the Arduino with IPC inside the component itself, and get the IPC arguments like port or shared memory name from extra properties in the scene file. That way, it would be possible to have multiple Arduino components in the scene, each connected to its own simulator. But the approach has not been properly tested. Since the IPC arguments are at moment passed through the command line, we can only have one Arduino anyway.
@@ -581,12 +581,12 @@ The \texttt{SvgDrawOp} is used within the \texttt{Render} method of \texttt{Comp
 \subsubsection{\texttt{HitTest} method}
 
 \begin{lstlisting}[language=csharp, caption={\texttt{HitTest} method}]
-    public bool #HitTest#($Point$ p) {
-        $SKPoint$ point = p.#ToSKPoint#();
-        $SKPoint$ localSpacePoint = 
-            Transform.#Invert#().#MapPoint#(point);
-        return _hitBox.#Contains#(localSpacePoint);
-    }
+public bool #HitTest#($Point$ p) {
+    $SKPoint$ point = p.#ToSKPoint#();
+    $SKPoint$ localSpacePoint = 
+        Transform.#Invert#().#MapPoint#(point);
+    return _hitBox.#Contains#(localSpacePoint);
+}
 \end{lstlisting}
 
 This method is called during pointer \textit{events}, e.g. when the user clicks on the canvas. It checks whether or not is the pointer located on top of the control. We use this in order to trigger the \texttt{OnPointerPressed} and \texttt{OnPointerReleased} handlers of the \texttt{ComponentControl}. 
@@ -596,25 +596,25 @@ The argument \texttt{p} is the location of the pointer relative to the circuit c
 \subsubsection{\texttt{Render} method}
 
 \begin{lstlisting}[language=csharp, caption={\texttt{Render} method}]
-    public void #Render#($ImmediateDrawingContext$ context) {
-        var leaseFeature = context.#TryGetFeature#<
-            $ISkiaSharpApiLeaseFeature$>();
+public void #Render#($ImmediateDrawingContext$ context) {
+    var leaseFeature = context.#TryGetFeature#<
+        $ISkiaSharpApiLeaseFeature$>();
 
-        if (leaseFeature == null) {
-            throw new $Exception$("LEASE");
-        }
-
-        using var lease = leaseFeature.#Lease#();
-        var canvas = lease.SkCanvas;
-        canvas.#Save#();
- 
-        canvas.#Concat#(ref Transform);
-        canvas.#DrawPicture#(Svg.Picture);
-        canvas.#Restore#();
+    if (leaseFeature == null) {
+        throw new $Exception$("LEASE");
     }
+
+    using var lease = leaseFeature.#Lease#();
+    var canvas = lease.SkCanvas;
+    canvas.#Save#();
+
+    canvas.#Concat#(ref Transform);
+    canvas.#DrawPicture#(Svg.Picture);
+    canvas.#Restore#();
+}
 \end{lstlisting}
 
-The method takes \texttt{ImmediateDrawingContext} as an argument, which is passed down from the argument of the \texttt{Render} method of \texttt{Control}. It defines the environment in which the picture is going to be drawn. We need to access the \texttt{SkiaSharp} canvas, upon which the Avalonia's drawing contexts are built and render their own vector graphics. We use it to draw our own \texttt{SKSvg} sprite. We do that by obtaining the SkiaSharp API lease from the context's features. \footnotemark
+The method takes \texttt{ImmediateDrawingContext} as an argument, which is passed down from the argument of the \texttt{Render} method of \texttt{Control}. It defines the environment in which the picture is going to be drawn. We need to access the API of the Skia's canvas, upon which the Avalonia's drawing contexts are built and render their own vector graphics. We use it to draw our own \texttt{SKSvg} sprite. We do that by obtaining the SkiaSharp API lease from the context's features. \footnotemark
 
 The Skia canvas coordinates are already in the vector space of the parent control (the \texttt{CircuitCanvas}). This was achieved by multiplying the original space of the main window by a transformation matrix of each predecessor of this control on the visual tree. So we can just multiply the tranformation matrix of the canvas with the transformation matrix of the control, in order to place it on the canvas with the right translation, rotation and scale. The \texttt{Concat} method does exactly that. Then we rasterise the picture with the \texttt{DrawPicture} method.
 
@@ -653,7 +653,7 @@ About \texttt{Save}: "This call saves the current matrix, clip, and draw filter,
 
 The \texttt{CircuitCanvas} is a user control, that contains component controls as its children. Those are stored in a collection, in a data context (viewmodel) of the \texttt{CircuitCanvas}. How the items of this collection are laid out is defined by the \texttt{ItemsControl} element. It inserts certain elements into the visual tree for each of the items in the collection. It binds to the collection, and provides two properties: \texttt{ItemsPanel} and \texttt{ItemTemplate}.
 
-\texttt{ItemsPanel} describes the layout of the container in which the items will be drawn. We want to freely choose the exact coordinates of where our components should be drawn to. So we chose to use \texttt{Canvas}, a type of panel made exactly for that purpose. \texttt{ItemTemplate} describes how should the individual items be styled. This could be a text box, another panel, or our custom drawn \texttt{ComponentControl}. The control must be enclosed in a \texttt{DataTemplate} element. The data type of the collection's item is specified through its \texttt{DataType} property. Using the \texttt{Binding} keyword, we assing each of the collection's elements to one of the controls.
+\texttt{ItemsPanel} describes the layout of the container in which the items will be drawn. We want to freely choose the exact coordinates of where our components should be drawn to. So we chose to use \texttt{Canvas}, a type of panel made exactly for that purpose. \texttt{ItemTemplate} describes how should the individual items be styled. This could be a text box, another panel, or our custom drawn \texttt{ComponentControl}. The control must be enclosed in a \texttt{DataTemplate} element. The data type of the collection's item is specified through its \texttt{DataType} property. Using the \texttt{Binding} keyword, we assign each of the collection's elements to one of the controls.
 
 The \texttt{ZoomBorder} element from the \texttt{PanAndZoom} NuGet package allows us to freely pan and zoom its child element using the mouse buttons. Unfortunately this moves with the entire \texttt{Canvas} element. And because of how this panel is implemented, children located outside of its bounds are never rendered. I.e. any elements with at least one negative coordinate, and elements with coordinates greater than the size of the canvas in its unzoomed state. The canvas fills the entirety of its parent's space, so more elements can fit into it by resizing the panel, but if course its is not an ideal solution. We made numerous unsuccessful attempts to fix the canvas in one place, and instead concatenate the tranformations of components and the transformation of the \texttt{ZoomBorder}. It always resulted in ugly glitches.
 
@@ -771,6 +771,8 @@ The implementaion defines constants for formats of individual parts, and it stil
 
 \subsection{\texttt{TcpClient} class}
 
+The TCP Adapter is built on the C\#'s native TCP Client implementation. It uses the \texttt{NetworkStream}, through which the actual data is sent. Our own \texttt{TcpClient} class wraps around the client. It establishes connection on the given port and initializes loops for sending and receiving data in new tasks. The received chunks of data are passed to the \texttt{TcpMessageHandler}, which divides into individual messages. Messages to be sent are passed over to the \texttt{TcpClient} thorugh the handler as well. \texttt{TcpMessageHandler} implements the \texttt{IIpcAdapter}.
+
 \begin{lstlisting}[language=csharp, caption={\texttt{TcpClient} class}]
 public class $TcpClient$ {
     private const int RECONNECT_DELAY = 3000;
@@ -806,6 +808,69 @@ public class $TcpClient$ {
 }
 \end{lstlisting}
 
+The \texttt{TcpClient} is constructed with an IP address and a port (i.e. localhost and the port of the backend). Only in the \texttt{TryConnectAsync} method is the underlying \texttt{\_client} created and connected to asynchronously. Its \texttt{NetworkStream} is acquired. The \texttt{LoopReadAsync} and \texttt{LoopWriteAsync} methods are then run in seperate tasks. The cancellation token (\texttt{\_cts}) is created. The token can be used to terminate these loops, once a disconnect or an error occurs. The \texttt{Disconnect} method cancels this token, and disposes of both the stream and the client.
+
+\subsubsection{Receiving messages}
+
+\begin{lstlisting}[language=csharp, caption={\texttt{LoopReadAsync} method}]
+private async $Task$ #LoopReadAsync#() {
+    try {
+        while (!_cts.IsCancellationRequested) {
+            int bytesRead = await _stream!.#ReadAsync#(
+                _buffer, 0, _buffer.Length, _cts.Token);
+            if (bytesRead == 0) {
+                ReachedEof?.#Invoke#();
+                return;
+            }
+
+            _logger?.#LogDebug#("Reading {bytesRead} bytes...");
+
+            var byteChunk = $Encoding$.ASCII.#GetString#(
+                _buffer, 0, bytesRead);
+            ReadBytesEvent?.#Invoke#(byteChunk);
+        }
+    }
+    catch ($Exception$ e) {
+        _logger?.#LogError#("TCP Reading loop failed: {e.Message}");
+    }
+}
+\end{lstlisting}
+
+The read loop is conditioned by the \texttt{\_cts} token. Inside, the stream's \texttt{ReadAsync} method is used to read any new available data on the stream, and copy it to the \texttt{\_buffer}. \texttt{\_buffer} is a simple array with size of 4096 bytes. We could choose any other size, but this one gives us a lot of breathing room if the stream happens to get clogged by many messages. The method blocks until new data is available.
+
+By passing 0 to the 2nd argument of the method, new data will always be copied to the start of the buffer, overwriting any old data. By passing the \texttt{\_cts} token as argument, the method will throw an \texttt{OperationCancelledException} once the token has been canceled. The method returns the number of bytes it has successfully read. If this number is 0, it means the connection has been gracefully closed. \cite{msdocs_network_stream}. In that case we invoke the \textit{ReachedEof event}.
+
+Since the new data is always at the start of the buffer, we can pass it to the \texttt{Encoding.ASCII.GetString} function in order to convert it into a string of ASCII characters. The number of bytes we want to convert is the value \texttt{bytesRead} returned from \texttt{ReadAsync}. We pass the converted bytes to the \textit{ReadBytesEvent}, to which the \texttt{TcpMessageHandler} subscribes to. There the string can (but doesn't have to) be pieced together into a list of meaningful messages.
+
+\subsubsection{Sending messages}
+
+\begin{lstlisting}[language=csharp, caption={\texttt{SendMessageAsync} method}]
+    public async $Task$ #SendMessageAsync#(string message) {
+        await _sendQueue.Writer.#WriteAsync#(message);
+    }
+\end{lstlisting}
+
+For sending messages we utilize the C\#'s \texttt{Channel} class. This a thread safe implementation of the concurrent producer/consumer pattern. It is a FIFO data structure, so we call the instanse \texttt{\_sendQueue} in our code. The messages are added to the channel through the \texttt{Writer} property and removed through the \texttt{Reader} property. The channel is unbounded, meaning that it doesn't block the writing thread, if the number of items reaches a certain limit. 
+
+\begin{lstlisting}[language=csharp, caption={\texttt{LoopWriteAsync} method}]
+private async $Task$ #LoopWriteAsync#() {
+    try {
+        while (await _sendQueue.Reader.#WaitToReadAsync#()) {
+            while (_sendQueue.Reader.#TryRead#(out var message)) {
+                var data = $Encoding$::ASCII.#GetBytes#(message);
+                await _stream!.#WriteAsync#(data, 0, data.Length);
+                _logger?.#LogDebug#("Sent {data.Length} bytes...");
+            }
+        }
+    }
+    catch ($Exception$ e) {
+        _logger?.#LogError#("TCP Writing loop failed: {e.Message}");
+    }
+}
+\end{lstlisting}
+
+The write loop reads from the \texttt{\_sendQueue}. It blocks the thread until there is at least one item available to be read. If the channel has been invalidated, the method returns false. In the inner loop, all available string messages are read and converted to ASCII bytes. The bytes are then copied asynchonously into the network stream.
+
 \subsection{\texttt{TcpMessageHandler} class}
 
 \begin{lstlisting}[language=csharp, caption={\texttt{TcpMessageHandler} class}]
@@ -835,6 +900,28 @@ public class $TcpMessageHandler$ : $IIpcAdapter$ {
     private void #HandleMessage#(string message) { ... }
 }
 \end{lstlisting}
+
+The \texttt{TcpMessageHandler} implements the \texttt{IIpcAdapter} and owns our \texttt{TcpClient} wrapper. It let's the client handle the \texttt{TryConnect} and \texttt{Disconnect} interface method by calling the client's methods with the same name. The \texttt{SendEvent} method is implemented by encoding the event, appending the delimiter, and passing it to the client's \texttt{SendMessageAsync} method in a new task. When the client's \textit{ReachedEof} is invoked, the handler tries to reconnect using the method inherited from the interface.
+
+\subsubsection{Handling incoming messages}
+
+\begin{lstlisting}[language=csharp, caption={\texttt{OnBytesRead} method}]
+private void #OnBytesRead#(string bytechunk) {
+    foreach (char c in bytechunk) {
+        if (c == Delimeter) {
+            #HandleMessage#(_messageBuilder.#ToString#());
+            _messageBuilder.#Clear#();
+        }
+        else {
+            _messageBuilder.#Append#(c);
+        }
+    }
+}
+\end{lstlisting}
+
+The handler's \texttt{OnBytesRead} method subscribes to the client's \textit{ReadBytesEvent}. It recieves a string that may contain the entire message, multiple messages, or just their pieces. So we add any incoming characters to the \texttt{\_messageBuilder} and look for the delimeter. Once a whole message has been put together, it is passed to the \texttt{HandleMessage} method, and the builder is cleared.
+
+In \texttt{HandleMessage}, the message is decoded into an \texttt{Event} struct and the \textit{ReceivedEventEvent} is invoked.
 
 \section{Shared Memory Adapter project}
 

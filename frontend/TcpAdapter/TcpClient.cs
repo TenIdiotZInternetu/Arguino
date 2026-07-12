@@ -24,7 +24,6 @@ public class TcpClient {
 
     public event Action<string> ReadBytesEvent;
     public event Action ReachedEof;
-
     private ILogger? _logger;
 
     public TcpClient(int port) {
@@ -85,7 +84,7 @@ public class TcpClient {
 
                 _logger?.LogDebug($"Reading {bytesRead} bytes...");
 
-                var byteChunk = Encoding.UTF8.GetString(_buffer, 0, bytesRead);
+                var byteChunk = Encoding.ASCII.GetString(_buffer, 0, bytesRead);
                 ReadBytesEvent?.Invoke(byteChunk);
             }
         }
@@ -98,7 +97,7 @@ public class TcpClient {
         try {
             while (await _sendQueue.Reader.WaitToReadAsync()) {
                 while (_sendQueue.Reader.TryRead(out var message)) {
-                    var data = Encoding.UTF8.GetBytes(message);
+                    var data = Encoding.ASCII.GetBytes(message);
                     await _stream!.WriteAsync(data, 0, data.Length);
                     _logger?.LogDebug($"Sent {data.Length} bytes...");
                 }

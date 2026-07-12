@@ -388,9 +388,44 @@
       \verb https://github.com/AvaloniaUI/Avalonia.Samples/blob/08b578f80f5d1b4b9eb52f5c41b6128621437240/src/Avalonia.Samples/CustomControls/SnowflakesControlSample/Controls/ScoreRenderer.cs
       \endverb
     \endentry
-    \entry{boost_get_started}{online}{}{}
+    \entry{msdocs_network_stream}{online}{}{}
+      \name{author}{1}{}{%
+        {{hash=378f32c4b305c4e4fd792910057f28ca}{%
+           family={karelz},
+           familyi={k\bibinitperiod}}}%
+      }
+      \strng{namehash}{378f32c4b305c4e4fd792910057f28ca}
+      \strng{fullhash}{378f32c4b305c4e4fd792910057f28ca}
+      \strng{fullhashraw}{378f32c4b305c4e4fd792910057f28ca}
+      \strng{bibnamehash}{378f32c4b305c4e4fd792910057f28ca}
+      \strng{authorbibnamehash}{378f32c4b305c4e4fd792910057f28ca}
+      \strng{authornamehash}{378f32c4b305c4e4fd792910057f28ca}
+      \strng{authorfullhash}{378f32c4b305c4e4fd792910057f28ca}
+      \strng{authorfullhashraw}{378f32c4b305c4e4fd792910057f28ca}
       \field{sortinit}{1}
       \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{abstract}{Reads data from the {NetworkStream} and stores it in a byte memory range as an asynchronous operation.}
+      \field{langid}{english}
+      \field{title}{{NetworkStream}.{ReadAsync} Method (System.Net.Sockets)}
+      \field{urlday}{12}
+      \field{urlmonth}{7}
+      \field{urlyear}{2026}
+      \field{urldateera}{ce}
+      \verb{file}
+      \verb Snapshot:/home/touster/Zotero/storage/QHZVPQ7Z/system.net.sockets.networkstream.html:text/html
+      \endverb
+      \verb{urlraw}
+      \verb https://learn.microsoft.com/en-us/dotnet/api/system.net.sockets.networkstream.readasync?view=net-10.0
+      \endverb
+      \verb{url}
+      \verb https://learn.microsoft.com/en-us/dotnet/api/system.net.sockets.networkstream.readasync?view=net-10.0
+      \endverb
+    \endentry
+    \entry{boost_get_started}{online}{}{}
+      \field{sortinit}{2}
+      \field{sortinithash}{8b555b3791beccb63322c22f3320aa9a}
       \field{labeltitlesource}{title}
       \field{title}{Boost User Guide - Getting started}
       \field{urlday}{27}
