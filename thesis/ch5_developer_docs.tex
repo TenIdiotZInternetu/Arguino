@@ -322,7 +322,7 @@ nodes:
 The example scene in the listing \ref{lst:scene} contains 2 LEDs, 1 button and 1 source of voltage. Source, which has one pin that is always driving, is connected to the 0th pin of the button, which reads a high value of the node. Both LEDs are connected to the 1st pin of the same button. Pressing the button will copy the digital state from pin 0 to pin 1, pin 1 becomes driving, and thus lights up the LEDs.
 
 \section{IPC interface} \label{sec:ipc_spec}
-This section describes how to set up IPC communication of a custom frontend application with the backend simulator. The two processes can communicate together either via TCP connection or through shared memory. The only requirement for a TCP connection, is that the client on the frontend listens to the same port as the server on the backend. IPC over shared memory requires a few more considerations, so that the memory accesses match the memory layout of shared internal structure created by the backend. This structure is described in the subsection \ref{shmem_specs};
+This section describes how to set up IPC communication of a custom frontend application with the backend simulator. The two processes can communicate together either via TCP connection or through shared memory. The only requirement for a TCP connection, is that the client on the frontend listens to the same port as the server on the backend. IPC over shared memory requires a few more considerations, so that the memory accesses match the memory layout of shared internal structure created by the backend. This structure is described in the subsection \ref{subsec:shmem_specs};
 
 The processes communicate using concrete events with up to 3 integer arguments. These events are encoded into a human readable text messages, seperated by a common delimeter. The messages are then sent over IPC.
 
@@ -391,7 +391,7 @@ terminated and then executed again. At this point the frontend has to invalidate
     \item[Arguments:] None
 \end{description}
 
-\subsection{Shared memory specification} \label{shmem_specs}
+\subsection{Shared memory specification} \label{subsec:shmem_specs}
 
 \subsubsection{Locating memory mapped file}
 On Linux, the mapped memory region is orchestrated by a proper shared memory object. It can be accessed either by a syscall, or by reading the \texttt{\textbackslash{}dev\textbackslash{}shm\textbackslash{}<shmem\_name>} virtual file.

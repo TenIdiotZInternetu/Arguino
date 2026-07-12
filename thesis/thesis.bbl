@@ -423,6 +423,41 @@
       \verb https://learn.microsoft.com/en-us/dotnet/api/system.net.sockets.networkstream.readasync?view=net-10.0
       \endverb
     \endentry
+    \entry{msdocs_memory_mapped_files}{online}{}{}
+      \name{author}{1}{}{%
+        {{hash=9ecd74085a04ef7487f1cde27f0a0cec}{%
+           family={adegeo},
+           familyi={a\bibinitperiod}}}%
+      }
+      \strng{namehash}{9ecd74085a04ef7487f1cde27f0a0cec}
+      \strng{fullhash}{9ecd74085a04ef7487f1cde27f0a0cec}
+      \strng{fullhashraw}{9ecd74085a04ef7487f1cde27f0a0cec}
+      \strng{bibnamehash}{9ecd74085a04ef7487f1cde27f0a0cec}
+      \strng{authorbibnamehash}{9ecd74085a04ef7487f1cde27f0a0cec}
+      \strng{authornamehash}{9ecd74085a04ef7487f1cde27f0a0cec}
+      \strng{authorfullhash}{9ecd74085a04ef7487f1cde27f0a0cec}
+      \strng{authorfullhashraw}{9ecd74085a04ef7487f1cde27f0a0cec}
+      \field{sortinit}{2}
+      \field{sortinithash}{8b555b3791beccb63322c22f3320aa9a}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{abstract}{Explore memory-mapped files in .{NET}, which contain file contents in virtual memory, and allow applications to modify the file by writing directly to the memory.}
+      \field{langid}{english}
+      \field{title}{Memory-Mapped Files - .{NET}}
+      \field{urlday}{12}
+      \field{urlmonth}{7}
+      \field{urlyear}{2026}
+      \field{urldateera}{ce}
+      \verb{file}
+      \verb Snapshot:/home/touster/Zotero/storage/48WIXVB2/memory-mapped-files.html:text/html
+      \endverb
+      \verb{urlraw}
+      \verb https://learn.microsoft.com/en-us/dotnet/standard/io/memory-mapped-files
+      \endverb
+      \verb{url}
+      \verb https://learn.microsoft.com/en-us/dotnet/standard/io/memory-mapped-files
+      \endverb
+    \endentry
     \entry{boost_get_started}{online}{}{}
       \field{sortinit}{2}
       \field{sortinithash}{8b555b3791beccb63322c22f3320aa9a}
