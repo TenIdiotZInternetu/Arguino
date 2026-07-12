@@ -675,6 +675,10 @@ public class $CircuitCanvas$ : $ObservableObject$ {
     \label{fig:ipc_project}
 \end{figure}
 
+This project attempts to unify the behavior of the TCP adapter and the shared memory adapter in a similar manner the \texttt{ipcAdapter.hpp} did in the backend. \texttt{IIpcAdapter} is initialized by the \texttt{MainController} and the implementation is chosen based on command line arguments. It is then passed to the \texttt{Arduino} component to handle.
+
+This time around, the adapter is not dependant on a \texttt{Simulator}-like entity to pass the events to. It simply invokes the \textit{ReceivedEventEvent}, which passes the event to any subscribed handler, i.e. the \texttt{Arduino} class. The actions of the \texttt{Event} struct are also not defined by static methods, but determined in the \texttt{Arduino} class itself.
+
 \subsection{\texttt{Event} struct}
 
 \begin{lstlisting}[language=csharp, caption={\texttt{Event} struct}]
@@ -691,6 +695,8 @@ public struct $Event$ {
     public $Event$() { }
 }
 \end{lstlisting}
+
+We've seen this structure many times before. In contrast with its backend counterpart, it doesn't include the \texttt{action} lambda, the factory methods, nor any other helper functions.
 
 \subsection{\texttt{IIpcAdapter} interface}
 
@@ -718,6 +724,12 @@ public interface $IIpcAdapter$ {
 }
 \end{lstlisting}
 
+The \texttt{SendEvent} method is similar to the \texttt{on\_event} method of the \texttt{ipcAdapter.hpp}. It is also used to send an event over IPC, by first encoding it to a message, just the dependencies are now inversed. The adapter isn't dependant on the simulator but vice versa. So we don't need to pass it anywhere, just call it directly from a component. And the events are not directly applied by calling the component, but by invoking the \textit{ReceivedEventEvent} that the components subscribe to.
+
+The interface also offers some more methods for handling the connection. \texttt{TryConnectAsync} and \texttt{Disconnect} must be implemented by the concrete adapters as they are dependant on the technology used. We want them exposed, because in the future, it could be desirable to change the IPC setup during runtime (for example, connecting to a simulator on a different port).
+
+\texttt{ConnectAsync} tries to periodacally connect to the every three seconds. Useful when the simulator isn't running yet, it establishes connection automatically when it is ready. \texttt{Reconnect} is useful, when there was some kind of sudden failure.
+
 \subsection{\texttt{TextEncoder} class}
 
 \begin{lstlisting}[language=csharp, caption={\texttt{TextEncoder} class}]
@@ -743,6 +755,10 @@ public class $TextEncoder$ : $IEncoder$
         out $Event$ @event) { ... }
 }
 \end{lstlisting}
+
+The \texttt{IEncoder} and \texttt{TextEncoder} are nearly equivalent to \texttt{encoder.hpp} and \texttt{textEncoder.cpp} in the backend. The interface still exposes methods for encoding and decoding, where decoding return a success state, and outputs the event to a parameter.
+
+The implementaion defines constants for formats of individual parts, and it still uses string formatting to fill them with event's arguments. Just the decoding has become mush more convenient thanks to C\#'s built-in functions.
 
 \section{TCP Adapter project}
 
