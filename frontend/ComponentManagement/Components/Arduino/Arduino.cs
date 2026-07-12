@@ -27,6 +27,7 @@ public partial class Arduino : Component {
         _ipc = ipc;
         
         _ipc.ReceivedEventEvent += e => {
+            // TODO - move to Component.UpdateSprite
             _uiContext.Post(_ => ProcessRemoteEvent(e), null);    
         };
     }

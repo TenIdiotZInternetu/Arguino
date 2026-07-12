@@ -8,7 +8,9 @@ Until now we've been talking about events exclusively in the context of IPC. But
 
 Classes of the \texttt{Circuitry} and \texttt{Scenes} directories are a tightly coupled system, encapsulating the core logic of the frontend. The \texttt{Scene} classes comprises of nothing more than a list of components and a list of electrical nodes. Components of the same electrical node interact with each other through the interface of pins. These can either listen to changes of digital state on the node, or they could assert a high state to it (driving).
 
-\texttt{Component} is the class overridden by user in order to create a custom component. It holds the \texttt{ComponentConfiguration} struct statically. This struct contains the metadata of the \texttt{Component} subtype, available sprites and pin identifiers. Each \texttt{Component} instance owns a set of \texttt{Pin} instances necessary to define a custom logic.
+\texttt{Component} is the class overridden by user in order to create a custom component. It holds the \texttt{ComponentConfiguration} struct statically. This struct contains the metadata of the \texttt{Component} subtype, available sprites and pin identifiers. Each \texttt{Component} instance owns a set of \texttt{Pin} instances necessary to define a custom logic. 
+
+One of the \texttt{Component} subtypes included in this project is the \texttt{Arduino} class. It is the component that connects from IPC to the backend simulator. Since the component is so important and it depends so heavily on the \texttt{IIpcAdapter} (it is basically the frontend for the adapter) we decided to document it in the IPC Adapter project section (\ref{sec:f_ipcadapter}). 
 
 Components, sprites and nodes of a scene are created by the static \texttt{SceneFactory} class and its loader interfaces. These are documentated in detail in the section \ref{sec:f_factory}.
 
@@ -422,11 +424,12 @@ As we mentioned at the beginning of this section, all the views have a codebehin
 We never explicitly defined a \texttt{CircuitCanvas} property in the \texttt{MainWindow} codebehind. Instead we added the attribute \texttt{x:Name="CircuitCanvas"} to the concrete \texttt{CircuitCanvas} XAML element. This tells the XAML compiler to generate the property with the given name in the \texttt{MainWindow} class, and populate it automatically with the concrete instance during Avalonia initialization. That is with all the properties set either through the codebehind, or through the attributes on the XAML element itself. \cite{avalonia_name_generator}
 
 \texttt{DataContext} is a property inherent to all the controls. It can be an instance of any one class, with which the control exchanges data through binding. That means, the control can change properties automatically when the values of the binded property changes. And in the other way, the property of the data context automatically updates when a user interacts with control. \footnotemark 
-In the MVVM architecure, data contexts are the best way to bind views to their viewmodels. \cite{avalonia_data_context} The type of the \texttt{DataContext} must be set to match the type of the view model in XAML. This can be done in more than one way. We do it by adding the \texttt{x:DataType} attribute to the root element of \texttt{CircuitCanvas.axaml}. The code below shows a minimal XAML example of how these two steps have been done.
+In the MVVM architecure, data contexts are the best way to bind views to their viewmodels. \cite{avalonia_data_context} The type of the \texttt{DataContext} must be set to match the type of the view model in XAML. This can be done in more than one way. We do it by adding the \texttt{x:DataType} attribute to the root element of \texttt{CircuitCanvas.axaml}. The code below shows a simplified XAML example of how these two steps have been done.
 
 \xxx{syntax highlight}
 \begin{lstlisting}[caption={Data context setup in XAML}]
-<Window xmlns:uc="clr-namespace:Gui.Views.UserControls"
+<Window ...
+        xmlns:uc="clr-namespace:Gui.Views.UserControls"
         x:Class="Gui.Views.MainWindow"
         Title="Main">
 
@@ -434,7 +437,8 @@ In the MVVM architecure, data contexts are the best way to bind views to their v
 
 </Window>
 
-<UserControl xmlns:vm="clr-namespace:Gui.ViewModels"
+<UserControl ...
+             xmlns:vm="clr-namespace:Gui.ViewModels"
              x:Class="Gui.Views.UserControls.CircuitCanvas"
              x:DataType="vm:CircuitCanvas">
 
@@ -455,9 +459,7 @@ private static void #InitArduino#() {
     $Arduino$? arduino;
     
     if (Arguments.IpcType == $IpcType$::None) {
-        Logger.#LogInfo#(
-            "IPC type not specified. " + 
-            "Skipping connection to simulator..");
+        Logger.#LogInfo#("...");
         return;
     }
     
@@ -467,9 +469,7 @@ private static void #InitArduino#() {
             .Value as $Arduino$;
     }
     catch ($InvalidOperationException$) {
-        Logger.#LogWarning#(
-            "Arduino not found in the scene. " + 
-            "Skipping connection to simulator.");
+        Logger.#LogWarning#("...");
         return;
     }
     
@@ -494,8 +494,7 @@ private static void #InitArduino#() {
         arduino?.#ConnectToSimulator#(ipc);
     }
     catch ($Exception$ e) {
-        ipcLogger.#LogError#(
-            "Error during IPC initialization: " + e.Message);
+        ipcLogger.#LogError#("...");
     }
 }
 \end{lstlisting}
@@ -551,7 +550,7 @@ The \texttt{ComponentControl} wires up the elements of the circuit canvas to the
 
 \texttt{OnPointerPressed} and \texttt{OnPointerReleased} are tied to the components \texttt{OnControlPress} and \texttt{OnControlRelease} methods. These are called when the user clicks the control on the canvas with their mouse. \texttt{OnAttachedToVisualTree} and \texttt{OnDetachedFromVisualTree} are used here, to subcribe to the global Alt key \textit{event}. The Alt key modifies whether should the control be still pressed, when the pointer is released.
 
-We need to specify which \texttt{Component} instance is tied to this control from \texttt{CircuitCanvas} view. I.e. we need to define a property, we can setup from the canvas' XAML, that we can then access from the control. Unfortunately, Avalonia is very obtuse with its property system, and requires quite a lot of boilerplate.
+We need to specify which \texttt{Component} instance from \texttt{CircuitCanvas} view is tied to this control. I.e. we need to define a property, we can set up from the canvas' XAML, that we can then access from the control. Unfortunately, Avalonia is very obtuse with its property system, and requires quite a lot of boilerplate.
 
 First we define the \texttt{\_component} backing field. Then a we define a static \texttt{DirectProperty} field, intialized by the \texttt{RegisterDirect} method, templated by the type of the control and type of the backing field. Then we define a regular property with getter and setter. The setter must contain the \texttt{SetAndRaise} in order to notify the control when its value changes. The property is passed to \texttt{RegisterDirect} and \texttt{DirectProperty} is passed to \texttt{SetAndRaise}. Then, once the value of the property changes through XAML binding, the \texttt{OnPropertyChanged} method is called. From the argument of this call we determine the property changed was our \texttt{Component}, and we can subscribe or unsubscribe from its \textit{SpriteChangedEvent}.
 
@@ -666,7 +665,7 @@ public class $CircuitCanvas$ : $ObservableObject$ {
 }
 \end{lstlisting}
 
-\section{IPC Adapter project}
+\section{IPC Adapter project} \label{sec:f_ipcadapter}
 
 \begin{figure}[htbp]
     \centering
@@ -759,6 +758,64 @@ public class $TextEncoder$ : $IEncoder$
 The \texttt{IEncoder} and \texttt{TextEncoder} are nearly equivalent to \texttt{encoder.hpp} and \texttt{textEncoder.cpp} in the backend. The interface still exposes methods for encoding and decoding, where decoding return a success state, and outputs the event to a parameter.
 
 The implementaion defines constants for formats of individual parts, and it still uses string formatting to fill them with event's arguments. Just the decoding has become mush more convenient thanks to .NET's built-in functions.
+
+\subsection{Arduino component}
+
+The configuration of the component defines 14 digital pins (\texttt{D0} up to \texttt{D13}) and 6 analog pins (\texttt{A0} up to \texttt{A5}). It has exactly one sprite, simply named \texttt{Arduino}. The partial class \texttt{Arduino} is split into two files \texttt{Arduino.cs} and \texttt{Arduino.Events.cs}. This is to establish seperation of concerns while still having access to all the private methods of both the side handling pin interaction and the side handling consumption and creation of events.
+
+\subsubsection{\texttt{Arduino.cs}}
+
+The front end side of the class defines a method for connecting to the IPC and some helper functions for conversion between pin indices and pin instances. The rest of the methods each reflects one of the possible IPC events. \texttt{WriteToPin} sets a value on a digital pin,\texttt{SetPinMode} sets a pin to write only or read only mode, and \texttt{Reboot} defaults all pins to a low state.
+
+\begin{lstlisting}[language=csharp, caption={\texttt{ConnectToSimulator} method}]
+public void #ConnectToSimulator#($IIpcAdapter$ ipc) {
+    _ipc = ipc;
+    
+    _ipc.ReceivedEventEvent += e => {
+        _uiContext.#Post#(_ => #ProcessRemoteEvent#(e), null);    
+    };
+}
+\end{lstlisting}
+
+The class gets the \texttt{IIpcAdapter} object from the \texttt{MainController} class of the \texttt{Main} project. It is already connected to the IPC, or trying to connect periodically. We have to subscribe to its \textit{ReceivedEventEvent}, which passes the decoded event as an argument.
+
+We have to be careful about the thread from which we consume the event. Most UI frameworks are single-threaded, and don't handle well, if more than one thread tries to enter the rendering pipeline. Consuming an event means we will have to at some point change a sprite of component connected to Arduino, and thus invalidate a visual of its associated \texttt{ComponentControl} in an Avalonia view. But the IPC listening system most likely executes on a different thread than the UI. Because of this the application kept freezing almost immediately after launch of the IPC, probably due to some deadlock. 
+
+We solved it by wrapping the \texttt{ProcessRemoteEvent} in \texttt{\_uiContext.Post} method. \texttt{\_uiContext} is an instance of the .NET's \texttt{SynchronizationContext} class. It represents the execution context of a single thread. We set to instance by calling \texttt{SynchronizationContext.Current} while constructing the component in the UI thread (the one that executes \texttt{MainController} functions). The \texttt{Post} method is a non-blocking method that schedules a delegate to be executed on the given thread. So the \textit{ReceivedEventEvent} is subscribed to a lambda, which schedules the consumption of the event on the correct thread.
+
+\begin{lstlisting}[language=csharp, caption={\texttt{OnPinStateChanged} method}]
+public override void #OnPinStateChanged#($Pin$ pin) {
+    int idx = #GetPinIndex#(pin.Name!);
+    
+    if (_ipc?.IsConnected ?? false) {
+        #InvokeWriteEvent#(idx, pin.State);
+    }
+}
+\end{lstlisting}
+
+The rest of the logic is simple. If we detect a change on one of the input pins, we check that IPC is connected. If it is, we create the appropriate event with the appropiate arguements.
+ 
+\subsubsection{\texttt{Arduino.Events.cs}}
+
+The \texttt{ProcessRemoteEvent} method comes from the event side of the \texttt{Arduino} class. It calls one of the \texttt{WriteToPin}, \texttt{SetPinMode} or \texttt{Reboot} methods based on the type of the event. Then it stores the LVT of the event into the \texttt{\_lastSeenLvt} member.
+
+\begin{lstlisting}[language=csharp, caption={\texttt{CreateWriteEvent}, \texttt{InvokeWriteEvent}, and \texttt{SendLocalEvent} methods}]
+private $Event$ #CreateWriteEvent#(int pinId, $DigitalState$ value) =>
+    new() {
+        Type = $EventType$::Write,
+        Args = [ pinId, (int)value ]
+    };
+
+private void #InvokeWriteEvent#(int pinId, $DigitalState$ value) => 
+    #SendLocalEvent#(#CreateWriteEvent#(pinId, value));
+
+private void #SendLocalEvent#($Event$ @event) {
+    @event.LocalVirtualTime = _lastSeenLvt;
+    _ipc?.#SendEvent#(@event);
+}
+\end{lstlisting}
+
+When the component needs to produce an event, we call one of the \texttt{Invoke*} methods. It creates the \texttt{Event} struct with the specific type and arguments and sends it via IPC with the \texttt{\_lastSeenLvt}. It isn't necessary to assign a unique LVT to different events. They will always be sent to the backend in the same order. All that matters is that a certain set of local events occurred between 2 remote events produced by the backend.
 
 \section{TCP Adapter project}
 
