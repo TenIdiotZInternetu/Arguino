@@ -208,6 +208,61 @@
       \verb https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=257627
       \endverb
     \endentry
+    \entry{asio_async_server}{online}{}{}
+      \field{sortinit}{1}
+      \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
+      \field{labeltitlesource}{title}
+      \field{title}{Daytime.3 - An asynchronous {TCP} daytime server}
+      \field{urlday}{12}
+      \field{urlmonth}{7}
+      \field{urlyear}{2026}
+      \field{urldateera}{ce}
+      \verb{file}
+      \verb Daytime.3 - An asynchronous TCP daytime server:/home/touster/Zotero/storage/TL8Z2TZA/tutdaytime3.html:text/html
+      \endverb
+      \verb{urlraw}
+      \verb https://www.boost.org/doc/libs/latest/doc/html/boost_asio/tutorial/tutdaytime3.html
+      \endverb
+      \verb{url}
+      \verb https://www.boost.org/doc/libs/latest/doc/html/boost_asio/tutorial/tutdaytime3.html
+      \endverb
+    \endentry
+    \entry{caisse_asio}{video}{}{}
+      \name{author}{1}{}{%
+        {{hash=9cdc9599a7020d0528f921aa50ed87d5}{%
+           family={{CppCon}},
+           familyi={C\bibinitperiod}}}%
+      }
+      \strng{namehash}{9cdc9599a7020d0528f921aa50ed87d5}
+      \strng{fullhash}{9cdc9599a7020d0528f921aa50ed87d5}
+      \strng{fullhashraw}{9cdc9599a7020d0528f921aa50ed87d5}
+      \strng{bibnamehash}{9cdc9599a7020d0528f921aa50ed87d5}
+      \strng{authorbibnamehash}{9cdc9599a7020d0528f921aa50ed87d5}
+      \strng{authornamehash}{9cdc9599a7020d0528f921aa50ed87d5}
+      \strng{authorfullhash}{9cdc9599a7020d0528f921aa50ed87d5}
+      \strng{authorfullhashraw}{9cdc9599a7020d0528f921aa50ed87d5}
+      \field{sortinit}{1}
+      \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{shorttitle}
+      \field{abstract}{http://{CppCon}.org — Presentation Slides, {PDFs}, Source Code and other presenter materials are available at: https://github.com/cppcon/cppcon2016}
+      \field{day}{5}
+      \field{month}{10}
+      \field{shorttitle}{{CppCon} 2016}
+      \field{title}{{CppCon} 2016: Michael Caisse “Asynchronous {IO} with Boost.Asio"}
+      \field{urlday}{12}
+      \field{urlmonth}{7}
+      \field{urlyear}{2026}
+      \field{year}{2016}
+      \field{dateera}{ce}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://www.youtube.com/watch?v=rwOv_tw2eA4
+      \endverb
+      \verb{url}
+      \verb https://www.youtube.com/watch?v=rwOv_tw2eA4
+      \endverb
+    \endentry
     \entry{avalonia_name_generator}{software}{}{}
       \list{publisher}{1}{%
         {Avalonia {UI}}%
@@ -367,8 +422,8 @@
       \endverb
     \endentry
     \entry{avalonia_samples}{online}{}{}
-      \field{sortinit}{1}
-      \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
+      \field{sortinit}{2}
+      \field{sortinithash}{8b555b3791beccb63322c22f3320aa9a}
       \field{labeltitlesource}{title}
       \field{abstract}{Avalonia.Samples aims to provide some minimal samples focusing on a particular issue at a time. This should help getting new users started. - {AvaloniaUI}/Avalonia.Samples}
       \field{langid}{english}
@@ -402,8 +457,8 @@
       \strng{authornamehash}{378f32c4b305c4e4fd792910057f28ca}
       \strng{authorfullhash}{378f32c4b305c4e4fd792910057f28ca}
       \strng{authorfullhashraw}{378f32c4b305c4e4fd792910057f28ca}
-      \field{sortinit}{1}
-      \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
+      \field{sortinit}{2}
+      \field{sortinithash}{8b555b3791beccb63322c22f3320aa9a}
       \field{labelnamesource}{author}
       \field{labeltitlesource}{title}
       \field{abstract}{Reads data from the {NetworkStream} and stores it in a byte memory range as an asynchronous operation.}

@@ -469,6 +469,13 @@ At each of these parts we can encounter a value that doesn't conform to its expe
 
 \section{TCP Server module}
 
+IPC over TCP is implemented using the \texttt{boost::asio} library. It serves as an abstraction over asynchronous I/O and networking resources of the OS. The core class of the library is the \texttt{io\_context} type, in which the network operations are scheduled and executed. The \texttt{tcp::acceptor} type attaches to the context and listens for any TCP connection on the given endpoint (ip and port). At that time \texttt{ConnectionHandler} instance is created. This happens within the \texttt{TcpServer} class.
+
+Once a connection has been established, it connects to a socket owned by the \texttt{ConnectionHandler}. Inside its \texttt{handle} method, the connection handler waits asynchrnously for any incoming data. Once data are available, and the message delimeter is found within them, the data is passed to the \texttt{handle\_message} where it is preprocessed and the passed to a handler callback passed to the class from the TCP adapter.
+
+If a message needs to be sent over TCP, it is first passed to \texttt{TcpServer} and that passes it to the \texttt{ConnectionHandler}. It is put to an outbox queue and sent asynchronously over the same socket, within the same \texttt{io\_context}.
+\footnote{The general outline of the server and connection handler is taken from \texttt{boost::asio} tutorials \cite{asio_async_server}. A CppCon presentation by Michael Caisse \cite{caisse_asio} was incredibly helpful for practical understanding of the library and common patterns. }
+
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=\textwidth,keepaspectratio]{./img/uml/b_tcpserver.pdf}
@@ -509,6 +516,49 @@ class $TcpServer$ {
 };
 \end{lstlisting}
 
+The class initializes the \texttt{io\_context}, the \texttt{acceptor} and the \texttt{endpoint} within its constructor. One of the contructor's arguments is callback, that has to be called once a message is received by the \texttt{ConnectionHandler}. We expect only one client to connect at a time. \footnotemark We store a shared pointer to this handler and pass it the \texttt{\_messageHandler} callback once it is ready. Local messages that need to be sent to the frontend are also passed to the same \texttt{ConnectionHandler}. If there is no connection, sending a message blocks the calling thread, hence the \texttt{\_connectionCv} condition variable.
+
+\footnotetext{A more robust architecture would of course allow multiple clients to be connected at once, which would require to decouple handler from the server. But only one connection also means we don't need any threadpool to handle the traffic. }
+
+\subsubsection{Accepting connections}
+
+\begin{lstlisting}[language=csharp, caption={\texttt{launch} method}]
+void $TcpServer$::#launch#()
+{
+    _acceptor.#listen#();
+    #start_accepting#();
+    _ioContext.#run#();
+}
+\end{lstlisting}
+
+The server starts to listen for connections by calling the \texttt{launch} method. Within it the acceptor starts to listen for connection with the \texttt{listen} method. What must happen after a connection is established is defined by the \texttt{start\_accepting} method. \texttt{\_ioContext.run()} blocks the calling thread and starts executing any asynchronous operations that have been scheduled for execution. The method return once there is no work to be done, so we have to make sure there is at least one scheduled operation.
+
+\begin{lstlisting}[language=csharp, caption={\texttt{start\_accepting} method}]
+void $TcpServer$::#start_accepting#()
+{
+    auto newConnection = handler_t::#create#(
+        _ioContext, _messageHandler, _logger);
+
+    _acceptor.#async_accept#(
+        newConnection->#socket#(), [=, this](auto error) {
+            if (!error) {
+                _logger->#log_info#("Connection accepted!");
+                _connectionHandler = newConnection;
+                _connectionCv.#notify_one#();
+                _connectionHandler->#handle#();
+            }
+            else {
+                _logger->#log_error#("...");
+            }
+            #start_accepting#();
+    });
+}
+\end{lstlisting}
+
+Async TCP operations generally require a reference to a \texttt{tcp::socket} object and a callback to call once the operation has been executed by the \texttt{io\_context}. A socket is always associated with a single connection, so we define it in our \texttt{ConnectionHandler} class and create its instance beforehand.
+
+In the callback we notify the \texttt{\_connectionCv} that a connection has been found, store the pointer of the handler and call its \texttt{handle} method. Then we must call the \texttt{start\_accepting} again. This is another common pattern among async operations. It makes sure that another async operation is scheduled immediately after the first one has been completed, listening for new connections, messages, etc. Without them \texttt{io\_context} simply stops. This looks like a recursive pattern, but remember that the outer function has finished long before the callback is invoked by the executing context.
+
 \subsection{\texttt{ConnectionHandler} class}
 
 \begin{lstlisting}[language=csharp, caption={\texttt{ConnectionHandler} class}]
@@ -543,8 +593,6 @@ class $ConnectionHandler$ :
     $std$::$queue$<$std$::$string$> _outboxQueue;
     $std$::$mutex$ _queueMutex;
     $std$::$condition_variable$ _queueCv;
-    size_t _connectionId;
-    static size_t _nextConnectionId;
     bool _isConnected;
     $std$::$atomic$<bool> _isWriting;
     $message_funct$ _messageHandler;
@@ -557,6 +605,118 @@ class $ConnectionHandler$ :
     void #disconnect#();
 };
 \end{lstlisting}
+
+The \texttt{ConnectionHandler} owns the socket, used for asynchronous TCP operations. It provides the public \texttt{handle} and \texttt{post\_message} methods for scheduling reading and writing operations respectively. The private \texttt{handle\_message} and \texttt{write\_from\_queue} are used within the callbacks of these operations.
+
+The \texttt{ConnectionHandler} inherits the \texttt{enable\_shared\_from\_this} with itself as the template argument. This allows us to call the inherited \texttt{shared\_from\_this}, that creates a new shared pointer, pointing to itself. Those are used to prolong the lifetime of the object with every subsequent scheduled operation, as each one of the creates a new pointer. This pattern is very common in ASIO servers, especially when the handlers are not owned by any higher entity.
+
+\subsubsection{Receiving messages}
+
+\begin{lstlisting}[language=csharp, caption={\texttt{handle} method}]
+void $ConnectionHandler$::#handle#()
+{
+    _isConnected = true;
+
+    $boost$::$asio$::#async_read_until#(
+        _socket,
+        $boost$::$asio$::#dynamic_buffer#(_incomingBuffer),
+        MESSAGE_DELIMITER,
+        [me = this->#shared_from_this#()]
+        (auto error, size_t messageSize) {
+            if (error == $boost$::$asio$::$error$::eof) {
+                me->#disconnect#();
+            }
+            else {
+                me->#handle_message#(error, messageSize);
+                me->#handle#();
+            }
+        }
+    );
+}
+\end{lstlisting}
+
+Upon new connection, the handler starts immediately listening for new messages with the \texttt{async\_read\_until} function. Aside from usual arguements it requires a delimiting character (semicolon in our case) and an \texttt{asio::buffer}. Buffers in the context of asio are views of contiguous regions of memory. We use a dynamic buffer (meaning it can change size) and back it with the \texttt{\_incomingBuffer} string.
+
+The method reads data from the network until the delimiting character has been encountered. Then the portion of the data until the delimiter is copied into the buffer. And after that the callback is called with the number of copied character passed as an argument. We process the data in the buffer with \texttt{handle\_message} method.
+
+\begin{lstlisting}[language=csharp, caption={\texttt{handle\_message} method}]
+void $ConnectionHandler$::#handle_message#(
+    $boost$::$system$::$error_code$ error, size_t messageSize)
+{
+    if (error) {
+        _logger->#log_error#("...");
+        return;
+    }
+
+    if (_incomingBuffer.#empty#()) return;
+
+    const $std$::$string$ message = 
+        _incomingBuffer.#substr#(0, messageSize - 1);
+    _logger->#log_debug#("...");
+    #_messageHandler#(message);
+
+    _incomingBuffer.#erase#(0, messageSize);
+}
+\end{lstlisting}
+
+We check for errors and strip the message of its delimiter. Finally we pass the message to the \texttt{\_messageHandler} which was bestowed to us from the \texttt{tcpHandler.cpp} through the server. 
+
+\subsubsection{Posting messages}
+
+\begin{lstlisting}[language=csharp, caption={\texttt{post\_message} method}]
+void $ConnectionHandler$::#post_message#(const $std$::$string$& message)
+{
+    {
+        $std$::$unique_lock$ lock(_queueMutex);
+        _queueCv.#wait#(lock, [this]() {
+            return _outboxQueue.#size#() <= MAX_QUEUE_SIZE;
+        });
+
+        _outboxQueue.#push#(message);
+    }
+
+    $boost$::$asio$::#post#(_executor, 
+        [me = this->#shared_from_this#()] {
+            me->#write_from_queue#();
+        });
+}
+\end{lstlisting}
+
+For scheduling messages to send we use a queue of strings called \texttt{\_outboxQueue}. Since this method is most likely going to be called from a thread different that one of \texttt{io\_context} we need to wrap the sending logic in \texttt{post} function. This schedules the \texttt{write\_from\_queue} method in the execution context of the \texttt{io\_context} thread. The \texttt{\_executor} argument represents this. It has been retrieved from \texttt{io\_context} in the connection handler's construtor.
+
+We set the maximum count of messages in the queue, so that the simulator doesn't do unnecessary work if it isn't listened to. Once this count has been reached, the calling thread is blocked with the \texttt{\_queueCv} condition variable.
+
+\begin{lstlisting}[language=csharp, caption={\texttt{write\_from\_queue} method}]
+void $ConnectionHandler$::#write_from_queue#()
+{
+    if (_isWriting) return;
+    if (_outboxQueue.#empty#()) return;
+
+    _isWriting = true;
+
+    $boost$::$asio$::#async_write#(_socket,
+        $boost$::$asio$::#buffer#(_outboxQueue.#front#() + ';'),
+        [me = this->#shared_from_this#()]
+        (auto error, size_t bytes_written) {
+            if (error) {
+                me->_logger->#log_error#("...");
+            }
+            else {
+                me->_logger->#log_debug#("...");
+                me->_outboxQueue.#pop#();
+                me->_queueCv.#notify_one#();
+            }
+
+            me->_isWriting = false;
+            me->#write_from_queue#();
+        }
+    );
+}
+\end{lstlisting}
+
+The messages are sent with the \texttt{async\_write} operation. It requires a buffer from which the data will be copied to the network. We back this up by one element of the \texttt{\_outboxQueue} with appended delimiter. Once succeeded, the message is removed from the queue and the condition variable is notified with the change of the queue's size. 
+
+It is possible for the \texttt{write\_from\_queue} method to be invoked twice before \texttt{async\_write} executes even once. This would end up by sending the same message multiple times. So we guard the method with \texttt{\_isWriting} bool, that is set to true once the method is called, and only set to false after the \texttt{async\_write} has been executed. This causes that the number of \texttt{post\_message} calls doesn't match the number of \texttt{async\_write} calls. So we call the method repeatedly from the callback, such that we send all the messages waiting in the queue.
 
 \subsection{\texttt{tcpAdapter.cpp}} \label{subsec:tcpadapter}
 
@@ -606,6 +766,10 @@ void #run_simulator_with_ipc#(
     tcp_thread.#join#();
 }
 \end{lstlisting}
+
+The implementation of \texttt{tcpAdapter.cpp} is quite simple. The \texttt{TcpServer} is instantiated with \texttt{on\_receive\_tcp\_message} as its message handler, and it's \texttt{launch} method is invoked in a new thread. Then simulation loop starts.
+
+\texttt{on\_event} and \texttt{on\_receive\_tcp\_message} are semantically opposite to each other. The former encodes an event into message and enqueues it to the server. The latter decodes a message into an event in enqueues it to the \texttt{Simulator}.
 
 \section{Shared Memory module}
 

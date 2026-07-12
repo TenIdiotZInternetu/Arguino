@@ -80,7 +80,7 @@ void ConnectionHandler::write_from_queue()
     _isWriting = true;
 
     boost::asio::async_write(_socket,
-        boost::asio::buffer(_outboxQueue.front() + ';'),
+        boost::asio::buffer(_outboxQueue.front() + ';'),  // TODO - constant
         [me = this->shared_from_this()](auto error, size_t bytes_written) {
             if (error) {
                 me->_logger->log_error("Error occured while writing to socket: " + error.what());
@@ -102,4 +102,4 @@ void ConnectionHandler::disconnect()
     _isConnected = false;
     _logger->log_warning("The client has disconnected");
 }
-}
+}  // namespace arguino::tcp
