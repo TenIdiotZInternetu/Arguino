@@ -187,6 +187,7 @@
     rulecolor=\color{gsline},
     basicstyle=\footnotesize\ttfamily,
     commentstyle=\color{gscomment},
+    showstringspaces=false
 }
 
 %%%%%%%%%%% Default listing format %%%%%%%%%%%%%%%%%%%
@@ -239,10 +240,10 @@
 
 \definecolor{ssymbol}{RGB}{44,55,58}
 \definecolor{skeyword}{RGB}{24, 78, 143}
-\definecolor{sident}{RGB}{23, 143, 131}
+\definecolor{sident}{RGB}{0, 117, 163}
 \definecolor{sstring}{RGB}{207, 106, 19}
 \definecolor{sdigit}{RGB}{211,54,130}
-\definecolor{sfunction}{RGB}{153, 131, 20}
+\definecolor{sfunction}{RGB}{138, 99, 0}
 \definecolor{sclass}{RGB}{25, 138, 13}
 
 
@@ -349,4 +350,30 @@
 
 
 %%%%%%%%%%% Shell syntax highlighting %%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%% XAML syntax highlighting %%%%%%%%%%%%%%%%
+
+\definecolor{sstring}{RGB}{207, 106, 19}
+\definecolor{sctrl}{RGB}{4, 44, 112}
+\definecolor{sattr}{RGB}{0, 117, 163}
+
+\makeatletter
+
+\newcommand\language@xaml{xaml}
+
+\expandafter\expandafter\expandafter\lstdefinelanguage
+\expandafter{\language@xaml}
+{
+  stringstyle=\color{sstring},
+  morestring=[b]",
+  moredelim=*[s][\bfseries\color{sctrl}]{<}{\ },
+  moredelim=[is][\color{sattr}]{$}{$},
+}
+
+\makeatother
+
+
+%%%%%%%%%%% XAML syntax highlighting %%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

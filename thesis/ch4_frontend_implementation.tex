@@ -288,22 +288,22 @@ We never explicitly defined a \texttt{CircuitCanvas} property in the \texttt{Mai
 In MVVM, data contexts are the best way to bind views to their viewmodels. \cite{avalonia_data_context} The type of the \texttt{DataContext} must be set to match the type of the view model in XAML. This can be done in more than one way. We do it by adding the \texttt{x:DataType} attribute to the root element of \texttt{CircuitCanvas.axaml}. The code below shows a simplified XAML example of how these two steps have been done.
 
 \xxx{syntax highlight}
-\begin{lstlisting}[caption={Data context setup in XAML}]
+\begin{lstlisting}[language={xaml}, caption={Data context setup in XAML}]
 <Window ...
-        xmlns:uc="clr-namespace:Gui.Views.UserControls"
-        x:Class="Gui.Views.MainWindow"
-        Title="Main">
+        $xmlns:uc$="clr-namespace:Gui.Views.UserControls"
+        $x:Class$="Gui.Views.MainWindow"
+        $Title$="Main">
 
-    <uc:CircuitCanvas x:Name="CircuitCanvas"/>
+    <uc:CircuitCanvas $x:Name$="CircuitCanvas"/>
 
 </Window>
 
 <UserControl ...
-             xmlns:vm="clr-namespace:Gui.ViewModels"
-             x:Class="Gui.Views.UserControls.CircuitCanvas"
-             x:DataType="vm:CircuitCanvas">
+             $xmlns:vm$="clr-namespace:Gui.ViewModels"
+             $x:Class$="Gui.Views.UserControls.CircuitCanvas"
+             $x:DataType$="vm:CircuitCanvas">
 
-    <ItemsControl ItemsSource="{Binding Components}">
+    <ItemsControl $ItemsSource$="{Binding Components}">
         ...
     </ItemsControl>
     
@@ -411,25 +411,25 @@ About \texttt{Save}: "This call saves the current matrix, clip, and draw filter,
 
 \subsection{\texttt{CircuitCanvas} user control}
 
-\begin{lstlisting}[caption={\texttt{CircuitCanvas} view layout}]
-    <Panel ClipToBounds="False">
-        <ZoomBorder Stretch="Fill" 
-                    ClipToBounds="True" 
-                    EnableDoubleClickZoom="False">
+\begin{lstlisting}[language={xaml}, caption={\texttt{CircuitCanvas} view layout}]
+    <Panel $ClipToBounds$="False">
+        <ZoomBorder $Stretch$="Fill" 
+                    $ClipToBounds$="True" 
+                    $EnableDoubleClickZoom$="False">
 
-            <ItemsControl ItemsSource="{Binding Components}">
-                <ItemsControl.ItemsPanel>
+            <ItemsControl $ItemsSource=$"{Binding Components}">
+                <ItemsControl.$ItemsPanel$>
                     <ItemsPanelTemplate>
-                        <Canvas ClipToBounds="False"/>
+                        <Canvas $ClipToBounds$="False"/>
                     </ItemsPanelTemplate>
-                </ItemsControl.ItemsPanel>
+                </ItemsControl.$ItemsPanel$>
     
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate DataType="scenes:Component" >
+                <ItemsControl.$ItemTemplate$>
+                    <DataTemplate $DataType$="scenes:Component">
                         <tcontrol:ComponentControl 
-                            Component="{Binding}"/>
+                            $Component$="{Binding}"/>
                     </DataTemplate>
-                </ItemsControl.ItemTemplate>
+                </ItemsControl.$ItemTemplate$>
             </ItemsControl>
             
         </ZoomBorder>
