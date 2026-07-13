@@ -9,22 +9,22 @@ namespace ComponentManagement.Factory.Loaders;
 // TODO: Too many responsibilities
 
 public class YamlSceneLoader : ISceneLoader {
-    public class ComponentsMap : Dictionary<string, SceneDto.ComponentDto>;
+    public class ComponentsMap : Dictionary<string, ComponentDto>;
     public class TypesMap : Dictionary<string, ComponentsMap>;
     public class NodesList : List<List<string>>;
 
-    public record SceneDto {
+    public record SceneDto() {
         public required TypesMap Components { get; init; } = [];
         public required NodesList Nodes { get; init; } = [];
-
-        public record ComponentDto {
-            public string Position = "0 0";
-            public float Rotation = 0;
-            public string Scale = "1 1";
+    }
+    
+    public record ComponentDto() {
+        public string Position = "0 0";
+        public float Rotation = 0;
+        public string Scale = "1 1";
             
-            // TODO: Flatten extra properties
-            public Dictionary<string, object>? ExtraProps { get; set; } 
-        }
+        // TODO: Flatten extra properties
+        public Dictionary<string, object>? ExtraProps { get; set; } 
     }
 
     private SceneDto? _sceneDto;
@@ -71,7 +71,7 @@ public class YamlSceneLoader : ISceneLoader {
         }
     }
 
-    private Transform ParseTransform(SceneDto.ComponentDto compDto) {
+    private Transform ParseTransform(ComponentDto compDto) {
         return new Transform {
             Position = YamlUtils.StringToVector2(compDto.Position) ?? Vector2.Zero,
             Rotation = compDto.Rotation,
@@ -79,7 +79,7 @@ public class YamlSceneLoader : ISceneLoader {
         };
     }
 
-    private void CreateComponentInstance(string typeName, string componentName, SceneDto.ComponentDto componentDto) {
+    private void CreateComponentInstance(string typeName, string componentName, ComponentDto componentDto) {
         try {
             Type type = _typesByName[typeName];
             Component compInstance = (Activator.CreateInstance(type, typeName) as Component)!;

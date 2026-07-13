@@ -14,6 +14,8 @@ Components:
   Button:
     BtnInc:
       Position: 360 10
+      ExtraProps:
+        locked: true
     BtnDec:
       Position: 360 100
   Vcc:

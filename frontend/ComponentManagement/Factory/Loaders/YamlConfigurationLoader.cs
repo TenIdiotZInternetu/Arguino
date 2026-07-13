@@ -38,15 +38,14 @@ public class YamlConfigurationLoader : IConfigurationLoader {
         }
     }
 
-    private ComponentConfiguration CreateConfig(ConfigDto configDto, string configPath) {
-        return new ComponentConfiguration {
+    private ComponentConfiguration CreateConfig(ConfigDto configDto, string configPath) =>
+         new() {
             Name = configDto.Name,
             ComponentPath = Path.GetDirectoryName(configPath)!,
             Description = configDto.Description,
             ImageSize = YamlUtils.StringToVector2(configDto.ImageSize) ?? ComponentConfiguration.DEFAULT_IMAGE_SIZE,
             Pins = CreatePins(configDto)
         };
-    }
 
     private List<PinPrototype> CreatePins(ConfigDto configDto) {
         List<PinPrototype> pins = [];

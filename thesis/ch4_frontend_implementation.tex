@@ -69,20 +69,136 @@ public record $ComponentConfiguration$() {
 
 \section{Component Management project - Scene factory} \label{sec:f_factory}
 
-\subsection{\texttt{SceneFactory} static class}
-
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=\textwidth,keepaspectratio]{./img/uml/f_Factory.pdf}
-    \caption{\texttt{Factory} architecture of the \texttt{ComponentManagement} project}
+    \includegraphics[width=\textwidth,keepaspectratio]{./img/uml/f_factory_flow.pdf}
+    \caption{Action flow of the \texttt{SceneFactory.LoadResources} function}
     \label{fig:cm_project_factory}
 \end{figure}
 
+\subsection{\texttt{SceneFactory} static class}
+
+The \texttt{SceneFactory} class ties the whole loading process together. It takes the path to the scene file and the directory containing the component assets in its constructor, saving them in private fields. It also holds the final \texttt{Scene} instance, which can be retrieved through a public property once the loading is complete.
+
+The main work is done in the \texttt{LoadResources} method, which follows the flow shown in Figure~\ref{fig:cm_project_factory}. It starts by creating a new \texttt{ISceneLoader} to load the scene file, get the list of component types, and instantiate the raw components. It then loops through each component type found in the scene. For each type, it loads additional data from other files, and then configures every individual instance of that type. Finally, it instantiates the electrical nodes, packages them with the components into a new \texttt{Scene} object, and returns it.
+
+The \texttt{CompleteComponentType} method handles the setup for a specific type of component. It first calls \texttt{CreateConfig} to get the \texttt{ComponentConfiguration} of the type. If that succeeds, it uses the \texttt{ISvgLoader} to load all SVG files from that directory. It resizes these SVGs to the size specified in the configuration and compiles them into usable sprites. These sprites are stored back in the configuration, and the finished configuration is registered globally by calling the component's static \texttt{AddConfiguration} method.
+
+The \texttt{CreateConfig} helper method finds and loads the YAML configuration file for a component type. It looks inside the component's directory for a file with the exact same name as the directory, but with a \texttt{.yaml} extension. If the file exists, it uses the \texttt{YamlConfigurationLoader} to load and return the configuration. If the file is missing, it logs an error and returns null, which prevents the loader from trying to instantiate components of this type.
+
+The \texttt{CompleteComponentInstance} method finalizes each individual component instance. It sets the base size of the component's SVGs to match the image size from its \texttt{ComponentConfiguration} and calls the internal pin initialization. It also assigns the first compiled sprite from the configuration as the active sprite, or fallback to an empty \texttt{SKSvg} if no sprites were loaded. At the end, it calls the component's \texttt{OnInitialized} method.
+
 \subsection{SVG Loader}
+
+\texttt{ISvgLoader} exposes functions for loading, modifying and compiling SVG documents. We say documents, because SVG is a readable XML-like format. So the first step is usually loading it into memory as a document object model. In this representation, we can freely change properties of individual picture elements are groups. We keep things simple by only changing the overall size of the picture to the default image size of a component type. After all necessary changes are done, the document is compiled into raw binary data, a blueprint on how the picture should be drawn. This data is wrapped an \texttt{SKSvg} type from \texttt{SkiaSharp}.
+
+\begin{lstlisting}[language=csharp, caption={\texttt{ISvgLoader} interface}]
+public interface $ISvgLoader$ {
+    public void #LoadDocuments#(string componentPath);
+    public void #ResizeDocuments#($Vector2$ desiredSize);
+    public $Dictionary$<string, $SvgDocument$> #GetDocuments#();
+    public $Dictionary$<string, $SKSvg$> #CompileSvgs#();
+}
+\end{lstlisting}
+
+Parsing the file and compiling the document is very expensive. A scene with even a few changing SVGs had a considerable lag when using built-in Avalonia, or available Avalonia libraries. That's why we have to compile all the SVGs once before the scene is ready to be used. Multiple component instances can be drawn using the same image data, that's why we store it in the \texttt{ComponentConfiguration} struct, shared between all components of the same type. A single component only holds a reference to the image.
+
+The \texttt{SkiaSvgLoader} uses the \texttt{SvgDocument} type from the \texttt{Svg} NuGet package to create the DOM from a file. On this type, the resizing is done using the \texttt{Width}, \texttt{Height} and \texttt{AspectRatio} properties. The compilation is done using \texttt{Svg.Skia} NuGet package, that extends both \texttt{Svg} and \texttt{SkiaSharp} libraries. The compilation is done using the static \texttt{CreateFromSvgDocument} function on \texttt{SKSvg} class. This is done for all files with the \texttt{.svg} extension in the component directory.
+
 
 \subsection{Configuration Loader}
 
+The \texttt{IConfigurationLoader} requires only one method, \texttt{LoadConfig}, that creates \texttt{ComponentConfiguration} struct from the given path. The implementation \texttt{YamlConfigurationLoader} utilizes the \texttt{YamlDotNet} NuGet package. It implements a deserializer, that reads the YAML from a file and saved is it to memory as structure with equivalent fields and data types definitions. For that we define the \texttt{ConfigDto} struct \footnotemark. 
+
+\footnotetext{The DTO meaning data transfer object.}
+
+\begin{lstlisting}[language=csharp, caption={\texttt{YamlConfigurationLoader.ConfigDto} struct}]
+public record struct $ConfigDto$() {
+    public required string Name;
+    public string Description = "";
+    public string ImageSize = "";
+    public uint Pins = 0;
+    public $List$<string> PinNames = [];
+}
+\end{lstlisting}
+
+It serves as an intermediate step before we shape the loaded data into the form we need. The rest is quite simple. \texttt{Name} and \texttt{Description} have exactly the same. The \texttt{ImageSize} size arrived as a string with two numbers seperated by space, so we just split them and parse them separately. \footnotemark The \texttt{Pins} are created as prototypes, where the unnamed prototypes have IDs ranging from zero to to the value specified in the DTO and no name. The named prototypes have names from the DTO and IDs in the same order as were they names listed in the DTO. The \texttt{Sprites} dictionary is not yet populated, as we want to avoid a dependency on another loader.
+
+\footnotetext{This is a non-standard YAML notation of 2D vectors. We created the static \texttt{YamlUtils} class to handle these vectors. See the specification at \ref{yaml_notation}}
+
+\begin{lstlisting}[language=csharp, caption={\texttt{YamlConfigurationLoader.CreateConfig} method}]
+private $ComponentConfiguration$ #CreateConfig#(
+    $ConfigDto$ configDto, string configPath) => new() {
+        Name = configDto.Name,
+        ComponentPath = $Path$.#GetDirectoryName#(configPath)!,
+        Description = configDto.Description,
+        ImageSize = $YamlUtils$.#StringToVector2#(configDto.ImageSize) 
+            ?? $ComponentConfiguration$.DEFAULT_IMAGE_SIZE,
+        Pins = #CreatePins#(configDto)
+    };
+\end{lstlisting}
+
 \subsection{Scene Loader}
+
+The \texttt{ISceneLoader} is responsible for parsing the entire scene. That means creating both \texttt{Component} and \texttt{ElectricalNode} instances, and register all component types used in the scene. The component instances are not yet complete, their pins and sprite require data from the other loaders. That's why we need na effective way to group them by their type.
+
+The \texttt{YamlSceneLoader} also uses the \texttt{YamlDotNet} package and its deserializer. The idea of the DTO also stays the same, just its definition is more complicated due to all the nested types. The \texttt{LoadFile} method does nothing more than deserializing the path into the DTO. The actual creation of the instances is done in \texttt{InstantiateComponents} and \texttt{InstantiateNodes}, which must be called in that order for the operation to make sense.
+
+\begin{lstlisting}[language=csharp, caption={\texttt{YamlSceneLoader.SceneDto} definitions}]
+public class $ComponentsMap$ : $Dictionary$<string, $ComponentDto$>;
+public class $TypesMap$ : $Dictionary$<string, $ComponentsMap$>;
+public class $NodesList$ : $List$<$List$<string>>;
+
+public record $SceneDto$() {
+    public required $TypesMap$ Components { get; init; } = [];
+    public required $NodesList$ Nodes { get; init; } = [];
+}
+
+public record $ComponentDto$() {
+    public string Position = "0 0";
+    public float Rotation = 0;
+    public string Scale = "1 1";
+    public $Dictionary$<string, object>? ExtraProps { get; set; } 
+}
+\end{lstlisting}
+
+\subsubsection{Instantiating components}
+
+\texttt{InstantiateComponents} loops through the nested dictionary of types and DTOs inside the deserialized scene. For each type name encountered, it attempts to resolve the C\# type of the currently executing assembly (if not already cached) and then loops through individual component DTOs to kick off their creation.
+
+The \texttt{CreateComponentInstance} method uses reflection to dynamically instantiate the object using its type name. Once the instance exists, it assigns it the information from \texttt{ComponentDto} (i.e. \texttt{Transform} and custom properties) and registers the finished instance into both the type-grouped and name-grouped lookup dictionaries.
+
+The custom properties are processed in the \texttt{HandleExtraProps} method from the \texttt{ExtraProps} member of the \texttt{ComponentDto}. User-defined properties are not part of the base component layout. They are acquired through reflection by matching properties of the concrete component class against the dictionary keys. If a property exists, the input type is converted dynamically to the destination property type, and the value is updated.
+
+\begin{lstlisting}[language=csharp, caption={\texttt{YamlSceneLoader.CreateComponentInstance} method}]
+private void #CreateComponentInstance#(
+    string typeName, 
+    string componentName, 
+    $ComponentDto$ componentDto) 
+{
+    try {
+        $Type$ type = _typesByName[typeName];
+        $Component$ compInstance = 
+            ($Activator$.#CreateInstance#(type, typeName) 
+                as $Component$)!;
+
+        compInstance.Name = componentName;
+        compInstance.Transform = #ParseTransform#(componentDto);
+        #HandleExtraProps#(compInstance, componentDto.ExtraProps);
+
+        _instancesByType[typeName].#Add#(compInstance);
+        _instancesByName[componentName] = compInstance;
+        $ComponentManager$.#LogInfo#("...");
+    }
+    catch {
+        $ComponentManager$.#LogError#("...");
+    }
+}
+\end{lstlisting}
+
+\subsubsection{Instantiating nodes}
+
+After all components exist, the \texttt{InstantiateNodes} iterates through the list of node arrays, creating a new \texttt{ElectricalNode} container for each. It splits the string representations (e.g. "Component.Pin") to locate the parent instance by name, resolves the pin using either its numeric index or name identifier, and adds \texttt{Pin} references to the node.
 
 \section{Main project with Avalonia UI}
 

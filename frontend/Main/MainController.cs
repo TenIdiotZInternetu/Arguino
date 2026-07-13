@@ -79,6 +79,8 @@ public static class MainController {
         MainWindow.CircuitCanvas.DataContext = canvas;
     }
 
+    // TODO - move to Arduino component
+    // TODO - IPC arguments through ExtraProps in scene
     private static void InitArduino() {
         Arduino? arduino;
         
