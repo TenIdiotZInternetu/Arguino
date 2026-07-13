@@ -489,7 +489,7 @@ inline bool $CircularBuffer$::#write#(const TRange& data)
 }
 \end{lstlisting}
 
-The range variant of \texttt{write} is the one that does all the hard work. The other one just just transforms the type \texttt{T} into an \texttt{std::span} with the constant reference to \texttt{T} as it's only element. This qualifies it as a range.
+The range variant of \texttt{write} is the one that does all the hard work. The other one just transforms the type \texttt{T} into an \texttt{std::span} with the constant reference to \texttt{T} as it's only element. This qualifies it as a range.
 
 First we turn the range into a span of bytes, so we can access each one of them using pointer arithmetics. Then we check if there is enough avilable space to store all the bytes. We have to make sure that there is always at least one byte unused. Otherwise would the consumer and producer offsets equal. We specifically interpret this state as the buffer being empty. Without this specification it would be ambiguous whether is the buffer empty or full.
 
@@ -533,7 +533,7 @@ $std$::$vector$<uint8_t> $CircularBuffer$::#consume_until#(
 
 First we need to copy the producer offset as it can change during the execution of the function. Since \texttt{iterator\_t} is a fully qualified forward iterator, we can pass the offset iterators as arguments of \texttt{std::find} in order to find the iterator of the delimeter. If the delimeter hasn't been found, we return an empty vector, indicating that the operation doesn't make sense with the current state of the buffer. 
 
-Otherwise we proceed analogously to \texttt{write}. We determine the length of the message, and if it could fit in until the end of the buffer. If not, it lies on the boundary, so we have to copy portion of the data from the end of the buffer, and portion from its beginning.
+Otherwise we proceed analogously to \texttt{write}. We determine the length of the message, and if it could fit until the end of the buffer. If not, it lies on the boundary, so we have to copy portion of the data from the end of the buffer, and portion from its beginning.
 
 \subsection{\texttt{TwoWayBuffer} class}
 
