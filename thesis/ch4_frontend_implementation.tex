@@ -409,7 +409,7 @@ About \texttt{Save}: "This call saves the current matrix, clip, and draw filter,
 
 \footnotetext{The notion of features and leases is specific to Avalonia, and at the time of writing the thesis doesn't seem to be properly documented. The usage has been inspired by the Avalonia's sample projects \cite{avalonia_samples}}
 
-\subsection{\texttt{CircuitCanvas} user control}
+\subsection{\texttt{CircuitCanvas} user control} \label{subsec:f_canvas}
 
 \begin{lstlisting}[language={xaml}, caption={\texttt{CircuitCanvas} view layout}]
     <Panel $ClipToBounds$="False">
@@ -440,7 +440,7 @@ The \texttt{CircuitCanvas} is a user control, that contains component controls a
 
 \texttt{ItemsPanel} describes the layout of the container in which the items will be drawn. We want to freely choose the exact coordinates of where our components should be drawn to. So we chose to use \texttt{Canvas}, a type of panel made exactly for that purpose. \texttt{ItemTemplate} describes how should the individual items be styled. This could be a text box, another panel, or our custom drawn \texttt{ComponentControl}. The control must be enclosed in a \texttt{DataTemplate} element. The data type of the collection's item is specified through its \texttt{DataType} property. Using the \texttt{Binding} keyword, we assign each of the collection's elements to one of the controls.
 
-The \texttt{ZoomBorder} element from the \texttt{PanAndZoom} NuGet package allows us to freely pan and zoom its child element using the mouse buttons. Unfortunately this moves with the entire \texttt{Canvas} element. And because of how most panels are implemented, children located outside of its bounds are never rendered. I.e. any elements with at least one negative coordinate, and elements with coordinates greater than the size of the canvas in its unzoomed state. The canvas fills the entirety of its parent's space, so more elements can fit into it by resizing the panel, but of course that's not a good solution. We made numerous unsuccessful attempts to fix the canvas in one place, and instead concatenate the tranformations of components and the transformation of the \texttt{ZoomBorder}. It always resulted in ugly glitches.
+The \texttt{ZoomBorder} element from the \texttt{PanAndZoom} NuGet package allows us to freely pan and zoom its child element using the mouse buttons. Unfortunately this moves with the entire \texttt{Canvas} element. And because of how most panels are implemented, children located outside of its bounds are never rendered. I.e. any elements with at least one negative coordinate, and elements with coordinates greater than the size of the canvas in its unzoomed state. The canvas fills the entirety of its parent's space, so more elements can fit into it by resizing the panel, but of course that's not a good solution. We made numerous unsuccessful attempts to fix the canvas in one place, and instead concatenate the tranformations of components and the transformation of the \texttt{ZoomBorder}. We didn't find a way to bind to the border's events.
 
 The viewmodel of the canvas itself is very simple. It contains just one property of the \texttt{ObservableCollection} type from the \texttt{CommunityToolkit.Mvvm} package. It ensures that every time an item is added, removed or modified within the collection, the properties binding to this collection are properly notified.
 

@@ -286,6 +286,10 @@ components:
       position: <Vector2>
       rotation?: <float>
       scale?: <Vector2>
+      extraProps?:
+        <Property 1>: <Value 1>
+        <Property 2>: <Value 2>
+        ...
     <Instance name>:
       ...
 nodes:
@@ -305,7 +309,7 @@ nodes:
     String. Name of the component instance. It identifies the instance within the node definition and in the UI. It must be unique across all instances within the components dictionary.
 
     \item[\texttt{position}]
-    Coordinates on the circuit canvas, with origin in the upper left corner.
+    Coordinates on the circuit canvas, with origin in the upper left corner. The coordinates must be positive, and lower than the expected size of the canvas in pixels. \footnotemark
 
     \item[\texttt{rotation}]
     Clockwise rotation angle in degrees on the circuit canvas.
@@ -313,9 +317,14 @@ nodes:
     \item[\texttt{scale}]
     Relative scaling along x an y axis on the circuit canvas.
 
+    \item[\texttt{extraProps}]
+    A directory of custom properties defined in the component subclass as keys and values to assign to them. The properties must match the case and the type of the property. The property must be public and have a public setter.
+
     \item[\texttt{nodes}]
     List of lists. The inner list represents all pins connected to the same electrical node. Its element is an instance-pin pair separated by a dot. Instance name must be present in the components dictionary. Pin name must be present in the component's configuration. In the case of unnamed pins, pin name is simply its index.
 \end{description}
+
+\footnotetext{This is a technical limitation of one of the Avalonia libraries used. See \ref{subsec:f_canvas}}
 
 \lstinputlisting[language=yaml, caption={Scene example: \texttt{minimal.scene.yaml}}, label={lst:scene}]{../tests/minimal.scene.yaml}
 
