@@ -23,7 +23,7 @@ For technical reasons described in the subsection \ref{subsec:ipc_considerations
 
 \subsubsection{C\#}
  
-The frontend is written in C\# from the .NET 9 Software development kit. We consider the language to be more convenient for writing many of the essential systems than its C++ counterpart. That includes handling the graphics, the user interactions, abstraction and parsing numerous configuration files. We also believe the language will be more comfortable for users that wish to extend the simulator with their own components. Libraries are also much easier to set up and compile thanks to NuGet.
+The frontend is written in C\# from the .NET 9 Software development kit. We consider the language to be more convenient for writing many of the essential systems than its C++ counterpart. That includes handling the graphics, the user interactions, reflection and parsing numerous configuration files. We also believe the language will be more comfortable for users that wish to extend the simulator with their own components. Libraries are also much easier to set up and compile thanks to NuGet.
 
 \subsubsection{Avalonia UI}
 
@@ -31,8 +31,7 @@ For the GUI we decided to use Avalonia UI. Avalonia is a popular open-source cro
 
 \subsubsection{SVG}
 
-We want to render the circuit's components using vector graphics, as they don't deform, no matter how much scaled they are. This is crucial, since we also want to render the components in different sizes and under different zoom levels. The most common file format for vector graphics is SVG, so this is format we will require supplied for custom components. Avalonia provides a sufficient support for rendering vector graphics using SkiaSharp under the hood, as all of its built-in controls are rendered using this framework.
-
+We want to render the circuit's components using vector graphics, as they don't have a limited resolution. This is crucial, since we also want to render the components in different sizes and under different zoom levels. The most common file format for vector graphics is SVG, so this is the format we will require to be supplied for custom components. Avalonia provides a sufficient support for rendering vector graphics using the Skia engine under the hood, as all of its built-in controls are rendered with it.
 
 \section{Specific goals of the thesis} \label{sec:goals}
 
