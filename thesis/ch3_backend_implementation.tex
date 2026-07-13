@@ -15,85 +15,14 @@ The events are created with static factory classes of the \texttt{Event} struct.
 
 \subsection{\texttt{ArduinoState} class}
 
-\begin{lstlisting}[language=csharp, caption={\texttt{ArduinoState} class}]
-class $ArduinoState$ {
-   public:
-    static constexpr uint8_t ANALOG_PIN_COUNT = 6;
-    static constexpr uint8_t DIGITAL_PIN_COUNT = 14;
-    static constexpr uint8_t PIN_COUNT = 
-        ANALOG_PIN_COUNT + DIGITAL_PIN_COUNT;
-
-    using $analog_arr_t$ = $std$::$array$<$analog_t$, ANALOG_PIN_COUNT>;
-    using $digital_arr_t$ = $std$::$array$<$digital_t$, DIGITAL_PIN_COUNT>;
-    using $pinmode_arr_t$ = $std$::$array$<$PinMode$, PIN_COUNT>;
-
-    void #init_timer#();
-    float #get_time#() { return _timer.#deltaTime#(); }
-
-    $analog_arr_t$& #get_analog#() { return _analogPins; }
-    double #get_analog#($pin_t$ pin) const;
-    bool #set_analog#($pin_t$ pin, $analog_t$ value);
-
-    $digital_arr_t$& #get_digital#() { return _digitalPins; }
-    bool #get_digital#($pin_t$ pin) const;
-    bool #set_digital#($pin_t$ pin, $digital_t$ value);
-
-    $pinmode_arr_t$& #get_pin_mode#() { return _pinModes; }
-    $PinMode$ #get_pin_mode#($pin_t$ pin) const;
-    bool #set_pin_mode#($pin_t$ pin, $PinMode$ mode);
-   private:
-    $Timer$ _timer;
-    $analog_arr_t$ _analogPins = {};
-    $digital_arr_t$ _digitalPins = {};
-    $pinmode_arr_t$ _pinModes = {};
-};
-\end{lstlisting}
-
 The class holds the digital states and modes of pins in \texttt{std::array}s. Sizes of these arrays match the specification of the \texttt{Arduino UNO R3 SMD} board. The analog pins also stored in this class are not utilized at the point of writing this thesis. 
 The pins can be read and modified with setters and getters analagous to those in \texttt{Arduino.h}, but instead of integers, the paramters are of types defined in \texttt{SimulatorTypes.hpp}. Namely \texttt{digital\_t} is \texttt{bool}, \texttt{analog\_t} is \texttt{double}, \texttt{pin\_t} is \texttt{uint8\_t} and \texttt{PinMode} is an enum attaining values \texttt{In} and \texttt{Out}.
 
-The parameterless overload return reference to an entire array. This was particularly useful when processing snapshots, before events were implemented. The setter methods return bool indicating success of the operation. Currently all methods always indicate success, but to achieve higher quality of life for users, warnings and errors should be logged instead of crashing the simulator immediately, e.g. when accessing pins outside of array's range.
+The parameterless overloads return reference to an entire array. This was particularly useful when processing snapshots, before events were implemented. The setter methods return bool indicating success of the operation. Currently all methods always indicate success, but to achieve higher quality of life for users, warnings and errors should be logged instead of crashing the simulator immediately, e.g. when accessing pins outside of array's range.
 
 The \texttt{\_timer} owned by this class represents the simulation time. The \texttt{Timer} class is not described in detail in this thesis as it was originally designed for a different project, and a lot of its features are not interesing for this particular work. Under the hood it uses \texttt{std::chrono} library. The \texttt{deltaTime()} method returns microseconds passed from the timer's last step. The timers of this thesis are stepped exclusively at its intialization.
 
 \subsection{\texttt{Simulator} singleton class}
-
-\begin{lstlisting}[language=csharp, caption={\texttt{Simulator} class}]
-class $Simulator$ {
-   public:
-    using $event_callback_fnct$ = 
-        $std$::$function$<void(const $Event$&)>;
-    using $logger_ptr$ = $std$::$shared_ptr$<logger::$ILogger$>;
-
-    static void #init#(
-        $event_callback_fnct$ eventCallback, 
-        $logger_ptr$ logger = nullptr);
-
-    static $ArduinoState$& #state#() { return s_instance->_state; }
-    static $EventQueue$& #queue#() { return s_instance->_eventQueue; }
-
-    static int64_t #simulation_time#() { return #state#().#get_time#(); }
-    static int64_t #real_time#() 
-        { return s_instance->_timer.#deltaTime#(); }
-
-    static void #handle_event#($Event$ event);
-    static void #handle_events#();
-
-    static void #log_debug#($std$::$string$&& str) 
-        { s_instance->_logger->#log_debug#($std$::#move#(str)); }
-    static void #log_info#($std$::$string$&& str) { ... }
-    static void #log_warning#($std$::$string$&& str) { ... }
-    static void #log_error#($std$::$string$&& str) { ... }
-
-   private:
-    static $Simulator$* s_instance;
-    $event_callback_fnct$ f_eventCallback;
-    $logger_ptr$ _logger;
-    $ArduinoState$ _state;
-    $EventQueue$ _eventQueue;
-    $Timer$ _timer;
-};
-\end{lstlisting}
 
 The singleton's instance is created on the heap within the static \texttt{init} method and its pointer stored in the \texttt{s\_instance} member. The \texttt{eventCallback} paramater of this method must be set to the handler, that should be called upon event consumption. In our implementation that is the \texttt{on\_event} function from \texttt{ipcAdapter.hpp}. This callback is stored into \texttt{f\_eventCallback}.
 
@@ -125,40 +54,11 @@ When the local event has finally been consumed, it is signalled to the IPC throu
 
 \subsection{\texttt{Event} struct}
 
-\begin{lstlisting}[language=csharp, caption={\texttt{Event} struct}]
-struct $Event$ {
-   public:
-    enum class $Type$ { Write, PinMode, Reboot };
-
-    $Type$ type;
-    int64_t timestampMicros;
-    int64_t localVirtualTime;
-    $std$::$function$<void()> action;
-
-    static constexpr int MAX_ARGS = 3;
-    $std$::$array$<int, MAX_ARGS> args;
-
-    template <typename... Args>
-    $Event$($Type$ type, Args... arguments);
-    $Event$() {}
-
-    size_t #id#() const { return _id; }
-    $std$::$string$ #to_string#();
-
-    static $Event$ #write#($pin_t$ pin, $digital_t$ value);
-    static $Event$ #set_pinmode#($pin_t$ pin, $PinMode$ mode);
-    static $Event$ #reboot#();
-   private:
-    static size_t s_nextEventId;
-    size_t _id;
-};
-\end{lstlisting}
-
 The members of the \texttt{Event} struct mostly match the event specification in the subsection \ref{subsec:events}. The additions are the \texttt{id} and \texttt{action} members. We already justified the use \texttt{id} member in the previous section. It is assigned in the constructor from the static \texttt{s\_nextEventId}, which is then incremented. The \texttt{action} is assigned as a lambda function from within the static factory methods. This lambda is executed during the \texttt{EventQueue}'s \texttt{execute\_next\_event} call.
 
-\subsubsection{Write event}
+\subsubsection{Event factories}
 
-\begin{lstlisting}[language=csharp, caption={\texttt{Write} event factory}]
+\begin{lstlisting}[language=csharp, caption={\texttt{Event::write} function}]
 $Event$ $Event$::#write#($pin_t$ pin, $digital_t$ value)
 {
     $Event$ event($Type$::Write, pin, value);
@@ -177,39 +77,13 @@ At this point, the LVT of the event is not known. That is the responsibility of 
 
 \subsection{\texttt{EventQueue} class}
 
-\begin{lstlisting}[language=csharp, caption={\texttt{EventQueue} class}]
-class $EventQueue$ {
-   public:
-    void #enqueue_local#($Event$& event);
-    void #enqueue_remote#($Event$ event);
-    void #execute_next_event#();
-
-    $Event$& #last_executed_event#() 
-        { return _processedEvents.#back#(); }
-    bool #is_empty#() const 
-        { return _localEvents.#empty#() && _remoteEvents.#empty#(); }
-    int64_t #next_lvt#() const { return _nextLvt; }
-    int64_t #last_lvt#() const { return _lastLvt; }
-
-   private:
-    $std$::$queue$<$Event$> _localEvents;
-    $std$::$queue$<$Event$> _remoteEvents;
-    $std$::$queue$<$Event$> _processedEvents;
-    int64_t _nextLvt;
-    int64_t _lastLvt;
-
-    void #clear#();
-    size_t #earliest_queue_lvt#(const $std$::$queue$<$Event$>& queue);
-};
-\end{lstlisting}
-
-The event queue is in reality two queues \xxx{lie}. One storing local and one storing remote events. As we only have two threads running concurrently in the backend, this simplifies the synchronization significantly. We also completely avoid locking the structure in order to prevent race conditions. These queues are populated with the public \texttt{enqueue\_local} and \texttt{enqueue\_remote} methods.
+The event queue is in reality two queues. One storing local and one storing remote events. As we only have two threads running concurrently in the backend, this simplifies the synchronization significantly. We also completely avoid locking the structure in order to prevent race conditions. These queues are populated with the public \texttt{enqueue\_local} and \texttt{enqueue\_remote} methods.
 
 \xxx{nextLvt, processedEvents}
 
 \subsubsection{\texttt{execute\_next\_event} method}
 
-\begin{lstlisting}[language=csharp, caption={\texttt{execute\_next\_event} method}]
+\begin{lstlisting}[language=csharp, caption={\texttt{EventQueue::execute\_next\_event} method}]
 void $EventQueue$::#execute_next_event#()
 {
     auto& queueAhead = 
@@ -291,38 +165,7 @@ Two execution targets are provided in the CMake configuration, one for each IPC 
 
 \subsection{\texttt{main.cpp}}
 
-\begin{lstlisting}[language=csharp, caption={\texttt{main.cpp}}]
-using $logger_t$ = logger::$FileLogger$;
-using namespace $arguino$::$simulator$;
-$ProgramOptions$ options;
-
-void #init_simulator#(
-    $Simulator$::$event_callback_fnct$ eventCallback)
-{
-    auto logPath = $std$::$filesystem$::#absolute#(
-        options.SimulatorLogPath);
-    auto logger = $std$::#make_shared#<$logger_t$>(logPath);
-
-    $Simulator$::#init#(eventCallback, logger);
-    logger->timerFunction = $Simulator$::#simulation_time#;
-    logger->verbosityLevel = options.Verbosity;
-}
-
-void #simulator_loop#()
-{
-    $Simulator$::#state#().#init_timer#();
-
-    $Simulator$::#handle_event#($Event$::#reboot#());
-    $Simulator$::#log_info#("Simulator initialized.");
-    #setup#();
-    $Simulator$::#log_info#(
-        "setup() finished successfully. Running loop().");
-
-    while (true) {
-        #loop#();
-    }
-}
-
+\begin{lstlisting}[language=csharp, caption={\texttt{main} function}]
 int #main#(int argc, char** argv)
 {
     options = #parse_arguments#(argc, argv);
@@ -339,32 +182,6 @@ The command line arguments are parsed using the \texttt{boost::program\_options}
 
 \subsection{\texttt{ipcAdapter.hpp}}
 
-\begin{lstlisting}[language=csharp, caption={\texttt{ipc\_adapter.hpp}}]
-using $logger_t$ = logger::$FileLogger$;
-using $loop_fnct$ = $std$::$function$<void()>;
-using $init_fnct$ = $std$::$function$<
-    void(arguino::simulator::$Simulator$::$event_callback_fnct$)>;
-
-static $std$::$shared_ptr$<$logger_t$> IpcLogger;
-
-void #run_simulator_with_ipc#(
-    $loop_fnct$ loopFunction, 
-    const $ProgramOptions$& options);
-
-void #on_event#(const arguino::simulator::$Event$& event);
-
-inline void #init_ipc_logger#(const $ProgramOptions$& options)
-{
-    auto loggerAbsolutePath = $std$::$filesystem$::#absolute#(
-        options.IcpLogPath);
-    IpcLogger = $std$::#make_shared#<$logger_t$>(loggerAbsolutePath);
-
-    IpcLogger->verbosityLevel = options.Verbosity;
-    IpcLogger->timerFunction = 
-        arguino::simulator::$Simulator$::#real_time#;
-}
-\end{lstlisting}
-
 The reposonsibility of the \texttt{run\_simulator\_with\_ipc} method is to initialize the classes used for IPC and store them in the implementing \texttt{.cpp} file. That typically involves creating a new thread for listening to messages incoming from the frontend process. This thread has to be joined at some point after the simulation loop. That is why we pass the loop function as an argument, to be invoked at the right time.
 
 The \texttt{on\_event} function is passed to the \texttt{Simulator} and is called every time a local event is consumed. The event is encoded into a message using the function included from \texttt{encoder.hpp}. The message can be then transmitted over the IPC, which has already been initialized before the very first local event is created.
@@ -375,66 +192,15 @@ Implementations are located in the \texttt{ipc} directory of the \texttt{executa
 
 \subsection{\texttt{textEncoder.cpp}}
 
-\begin{lstlisting}[language=csharp, caption={\texttt{encoder.hpp}}]
-constexpr char UNKNOWN_EVENT[] = "UNKNOWN";
-
-$std$::$string$ #encode_event#(
-    const arguino::simulator::$Event$& event);
-bool #decode_event#(
-    const $std$::$string$& message, 
-    arguino::simulator::$Event$& event);
-\end{lstlisting}
-
 The \texttt{encoder.hpp} declares a function that encodes local events into messages, and decodes messages into remote events \texttt{decode\_event} outputs the result event as a reference parameter. Its return value indicates success of the operation. That is, whether or not was the received message in a valid a format. The \texttt{UNKNOWN\_EVENT} constant is used to identify undefined event types.
 \footnote{This can occur when implementing new events, but forgetting to add new cases in encoding. This should never happen with the source code attached with this thesis.}
 
-\begin{lstlisting}[language=csharp, caption={\texttt{textEncoder.cpp}}]
-using namespace arguino::simulator;
 
-constexpr char PART_DELIMETER = ':';
-constexpr char COMMON_PART_FORMAT[] = "{:012}:{:07}:";
-constexpr char WRITE_FORMAT[] = "W:{:02}:{}";
-constexpr char PINMODE_FORMAT[] = "P:{:02}:{}";
-constexpr char REBOOT_FORMAT[] = "R";
+At the time of writing this thesis, \texttt{textEncoder.cpp} is the only encoder implementation. It handles human readable messages, the format of which is described in more detail in the section \ref{sec:msg_format}. The message is divided into 3 to 6 parts delimited by a colon, the first 2 of which are common for every event type. Hence the constant string formats for each of the types. \texttt{encode\_message} identifies the type, fills the event values into the respective format, and its done.
 
-constexpr int COMMON_PARTS = 3;
-constexpr int MAX_ARGS = 3;
-constexpr int MAX_PARTS = 6;
+\subsubsection{Decoding a message}
 
-using $parts_array_t$ = $std$::$array$<$std$::$string_view$, MAX_PARTS>;
-
-static $std$::$string$ #encode_write#(const $Event$& e)
-    { return $std$::#format#(WRITE_FORMAT, e.args[0], e.args[1]); }
-
-static $std$::$string$ #encode_pinmode#(const $Event$& e)
-    { return $std$::#format#(PINMODE_FORMAT, e.args[0], e.args[1]); }
-
-static $std$::$string$ #encode_reboot#(const $Event$& e)
-    { return REBOOT_FORMAT; }
-
-$std$::$string$ #encode_event#(const $Event$& event)
-{
-    $std$::$string$ commonPart = $std$::#format#(
-        COMMON_PART_FORMAT, 
-        event.timestampMicros, 
-        event.localVirtualTime);
-
-    switch (event.type) {
-        case $Event$::$Type$::Write:
-            return commonPart + #encode_write#(event);
-        case $Event$::$Type$::PinMode:
-            return commonPart + #encode_pinmode#(event);
-        case $Event$::$Type$::Reboot:
-            return commonPart + #encode_reboot#(event);
-        default:
-            return UNKNOWN_EVENT;
-    }
-}
-
-bool #decode_int#($std$::$string_view$ str, int64_t& out) { ... }
-bool #decode_int#($std$::$string_view$ str, int& out) { ... }
-$parts_array_t$ #split#($std$::$string_view$ messageView) { ... }
-
+\begin{lstlisting}[language=csharp, caption={\texttt{decode\_event} implementation}]
 bool #decode_event#(const $std$::$string$& message, $Event$& event)
 {
     $parts_array_t$ parts = #split#(message);
@@ -461,8 +227,6 @@ bool #decode_event#(const $std$::$string$& message, $Event$& event)
 }
 \end{lstlisting}
 
-At the time of writing this thesis, \texttt{textEncoder.cpp} is the only encoder implementation. It handles human readable messages, the format of which is described in more detail in the section \ref{sec:msg_format}. The message is divided into 3 to 6 parts delimited by a colon, the first 2 of which are common for every event type. Hence the constant string formats for each of the types. \texttt{encode\_message} identifies the type, fills the event values into the respective format, and its done.
-
 \texttt{decode\_message} has to manually split the message into substrings and parse each substring individually. First we decode arguments in a loop. then we decode the type encoding character, and based on that we call the appropriate factory method with the right arguments. In the end we decode the timestamps from the common parts.
 
 At each of these parts we can encounter a value that doesn't conform to its expected data type or a known event type, and the decoding fails. Then we have to return \texttt{false}. At this point, the event can be already partially initialized, but it is the responsibility of the caller to discard this instance, and fall into some fail state.
@@ -484,37 +248,6 @@ If a message needs to be sent over TCP, it is first passed to \texttt{TcpServer}
 \end{figure}
 
 \subsection{\texttt{TcpServer} class}
-
-\begin{lstlisting}[language=csharp, caption={\texttt{TcpServer} class}]
-class $TcpServer$ {
-   public:
-    using $handler_t$ = $ConnectionHandler$;
-    using $logger_ptr$ = $std$::$shared_ptr$<logger::$ILogger$>;
-
-    $TcpServer$(
-        uint16_t port, 
-        $handler_t$::$message_funct$ messageHandler, 
-        $logger_ptr$ logger);
-
-    void #launch#();
-    void #post_message#(const $std$::$string$& message);
-    bool #is_connected#() const;
-
-   private:
-    $boost$::$asio$::$io_context$ _ioContext;
-    $boost$::$asio$::$ip$::$tcp$::$endpoint$ _endpoint;
-    $boost$::$asio$::$ip$::$tcp$::$acceptor$ _acceptor;
-    uint16_t _port;
-
-    $std$::$shared_ptr$<$handler_t$> _connectionHandler;
-    $std$::$mutex$ _connectionMutex;
-    $std$::$condition_variable$ _connectionCv;
-    $handler_t$::$message_funct$ _messageHandler;
-    $logger_ptr$ _logger;
-
-    void #start_accepting#();
-};
-\end{lstlisting}
 
 The class initializes the \texttt{io\_context}, the \texttt{acceptor} and the \texttt{endpoint} within its constructor. One of the contructor's arguments is callback, that has to be called once a message is received by the \texttt{ConnectionHandler}. We expect only one client to connect at a time. \footnotemark We store a shared pointer to this handler and pass it the \texttt{\_messageHandler} callback once it is ready. Local messages that need to be sent to the frontend are also passed to the same \texttt{ConnectionHandler}. If there is no connection, sending a message blocks the calling thread, hence the \texttt{\_connectionCv} condition variable.
 
@@ -560,51 +293,6 @@ Async TCP operations generally require a reference to a \texttt{tcp::socket} obj
 In the callback we notify the \texttt{\_connectionCv} that a connection has been found, store the pointer of the handler and call its \texttt{handle} method. Then we must call the \texttt{start\_accepting} again. This is another common pattern among async operations. It makes sure that another async operation is scheduled immediately after the first one has been completed, listening for new connections, messages, etc. Without them \texttt{io\_context} simply stops. This looks like a recursive pattern, but remember that the outer function has finished long before the callback is invoked by the executing context.
 
 \subsection{\texttt{ConnectionHandler} class}
-
-\begin{lstlisting}[language=csharp, caption={\texttt{ConnectionHandler} class}]
-class $ConnectionHandler$ : 
-    public $std$::$enable_shared_from_this$<$ConnectionHandler$> {
-   public:
-    static constexpr char MESSAGE_DELIMITER = ';';
-    static constexpr size_t MAX_QUEUE_SIZE = 100;
-    using $self_ptr$ = $std$::$shared_ptr$<$ConnectionHandler$>;
-    using $logger_ptr$ = $std$::$shared_ptr$<logger::$ILogger$>;
-    using $message_funct$ = $std$::$function$<void(const $std$::$string$&)>;
-
-    $ConnectionHandler$(
-        $boost$::$asio$::$io_context$& ioContext, 
-        $message_funct$ messageHandler, 
-        $logger_ptr$ logger);
-    static $self_ptr$ #create#(
-        $boost$::$asio$::$io_context$& ioContext, 
-        $message_funct$ messageHandler, 
-        $logger_ptr$ logger);
-
-    void #handle#();
-    void #post_message#(const $std$::$string$& message);
-    $boost$::$asio$::$ip$::$tcp$::$socket$& #socket#() 
-        { return _socket; }
-    bool #is_connected#() const { return _isConnected; }
-
-   private:
-    $boost$::$asio$::$io_context$::$executor_type$ _executor;
-    $boost$::$asio$::$ip$::$tcp$::$socket$ _socket;
-    $std$::$string$ _incomingBuffer;
-    $std$::$queue$<$std$::$string$> _outboxQueue;
-    $std$::$mutex$ _queueMutex;
-    $std$::$condition_variable$ _queueCv;
-    bool _isConnected;
-    $std$::$atomic$<bool> _isWriting;
-    $message_funct$ _messageHandler;
-    $logger_ptr$ _logger;
-
-    void #handle_message#(
-        $boost$::$system$::$error_code$ error, 
-        size_t messageSize);
-    void #write_from_queue#();
-    void #disconnect#();
-};
-\end{lstlisting}
 
 The \texttt{ConnectionHandler} owns the socket, used for asynchronous TCP operations. It provides the public \texttt{handle} and \texttt{post\_message} methods for scheduling reading and writing operations respectively. The private \texttt{handle\_message} and \texttt{write\_from\_queue} are used within the callbacks of these operations.
 
@@ -720,24 +408,7 @@ It is possible for the \texttt{write\_from\_queue} method to be invoked twice be
 
 \subsection{\texttt{tcpAdapter.cpp}} \label{subsec:tcpadapter}
 
-\begin{lstlisting}[language=csharp, caption={\texttt{tcp\_adapter.cpp}}]
-using namespace arguino::simulator;
-using $tcp_server_t$ = arguino::tcp::$TcpServer$;
-static $std$::$unique_ptr$<$tcp_server_t$> _tcpServer;
-
-void #on_event#(const $Event$& event)
-{
-    auto message = #encode_event#(event);
-    if (message == UNKNOWN_EVENT) {
-        IpcLogger->#log_error#(
-            "Encountered unknown event type; skipping.");
-        return;
-    }
-
-    IpcLogger->#log_debug#("Enqueuing message " + message);
-    _tcpServer->#post_message#(message);
-}
-
+\begin{lstlisting}[language=csharp, caption={\texttt{on\_received\_tcp\_message} function}]
 static void #on_received_tcp_message#(const $std$::$string$ message)
 {
     $Event$ event;
@@ -745,25 +416,8 @@ static void #on_received_tcp_message#(const $std$::$string$ message)
         $Simulator$::#queue#().#enqueue_remote#(event);
     }
     else {
-        IpcLogger->#log_error#(
-            "Could not decode event from message " + message);
+        IpcLogger->#log_error#("...");
     }
-}
-
-static void #run_tcp#() { _tcpServer->#launch#(); }
-
-void #run_simulator_with_ipc#(
-    $loop_fnct$ loopFunction, 
-    const $ProgramOptions$& options)
-{
-    #init_ipc_logger#(options);
-    _tcpServer = $std$::#make_unique#<$tcp_server_t$>(
-        options.TcpPort, on_received_tcp_message, IpcLogger);
-
-    $std$::$thread$ tcp_thread(#run_tcp#);
-    IpcLogger->#log_info#("Tcp Server launched");
-    loopFunction();
-    tcp_thread.#join#();
 }
 \end{lstlisting}
 
@@ -786,87 +440,13 @@ The \texttt{CircularBuffer} class implements the data structure of the buffer it
 
 \subsection{\texttt{MemoryRegion} class}
 
-\begin{lstlisting}[language=csharp, caption={\texttt{MemoryRegion} class}]
-class $MemoryRegion$ {
-   public:
-    using $shmem_t$ = 
-        $boost$::$interprocess$::$shared_memory_object$;
-    using $shmem_region_t$ = 
-        $boost$::$interprocess$::$mapped_region$;
-
-    $MemoryRegion$(
-        const $shmem_t$& shmemObject, 
-        size_t offset, 
-        size_t size);
-
-    size_t #size#() { return _mappedRegion.#get_size#(); }
-    uint8_t* #begin#() 
-        { return (uint8_t*)_mappedRegion.#get_address#(); }
-    uint8_t* #end#() { return #begin#() + #size#(); }
-
-    template <typename T>
-    T& #at#(size_t offset);
-    uint8_t* #at#(size_t offset) { return #begin#() + offset; }
-    size_t #offset#(void* ptr) 
-        { return (uint8_t*)ptr - #begin#(); }
-
-   private:
-    $shmem_region_t$ _mappedRegion;
-};
-\end{lstlisting}
-
 This class provides an abstraction over the \texttt{interprocess::mapped\_region} type. The aforementioned type isolates a region of memory within the \texttt{interprocess::shared\_memory\_object} and provides direct access to it. We create the \texttt{mapped\_region} object in the constructor, defined by its size and the offset from the starting address of the \texttt{shared\_memory\_object} in bytes. We set its permission to read and write.
 
 The methods of \texttt{MemoryRegion} consist mostly of transformations from \texttt{void*} to \texttt{uint8\_t*}, and conversions between pointers and offsets. We cannot perform pointer arithmetic on \texttt{void*}, so it is useful to have the pointers already in form that allows passing through memory byte by byte. We already mentioned the importance of offsets in the section \ref{subsec:ipc_shmem}.
 
-The templated \texttt{at} method uses reinterpretation casting to automatically retrieve the underlying type from raw bytes, and returns a reference to.
+The templated \texttt{at} method uses reinterpretation casting to automatically retrieve the underlying type from raw bytes, and returns a reference to it.
 
 \subsection{\texttt{CircularBuffer} class} \label{subsec:b_circular_buffer}
-
-\begin{lstlisting}[language=csharp, caption={\texttt{CircularBuffer} class}]
-class $CircularBuffer$ {
-   public:
-    struct $iterator_t$;
-    friend struct $iterator_t$;
-    using $shmem_t$ = 
-        $boost$::$interprocess$::$shared_memory_object$;
-
-    static constexpr size_t PRODUCER_PTR_LOCATION = 0;
-    static constexpr size_t CONSUMER_PTR_LOCATION = 8;
-    static constexpr size_t BUFFER_LOCATION = 16;
-    $CircularBuffer$() = default;
-    $CircularBuffer$(
-        const $shmem_t$& shmemObject, 
-        size_t offset, 
-        size_t size);
-
-    bool #is_empty#();
-    size_t #buffer_size#() { ... }
-    size_t #bytes_filled#();
-    size_t #bytes_available#() { ... }
-
-    template <typename T>
-        requires $std$::$is_trivially_copyable_v$<T>
-              && (!$std$::$ranges$::$contiguous_range$<T>)
-    bool #write#(const T& data);
-
-    template <$std$::$ranges$::$contiguous_range$ TRange>
-    bool #write#(const TRange& data);
-
-    $std$::$vector$<uint8_t> #consume_until#(uint8_t delimeter);
-
-   private:
-    $std$::$unique_ptr$<$MemoryRegion$> _memoryRegion;
-
-    $iterator_t$ #begin#();
-    $iterator_t$ #end#();
-    $iterator_t$ #at#(size_t offset);
-    $iterator_t$ #producer_it#();
-    $iterator_t$ #consumer_it#();
-    void #write_producer#($iterator_t$ producer_it);
-    void #write_consumer#($iterator_t$ consumer_it);
-};
-\end{lstlisting}
 
 The data structure occupies the entire space defined by the underlying \texttt{MappedRegion}. The producer and consumer offsets occupy the first 16 bytes of the region. The rest is filled with the raw data, simply referred to as \texttt{buffer} in the code. In the context of this structure, the offset must be interpreted as the distance from the address from the start of the buffer.
 
@@ -874,7 +454,7 @@ To simplify this notion we defined a forward iterator with this offset as the un
 
 For the purpose of writing and reading messages (or bigger structures in general), we define the \texttt{write} an \texttt{consume\_until} methods. These implicitly access the data at \texttt{producer\_it}, respectively \texttt{consumer\_it}, onwards. \texttt{write} comes in two variants, one for contiguous ranges and one for any other templated type. The return value indicates whether or not does the buffer have enough available space to insert the type. \texttt{consume\_until} takes a delimeter as the point at which to stop reading the data. It returns the read bytes in an \texttt{std::vector} and moves the producer offset. 
 
-\subsubsection{\texttt{write} method}
+\subsubsection{Writing to buffer}
 
 \begin{lstlisting}[language=csharp, caption={\texttt{CircularBuffer::write} method}]
 template <$std$::$ranges$::$contiguous_range$ TRange>
@@ -915,7 +495,7 @@ First we turn the range into a span of bytes, so we can access each one of them 
 
 Then we check if there is enough space left until the end of the buffer. If not, we will have to write the data on its boundary by splitting it in two. The \texttt{firstBytes} get copied to the producer offset, and the rest at the offset 0.
 
-\subsubsection{\texttt{consume\_until} method}
+\subsubsection{Reading from buffer}
 
 \begin{lstlisting}[language=csharp, caption={\texttt{CircularBuffer::consume\_until} method}]
 $std$::$vector$<uint8_t> $CircularBuffer$::#consume_until#(
@@ -957,34 +537,6 @@ Otherwise we proceed analogously to \texttt{write}. We determine the length of t
 
 \subsection{\texttt{TwoWayBuffer} class}
 
-\begin{lstlisting}[language=csharp, caption={\texttt{TwoWayBuffer} class}]
-class $TwoWayBuffer$ {
-   public:
-    using $shmem_t$ = 
-        $boost$::$interprocess$::$shared_memory_object$;
-
-    $TwoWayBuffer$(const $std$::$string$& shmemName, size_t sizeInPages);
-    ~$TwoWayBuffer$();
-
-    template <typename T>
-    bool #write#(const T& data);
-
-    $std$::$vector$<uint8_t> #consume_until#(uint8_t delimeter);
-    $CircularBuffer$& #producer#() { return _producer; }
-    $CircularBuffer$& #consumer#() { return _consumer; }
-    $std$::$string$& #name#() { return _name; }
-    size_t #pages#() { return _pages; }
-    size_t #size#();
-
-   private:
-    $std$::$string$ _name;
-    size_t _pages;
-    $shmem_t$ _shmemObject;
-    $CircularBuffer$ _producer;
-    $CircularBuffer$ _consumer;
-};
-\end{lstlisting}
-
 \texttt{TwoWayBuffer} is a wrapper around the \texttt{CircularBuffer} class. It owns the instances of both buffers, and limits access to them. \texttt{write} passes its arguments to \texttt{write} method of the producer buffer and \texttt{consume\_until} passes its argument to the method of the same name of the consumer buffer.
 
 The class also creates and owns the \texttt{shared\_memory\_object}. This object either creates a new OS-level shared memory object, or opens one with the given name if it already exists. Opening the object means it doesn't need to be destroyed, and the frontend doesn't need to shift into a panic state. At the construction of the circular buffers, both of the offsets are reset 0, effectively clearing any previous data.
@@ -993,27 +545,7 @@ The memory object needs to be specified its size, which is always a multiple of 
 
 \subsection{\texttt{shmemAdapter.cpp}} \label{subsec:shmemadapter}
 
-\begin{lstlisting}[language=csharp, caption={\texttt{shmem\_adapter.cpp}}]
-using namespace arguino::shmem;
-using namespace arguino::simulator;
-
-constexpr uint8_t MESSAGE_DELIMETER = ';';
-static $TwoWayBuffer$* _shmem;
-
-void #on_event#(const $Event$& event)
-{
-    auto message = #encode_event#(event);
-    if (message == UNKNOWN_EVENT) {
-        IpcLogger->#log_error#("...");
-        return;
-    }
-    if (!_shmem->#write#(message + ';')) {
-        IpcLogger->#log_error#("...");
-    }
-    else {
-        IpcLogger->#log_debug#("...");
-    }
-}
+\begin{lstlisting}[language=csharp, caption={\texttt{run\_shmem\_consumer} function}]
 
 static void #run_shmem_consumer#()
 {
@@ -1040,21 +572,6 @@ static void #run_shmem_consumer#()
             }
         }
     }
-}
-
-void #run_simulator_with_ipc#(
-    $loop_fnct$ loopFunction, 
-    const $ProgramOptions$& options)
-{
-    #init_ipc_logger#(options);
-    _shmem = new $TwoWayBuffer$(
-        options.ShmemName, options.ShmemSizePages);
-
-    $std$::$thread$ consumer_thread(#run_shmem_consumer#);
-    IpcLogger->#log_info#("Shared memory buffer intitialized.");
-
-    loopFunction();
-    consumer_thread.#join#();
 }
 \end{lstlisting}
 

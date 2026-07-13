@@ -2,7 +2,7 @@
 
 \subsubsection{Note on the \texttt{event} keyword}
 
-Until now we've been talking about events exclusively in the context of IPC. But since C\# defines it's own \texttt{event} keyword, used multiple times in the frontend's code, using the two different meanings can be confusing. So for the duration of this chapter, we will write \textit{event} (in italics) every time we talk about the C\#'s keyword and the associated patterns. The notation of the IPC event and \texttt{Event} structs remains unchanged.
+Until now we've been talking about events exclusively in the context of IPC. But since C\# defines it's own \texttt{event} keyword, used multiple times in the frontend's code, using the two different meanings could become confusing. So for the duration of this chapter, we will write \textit{event} (in italics) every time we talk about the C\#'s keyword and the associated patterns. The notation of the IPC event and \texttt{Event} structs remains unchanged.
 
 \section{Component Management project - Circuitry and Scenes} \label{sec:cm_project_circuitry_and_scenes}
 
@@ -23,65 +23,6 @@ Components, sprites and nodes of a scene are created by the static \texttt{Scene
 
 \subsection{\texttt{Pin} class}
 
-\begin{lstlisting}[language=csharp, caption={\texttt{Pin} class}]
-public record struct $PinPrototype$(uint Id, string? Name = null);
-
-public class $Pin$
-{
-    public uint Id { get; init; }
-    public string? Name { get; init; }
-
-    public bool IsDriving { get; private set; }
-    public $DigitalState$ State => 
-        (IsDriving || (_node?.IsHigh ?? false)) 
-        ? $DigitalState$.High 
-        : $DigitalState$.Low;
-
-    public bool IsHigh => State == $DigitalState$.High;
-    public bool IsLow => State == $DigitalState$.Low;
-    public bool IsWriteOnly => _mode == $Mode$.WriteOnly;
-    public bool IsReadOnly => _mode == $Mode$.ReadOnly;
-    public bool IsConnected => _node != null;
-
-    public event $Action$<$Pin$, bool>? DrivingChangedEvent;
-    public event $Action$<$Pin$, $DigitalState$>? StateChangedEvent;
-    public event $Action$<$Pin$>? PinConnectedEvent;
-    public event $Action$<$Pin$>? PinDisconnectedEvent;
-
-    private $Component$ _component;
-    private $ElectricalNode$? _node;
-
-    public enum $Mode$ { General, ReadOnly, WriteOnly }
-    private $Mode$ _mode = $Mode$.General;
-
-    public $Pin$($Component$ component, $PinPrototype$ prototype)
-    { ... }
-
-    public $Pin$($Component$ component, uint id, string? name = null)
-    { ... }
-
-    public void #MakeReadOnly#() => _mode = $Mode$.ReadOnly;
-    public void #MakeWriteOnly#() => _mode = $Mode$.WriteOnly;
-    public void #MakeGeneral#() => _mode = $Mode$.General;
-
-    public void #SetHigh#() => #SetValue#(true);
-    public void #SetLow#() => #SetValue#(false);
-
-    public void #SetValue#($DigitalState$ value) => 
-        #SetValue#(value == $DigitalState$.High);
-
-    public void #SetValue#(bool value) { ... }
-    public void #SetMode#($Mode$ mode) { ... }
-
-    public void #ConnectToNode#($ElectricalNode$ node) { ... }
-    public void #Disconnect#() { ... }
-
-    public void #NotifyStateChange#(
-        $ElectricalNode$? _, 
-        $DigitalState$ nodeState) { ... }
-}
-\end{lstlisting}
-
 \texttt{IsDriving} and \texttt{State} are the most important properties of the \texttt{Pin}. \texttt{State} is a read only getter property, that evaluates based on the state of the node it is connected to (if any). \texttt{IsDriving} can be changed by the owner \texttt{Component} by using either \texttt{SetHigh}, \texttt{SetLow} or \texttt{SetValue} methods. For read only pins, these methods trigger a warning, and the value isn't changed. If the value is different from before these methods were called, the \textit{DrivingChangedEvent} is invoked. This notifies the connected node to update its internal driving pins counter.
 
 By default, the pin is not connected to any node. \texttt{ConnectToNode} method is called within the \texttt{ElectricalNode} to change that. In this method, the pin is added to the node's list of pins. The \texttt{NotifyStateChanged} method is called by the node, when its state changes. The method is also called right after the pin has been succesfully connected or disconnected.
@@ -94,25 +35,6 @@ The \texttt{PinPrototype} record struct is used to encapsulate the identifiers o
 
 \subsection{\texttt{ElectricalNode} class}
 
-\begin{lstlisting}[language=csharp, caption={\texttt{ElectricalNode} class}]
-public class $ElectricalNode$ {
-    public uint DrivingPins { get; private set; } = 0;
-    public $DigitalState$ State => DrivingPins > 0 
-                                ? DigitalState.High 
-                                : DigitalState.Low;
-
-    public bool IsHigh => State == DigitalState.High;
-    public bool IsLow => State == DigitalState.Low;
-
-    private $List$<$Pin$> _pins = new();
-
-    public void #AddPin#($Pin$ pin) { ... }
-    public void #RemovePin#($Pin$ pin) { ... }
-    private void #Propagate#($Pin$ sourcePin, bool beganDriving) 
-    { ... }
-}
-\end{lstlisting}
-
 The \texttt{ElectricalNode} holds a reference to all of its connected pins a list. Its digital state is determined by how many of its connected pins are driving. It is low if this value is zero, high otherwise.
 
 The pins of the node are modified using the \texttt{AddPin} and \texttt{RemovePin} methods. Inside these methods, the \texttt{ConnectToNode} and \texttt{Disconnect} methods are called on the pin passed in the argument. The \texttt{DrivingPins} count is updated. While the pin is connected, the \texttt{Propagate} method is either subscribed or unsubscribed from the pin's \textit{StateChangedEvent}.
@@ -122,49 +44,6 @@ The \texttt{Propagate} method updates the \texttt{DrivingPins} counter. If the s
 \footnotetext{I.e. when the counter changed from 0 to 1 or vice versa.}
 
 \subsection{\texttt{Component} abstract class}
-
-\begin{lstlisting}[language=csharp, caption={\texttt{Component} class}]
-public abstract class $Component$ {
-    public required string Name { get; set; }
-    public string TypeName { get; init; }
-
-    public $ComponentConfiguration$ Configuration => 
-        _configs[TypeName];
-    public $Transform$ Transform { get; set; } = new();
-    public $SKSvg$ CurrentSprite { get; internal set; } = null!;
-    
-    public event $Action$<$SKSvg$>? SpriteChangedEvent;
-
-    private readonly $List$<$Pin$> _pins = [];
-    private static readonly $Dictionary$
-        <string, $ComponentConfiguration$> _configs = [];
-    
-    internal $Component$(string typeName) {
-        TypeName = typeName;
-    }
-    
-    public virtual void #OnPinConnected#($Pin$ pin) {}
-    public virtual void #OnPinDisconnected#($Pin$ pin) {}
-    public virtual void #OnPinStateChanged#($Pin$ pin) {}
-    public virtual void #OnControlPress#($Vector2$ cursorPosition) {}
-    public virtual void #OnControlRelease#() {}
-    internal virtual void #OnInitialized#() {}
-
-    public $Pin$? #GetPin#(string name) { ... }
-    public $Pin$? #GetPin#(uint id) { ... }
-
-    internal static void #AddConfiguration#(
-        $ComponentConfiguration$ config) { ... }
-
-    protected void #UpdateSprite#($SKSvg$ sprite) { ... }
-    protected void #UpdateSprite#(string spriteName) { ... }
-
-    internal void #InitPins#() { ... }
-
-    private void #OnPinStateChanged#($Pin$ pin, $DigitalState$ _) => 
-        #OnPinStateChanged#(pin);
-}
-\end{lstlisting}
 
 The instance of \texttt{Component} class is identified by both name of its instance and the name of its type. It holds the \texttt{Transform} (position, rotation and scale within the scene), the currently rendered sprite, and instances of its pins. Reference to a pin is acquired through the \texttt{GetPin} methods, identified either by its name or id. The rendered sprite can be changed with the \texttt{UpdateSprite}, which also identifies sprite by its name, or its reference. These methods invoke the \textit{SpriteChangedEvent}, which is listened to from the \texttt{ComponentControl}. This updates its visuals in the Avalonia UI window.
 
@@ -199,124 +78,11 @@ public record $ComponentConfiguration$() {
     \label{fig:cm_project_factory}
 \end{figure}
 
-\begin{lstlisting}[language=csharp, caption={\texttt{SceneFactory} class}]
-public class $SceneFactory$ {
-    public $Scene$ Scene { get; private set; } = new();
-
-    private string _scenePath;
-    private string _componentsDirPath;
-
-    public $SceneFactory$(
-        string scenePath, 
-        string componentsDirPath) { ... }
-
-    public $Scene$ #LoadResources#() { ... }
-    private bool #CompleteComponentType#(string typeName) { ... }
-    private void #CompleteComponentInstance#($Component$ instance) 
-    { ... }
-    private $ComponentConfiguration$? #CreateConfig#(string typeName) 
-    { ... }
-
-    private string #GetComponentTypePath#(string typeName) => 
-        $"{_componentsDirPath}/{typeName}";
-}
-\end{lstlisting}
-
 \subsection{SVG Loader}
-
-\begin{lstlisting}[language=csharp, caption={\texttt{SkiaSvgLoader} class}]
-public class $SkiaSvgLoader$ : $ISvgLoader$ {
-    private readonly $Dictionary$<string, $SvgDocument$> 
-        _loadedDocuments = [];
-
-    public void #LoadDocuments#(string componentPath) { ... }
-    public $Dictionary$<string, $SvgDocument$> #GetDocuments#() => 
-        _loadedDocuments;
-
-    public $Dictionary$<string, $SKSvg$> #CompileSvgs#() { ... }
-    public void #ResizeDocuments#($Vector2$ desiredSize) { ... }
-}
-\end{lstlisting}
 
 \subsection{Configuration Loader}
 
-\begin{lstlisting}[language=csharp, caption={\texttt{YamlConfigurationLoader} class}]
-public class $YamlConfigurationLoader$ : $IConfigurationLoader$ {
-    public record struct $ConfigDto$() {
-        public required string Name;
-        public string Description = "";
-        public string ImageSize = "";
-        public uint Pins = 0;
-        public $List$<string> PinNames = [];
-    }
-
-    public $ComponentConfiguration$? #LoadConfig#(
-        string configPath) { ... }
-
-    private $ComponentConfiguration$ #CreateConfig#(
-        $ConfigDto$ configDto, 
-        string configPath) { ... }
-
-    private $List$<$PinPrototype$> #CreatePins#(
-        $ConfigDto$ configDto) { ... }
-}
-\end{lstlisting}
-
 \subsection{Scene Loader}
-
-\begin{lstlisting}[language=csharp, caption={\texttt{YamlSceneLoader} class}]
-public class $YamlSceneLoader$ : $ISceneLoader$ {
-    public class $ComponentsMap$ : $Dictionary$<
-        string, $SceneDto$.$ComponentDto$>;
-    public class $TypesMap$ : $Dictionary$<string, $ComponentsMap$>;
-    public class $NodesList$ : $List$<$List$<string>>;
-
-    public record $SceneDto$ {
-        public required $TypesMap$ Components { get; init; } = [];
-        public required $NodesList$ Nodes { get; init; } = [];
-
-        public record $ComponentDto$ {
-            public string Position = "0 0";
-            public float Rotation = 0;
-            public string Scale = "1 1";
-            
-            public $Dictionary$<string, object>? ExtraProps { 
-                get; set; 
-            } 
-        }
-    }
-
-    private $SceneDto$? _sceneDto;
-    private readonly $Dictionary$<string, $Type$> _typesByName = [];
-    private readonly $Dictionary$<string, $Component$> 
-        _instancesByName = [];
-    private readonly $Dictionary$<string, $List$<$Component$>> 
-        _instancesByType = [];
-
-    public $Dictionary$<string, $Component$> #InstantiateComponents#() 
-        { ... }
-
-    private $Type$? #MapComponentType#(string typeName) { ... }
-
-    private $Transform$ #ParseTransform#(
-        $SceneDto$.$ComponentDto$ compDto) { ... }
-
-    private void #CreateComponentInstance#(
-        string typeName, 
-        string componentName, 
-        $SceneDto$.$ComponentDto$ componentDto) { ... }
-
-    private void #HandleExtraProps#(
-        $Component$ component, 
-        $Dictionary$<string, object>? properties) { ... }
-
-    public $List$<$ElectricalNode$> #InstantiateNodes#() { ... }
-    public void #LoadFile#(string scenePath) { ... }
-    public $List$<string> #GetComponentTypeNames#() { ... }
-    public $List$<$Component$> #GetComponentsOfType#(
-        string typeName) { ... }
-}
-\end{lstlisting}
 
 \section{Main project with Avalonia UI}
 
@@ -331,7 +97,7 @@ The \texttt{MainController} intializes the majority of the application. It invok
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=\textwidth,keepaspectratio]{./img/uml/f_Main.pdf}
-    \caption{\texttt{Main} project architecture}
+    \caption{\texttt{Main} project architecture \xxx{GeometryExtensions missing}}
     \label{fig:main_project}
 \end{figure}
 
@@ -343,7 +109,7 @@ The \texttt{App} class is defined by the \texttt{App.axaml} and \texttt{App.axam
 
 Much more important is the \texttt{App} codebehind. It  overrides the method \texttt{OnFrameworkInitializationCompleted} inherited from the Avalonia's \texttt{Application} class. This is where we create the instance of \texttt{MainWindow} class and set it to be the first only window opened by the application. The we call our \texttt{MainController}. \xxx{lifetimes}
 
-\begin{lstlisting}[language=csharp, caption={\texttt{OnFrameworkInitializationCompleted} method}]
+\begin{lstlisting}[language=csharp, caption={\texttt{App.OnFrameworkInitializationCompleted} override}]
 public override void #OnFrameworkInitializationCompleted#() {
     $MainWindow$ mainWindow = new $MainWindow$();
     
@@ -353,13 +119,14 @@ public override void #OnFrameworkInitializationCompleted#() {
         desktop.MainWindow = mainWindow;
         $MainController$.#InitApp#(desktop);
     } else {
-        throw new $NotImplementedException$(
-            "Only Desktop style applications are supported");
+        throw new $NotImplementedException$("...");
     }
 
     base.#OnFrameworkInitializationCompleted#();
 }
 \end{lstlisting}
+
+\subsubsection{Main window}
 
 Layouts of views (more accurately controls) are defined by so called panels. Panels are designed to contain other controls in an organized manner. The layout of the \texttt{MainWindow} uses the \texttt{Grid} panel. It works very similarly to how the grid display method works in CSS. The cells of the grid are merged into bigger wholes, and contain another panels. Between these wholes are placed elements called \texttt{GridSplitter}, that can resize the wholes by dragging them with a cursor.
 
@@ -375,34 +142,11 @@ The timer visible in the main window simply shows the time elapse from the start
 
 \subsection{\texttt{MainController} static class}
 
-\begin{lstlisting}[language=csharp, caption={\texttt{MainController} class}]
-public static class $MainController$ {
-    public static $CommandLineArguments$ Arguments { 
-        get; private set; } = null!;
-    public static $MainWindow$ MainWindow { get; private set; } = null!;
-    public static $Scene$ Scene { get; private set; } = null!;
-    public static $Stopwatch$ GlobalTimer { get; private set; } = null!;
-    public static $ILogger$ Logger { get; private set; } = null!;
-
-    public static event $Action$? AppInitializedEvent;
-    private static bool _isInitialized = false;
-
-    public static void #InitApp#(
-        $IClassicDesktopStyleApplicationLifetime$ desktop) { ... }
-
-    private static $ILogger$ #InitLogger#(
-        string path, 
-        $LogLevel$ verbosity) { ... }
-    private static void #InitScene#() { ... }
-    private static void #InitArduino#() { ... }
-}
-\end{lstlisting}
-
 This class initializes all the important systems and brings them together. It stores a reference to the \texttt{MainWindow} from the desktop lifetime, so that we can access the visual tree. Then it parses and stores the program options with the \texttt{CommandLineArguments} struct, implemented with the \texttt{CommandLineParser} NuGet package. After that it initialzies loggers, the scene, the IPC and \texttt{Arduino} component if present in the scene.
 
-\subsubsection{\texttt{InitScene} function}
+\subsubsection{Scene initialization}
 
-\begin{lstlisting}[language=csharp, caption={\texttt{InitScene} function}]
+\begin{lstlisting}[language=csharp, caption={\texttt{MainController.InitScene} function}]
 private static void #InitScene#() {
     var SceneFactory = new $SceneFactory$(
         Arguments.ScenePath, Arguments.ComponentsPath);
@@ -450,101 +194,17 @@ In the MVVM architecure, data contexts are the best way to bind views to their v
 
 \end{lstlisting}
 
-\footnotetext{That is when the properties of the data context class are set properly. For example by implementing the \texttt{INotifyPropertyChanged} interface or using the attributes from \texttt{CommunityToolkit.Mvvm} NuGet package \cite{avalonia_inotifychanged}. In our case with \texttt{CircuitCanvas}, we used the \texttt{ObservableCollection} class from the same package, to store the \texttt{Component} instances in. }
+\footnotetext{That is if the properties of the data context class are set properly. For example by implementing the \texttt{INotifyPropertyChanged} interface or using the attributes from \texttt{CommunityToolkit.Mvvm} NuGet package \cite{avalonia_inotifychanged}. In our case with \texttt{CircuitCanvas}, we used the \texttt{ObservableCollection} class from the same package, to store the \texttt{Component} instances in. }
 
-\subsubsection{\texttt{InitArduino} function}
-
-\begin{lstlisting}[language=csharp, caption={\texttt{InitArduino} function}]
-private static void #InitArduino#() {
-    $Arduino$? arduino;
-    
-    if (Arguments.IpcType == $IpcType$::None) {
-        Logger.#LogInfo#("...");
-        return;
-    }
-    
-    try {
-        arduino = Scene.ComponentsMap.#First#(
-            c => c.Value.TypeName == nameof($Arduino$))
-            .Value as $Arduino$;
-    }
-    catch ($InvalidOperationException$) {
-        Logger.#LogWarning#("...");
-        return;
-    }
-    
-    $ILogger$ ipcLogger = #InitLogger#(
-        Arguments.IpcLogFile, Arguments.Verbosity);
-    $IEncoder$ encoder = new $TextEncoder$();
-    $IIpcAdapter$? ipc = null;
-
-    try {
-        if (Arguments.IpcType == $IpcType$::Tcp) {
-            var tcpClient = new $TcpClient$(Arguments.TcpPort);
-            ipc = new $TcpMessageHandler$(
-                tcpClient, encoder, ipcLogger);
-        }
-        if (Arguments.IpcType == $IpcType$::Shmem) {
-            ipc = new $TwoWayBuffer$(
-                Arguments.ShmemName, Arguments.ShmemSize, 
-                encoder, ipcLogger);
-        }
-
-        $Task$::#Run#(ipc!.ConnectAsync);
-        arduino?.#ConnectToSimulator#(ipc);
-    }
-    catch ($Exception$ e) {
-        ipcLogger.#LogError#("...");
-    }
-}
-\end{lstlisting}
+\subsubsection{Arduino initialization}
 
 First we try to find the \texttt{Arduino} component in the scene. It is perfectly valid to have a scene without Arduino, so we only throw a warning and skip the rest of the initilazition. With the way this is handled, only one Arduino can reasonably work in a scene. A better implementation, would be to initialize the Arduino with IPC inside the component itself, and get the IPC arguments like port or shared memory name from extra properties in the scene file. That way, it would be possible to have multiple Arduino components in the scene, each connected to its own simulator. But the approach has not been properly tested. Since the IPC arguments are at moment passed through the command line, we can only have one Arduino anyway.
 
-Subsequently the IPC logger, the text encoder and the IPC adapter is initialized. The \texttt{IIpcAdapter} implementation is chosen based on the \texttt{IpcType} option from the command line arguments. If the chosen type is \texttt{None}, the function is skipped completely. After instantiating the adapter, we perodically try to connect to it in a new task, and immediately send it to the \texttt{Arduino} component. Once the adapter connects (if ever), the component will be able to react to the incoming events.
+Subsequently the IPC logger, the text encoder and the IPC adapter is initialized. The \texttt{IIpcAdapter} implementation is chosen based on the \texttt{IpcType} option from the command line arguments. If the chosen type is \texttt{None}, the function is skipped completely. After instantiating the adapter, we perodically try to connect to it in a new task, and immediately pass it to the \texttt{Arduino} component. Once the adapter connects (if ever), the component will be able to react to the incoming events.
 
 \subsection{\texttt{ComponentControl} custom control}
 
 \xxx{Adjust Alt key behavior}
-\begin{lstlisting}[language=csharp, caption={\texttt{ComponentControl} class}]
-public class $ComponentControl$ : $Control$ {
-    private $Component$ _component = null!;
-    private bool _pressHeld = false;
-
-    public static readonly $DirectProperty$<
-        $ComponentControl$, $Component$> ComponentProperty = 
-            $AvaloniaProperty$
-            .#RegisterDirect#<$ComponentControl$, $Component$>
-                (nameof(Component), o => o.Component,
-                 (o, v) => o.Component = v);
-
-    public $Component$ Component {
-        get => _component;
-        set => #SetAndRaise#(ComponentProperty, 
-            ref _component, value);
-    }
-
-    public $ComponentControl$() { ... }
-
-    public override void #Render#($DrawingContext$ context) { ... }
-    private void #InvalidateVisual#($SKSvg$ _) => #InvalidateVisual#();
-
-    protected override void #OnPropertyChanged#(
-        $AvaloniaPropertyChangedEventArgs$ change) { ... }
-    private void #HandleComponentChanged#(
-        $AvaloniaPropertyChangedEventArgs$ change) { ... }
-
-    protected override void #OnPointerPressed#(
-        $PointerPressedEventArgs$ e) { ... }
-    protected override void #OnPointerReleased#(
-        $PointerReleasedEventArgs$ e) { ... }
-    protected override void #OnAttachedToVisualTree#(
-        $VisualTreeAttachmentEventArgs$ e) { ... }
-    protected override void #OnDetachedFromVisualTree#(
-        $VisualTreeAttachmentEventArgs$ e) { ... }
-    private void #OnGlobalKeyUp#(object? _, $KeyEventArgs$ e) { ... }
-}
-\end{lstlisting}
 
 The \texttt{ComponentControl} wires up the elements of the circuit canvas to the \texttt{Component} class in the \texttt{Component Management} project. The class inherites from \texttt{Control}, in order to override its \texttt{Render} method, and respond to Avalonia \textit{events}. The \texttt{InvalidateVisual} method is called when the sprite of the \texttt{Component} changes. It notifies the Avalonia renderer, that it is time to redraw the control. The \texttt{Render} method is then called, using the new sprite is used.
 
@@ -554,32 +214,41 @@ We need to specify which \texttt{Component} instance from \texttt{CircuitCanvas}
 
 First we define the \texttt{\_component} backing field. Then a we define a static \texttt{DirectProperty} field, intialized by the \texttt{RegisterDirect} method, templated by the type of the control and type of the backing field. Then we define a regular property with getter and setter. The setter must contain the \texttt{SetAndRaise} in order to notify the control when its value changes. The property is passed to \texttt{RegisterDirect} and \texttt{DirectProperty} is passed to \texttt{SetAndRaise}. Then, once the value of the property changes through XAML binding, the \texttt{OnPropertyChanged} method is called. From the argument of this call we determine the property changed was our \texttt{Component}, and we can subscribe or unsubscribe from its \textit{SpriteChangedEvent}.
 
+\begin{lstlisting}[language=csharp, caption={Property setup in \texttt{ComponentControl}}]
+private $Component$ _component = null!;
+
+public static readonly $DirectProperty$<
+    $ComponentControl$, $Component$> ComponentProperty = 
+        $AvaloniaProperty$
+        .#RegisterDirect#<$ComponentControl$, $Component$>
+            (nameof(Component), o => o.Component,
+                (o, v) => o.Component = v);
+
+public $Component$ Component {
+    get => _component;
+    set => #SetAndRaise#(ComponentProperty, 
+        ref _component, value);
+}
+
+protected override void #OnPropertyChanged#(
+    $AvaloniaPropertyChangedEventArgs$ change) {
+        base.#OnPropertyChanged#(change);
+        if (change.Property == ComponentProperty) {
+            #HandleComponentChanged#(change);
+        }
+}
+\end{lstlisting}
+
 We used direct properties since they are the most performant and appropriate for read only values (we don't change the \texttt{Component} from the control itself). There are more types of propreties appropriate for different use cases. \cite{avalonia_properties}
 
 \subsection{\texttt{SvgDrawOp} drawing operation}
 
-\begin{lstlisting}[language=csharp, caption={\texttt{SvgDrawOp} class}]
-public class $SvgDrawOp$($SKSvg$ Svg, $SKMatrix$ Transform) : 
-    $ICustomDrawOperation$ {
-
-    public $Rect$ Bounds => 
-        Transform.#MapRect#(_hitBox).#ToAvaloniaRect#();
-
-    private $SKRect$ _hitBox => Svg.Picture!.CullRect;
-
-    public void #Dispose#() { ... }
-    public bool #Equals#($ICustomDrawOperation$? other) => false;
-    public bool #HitTest#($Point$ p) { ... }
-    public void #Render#($ImmediateDrawingContext$ context) { ... }
-}
-\end{lstlisting}
-
 The \texttt{SvgDrawOp} is used within the \texttt{Render} method of \texttt{ComponentControl}. It takes the compiled SVG of the \texttt{Component} as an argument, as well as its \texttt{Transform} converted into a transformation matrix. This conversion is done through an extension method within the \texttt{GeometryExtensions} class. The method creates elementary 3x3 translation, rotation and scale matrices and multiplies them together. \texttt{SKMatrix}, the type of the transformation matrix, comes from the \texttt{SkiaSharp} library. The same one that defines the SVG type, and many other systems used by the Avalonia's rendering pipeline.
 \footnote{\texttt{SkiaSharp} is the C\# API of \texttt{Skia}, an open source 2D graphics engine. It is owned by Google and is used in some of their products like Chrome or Android for rendering PDFs, shaders and vector graphics. \cite{skia} The API is implemented in many more popular languages. }
 
-\subsubsection{\texttt{HitTest} method}
+\subsubsection{Hit testing}
 
-\begin{lstlisting}[language=csharp, caption={\texttt{HitTest} method}]
+\begin{lstlisting}[language=csharp, caption={\texttt{SvgDrawOp.HitTest} method}]
 public bool #HitTest#($Point$ p) {
     $SKPoint$ point = p.#ToSKPoint#();
     $SKPoint$ localSpacePoint = 
@@ -592,9 +261,9 @@ This method is called during pointer \textit{events}, e.g. when the user clicks 
 
 The argument \texttt{p} is the location of the pointer relative to the circuit canvas. The \texttt{\_hitBox} is given by the SVG. It is the rectangle in which the picure is inscribed. We described its coordinates in the local space of the picture. The rectangle's left corner is located in the origin of the local space, and its dimensions are given by \texttt{ImageSize} property we specified in the component's configuration. Using the inverse of the tranformation matrix, we can map \texttt{p} from the space of the canvas, to the picture's local space. If it lies within the \texttt{\_hitBox} area, we consider it a hit.
 
-\subsubsection{\texttt{Render} method}
+\subsubsection{Rendering}
 
-\begin{lstlisting}[language=csharp, caption={\texttt{Render} method}]
+\begin{lstlisting}[language=csharp, caption={\texttt{SvgDrawOp.Render} method}]
 public void #Render#($ImmediateDrawingContext$ context) {
     var leaseFeature = context.#TryGetFeature#<
         $ISkiaSharpApiLeaseFeature$>();
@@ -625,7 +294,7 @@ About \texttt{Save}: "This call saves the current matrix, clip, and draw filter,
 
 \subsection{\texttt{CircuitCanvas} user control}
 
-\begin{lstlisting}[caption={\texttt{CircuitCanvas} view}]
+\begin{lstlisting}[caption={\texttt{CircuitCanvas} view layout}]
     <Panel ClipToBounds="False">
         <ZoomBorder Stretch="Fill" 
                     ClipToBounds="True" 
@@ -731,30 +400,6 @@ The interface also offers some more methods for handling the connection. \texttt
 
 \subsection{\texttt{TextEncoder} class}
 
-\begin{lstlisting}[language=csharp, caption={\texttt{TextEncoder} class}]
-public class $TextEncoder$ : $IEncoder$
-{
-    private const int COMMON_PARTS = 3;
-    private const char PART_DELIMETER = ':';
-
-    private const string COMMON_PART_FORMAT = "{0:D12}:{1:D7}:";
-    private const string WRITE_FORMAT = "W:{0:D2}:{1:D1}";
-    private const string PINMODE_FORMAT = "P:{0:D2}:{1}";
-
-    public static string #EncodeWrite#($Event$ e) =>
-        string.Format(WRITE_FORMAT, e.Args[0], e.Args[1]);
-
-    public static string #EncodePinMode#($Event$ e) =>
-        string.Format(PINMODE_FORMAT, e.Args[0], (char)e.Args[1]);
-
-    public string #EncodeEvent#($Event$ @event) { ... }
-
-    public bool #TryDecodeEvent#(
-        string message, 
-        out $Event$ @event) { ... }
-}
-\end{lstlisting}
-
 The \texttt{IEncoder} and \texttt{TextEncoder} are nearly equivalent to \texttt{encoder.hpp} and \texttt{textEncoder.cpp} in the backend. The interface still exposes methods for encoding and decoding, where decoding return a success state, and outputs the event to a parameter.
 
 The implementaion defines constants for formats of individual parts, and it still uses string formatting to fill them with event's arguments. Just the decoding has become mush more convenient thanks to .NET's built-in functions.
@@ -767,7 +412,7 @@ The configuration of the component defines 14 digital pins (\texttt{D0} up to \t
 
 The front end side of the class defines a method for connecting to the IPC and some helper functions for conversion between pin indices and pin instances. The rest of the methods each reflects one of the possible IPC events. \texttt{WriteToPin} sets a value on a digital pin,\texttt{SetPinMode} sets a pin to write only or read only mode, and \texttt{Reboot} defaults all pins to a low state.
 
-\begin{lstlisting}[language=csharp, caption={\texttt{ConnectToSimulator} method}]
+\begin{lstlisting}[language=csharp, caption={\texttt{Arduino.ConnectToSimulator} method}]
 public void #ConnectToSimulator#($IIpcAdapter$ ipc) {
     _ipc = ipc;
     
@@ -783,7 +428,7 @@ We have to be careful about the thread from which we consume the event. Most UI 
 
 We solved it by wrapping the \texttt{ProcessRemoteEvent} in \texttt{\_uiContext.Post} method. \texttt{\_uiContext} is an instance of the .NET's \texttt{SynchronizationContext} class. It represents the execution context of a single thread. We set to instance by calling \texttt{SynchronizationContext.Current} while constructing the component in the UI thread (the one that executes \texttt{MainController} functions). The \texttt{Post} method is a non-blocking method that schedules a delegate to be executed on the given thread. So the \textit{ReceivedEventEvent} is subscribed to a lambda, which schedules the consumption of the event on the correct thread.
 
-\begin{lstlisting}[language=csharp, caption={\texttt{OnPinStateChanged} method}]
+\begin{lstlisting}[language=csharp, caption={\texttt{Arduino.OnPinStateChanged} method}]
 public override void #OnPinStateChanged#($Pin$ pin) {
     int idx = #GetPinIndex#(pin.Name!);
     
@@ -799,7 +444,7 @@ The rest of the logic is simple. If we detect a change on one of the input pins,
 
 The \texttt{ProcessRemoteEvent} method comes from the event side of the \texttt{Arduino} class. It calls one of the \texttt{WriteToPin}, \texttt{SetPinMode} or \texttt{Reboot} methods based on the type of the event. Then it stores the LVT of the event into the \texttt{\_lastSeenLvt} member.
 
-\begin{lstlisting}[language=csharp, caption={\texttt{CreateWriteEvent}, \texttt{InvokeWriteEvent}, and \texttt{SendLocalEvent} methods}]
+\begin{lstlisting}[language=csharp, caption={Sending the Write event with \texttt{Arduino.Events.cs}}]
 private $Event$ #CreateWriteEvent#(int pinId, $DigitalState$ value) =>
     new() {
         Type = $EventType$::Write,
@@ -830,46 +475,11 @@ When the component needs to produce an event, we call one of the \texttt{Invoke*
 
 The TCP Adapter is built on the .NET's native TCP Client implementation. It uses the \texttt{NetworkStream}, through which the actual data is sent. Our own \texttt{TcpClient} class wraps around the client. It establishes connection on the given port and initializes loops for sending and receiving data in new tasks. The received chunks of data are passed to the \texttt{TcpMessageHandler}, which divides into individual messages. Messages to be sent are passed over to the \texttt{TcpClient} thorugh the handler as well. \texttt{TcpMessageHandler} implements the \texttt{IIpcAdapter}.
 
-\begin{lstlisting}[language=csharp, caption={\texttt{TcpClient} class}]
-public class $TcpClient$ {
-    private const int RECONNECT_DELAY = 3000;
-    
-    public bool Connected => _client?.Connected ?? false;
-    public readonly $IPEndPoint$ Endpoint;
-    
-    private const string LOCAL_HOST = "127.0.0.1";
-    private const uint BUFFER_SIZE = 4096;
-    
-    private $System$.$Net$.$Sockets$.$TcpClient$? _client = new();
-    private $NetworkStream$? _stream = null;
-    private byte[] _buffer = new byte[BUFFER_SIZE];
-    private $Channel$<string> _sendQueue = 
-        $Channel$.#CreateUnbounded#<string>();
-    
-    private $CancellationTokenSource$ _cts;
-    private $ILogger$? _logger;
-
-    public event $Action$<string> ReadBytesEvent;
-    public event $Action$ ReachedEof;
-
-    public $TcpClient$(int port) { ... }
-    public $TcpClient$(string ip, int port) { ... }
-
-    public async $Task$<bool> #TryConnectAsync#() { ... }
-    public void #Disconnect#() { ... }
-    public async $Task$ #SendMessageAsync#(string message) { ... }
-    public $TcpClient$ #SetLogger#($ILogger$? logger) => 
-        _logger = logger;
-    private async $Task$ #LoopReadAsync#() { ... }
-    private async $Task$ #LoopWriteAsync#() { ... }
-}
-\end{lstlisting}
-
 The \texttt{TcpClient} is constructed with an IP address and a port (i.e. localhost and the port of the backend). Only in the \texttt{TryConnectAsync} method is the underlying \texttt{\_client} created and connected to asynchronously. Its \texttt{NetworkStream} is acquired. The \texttt{LoopReadAsync} and \texttt{LoopWriteAsync} methods are then run in seperate tasks. The cancellation token (\texttt{\_cts}) is created. The token can be used to terminate these loops, once a disconnect or an error occurs. The \texttt{Disconnect} method cancels this token, and disposes of both the stream and the client.
 
 \subsubsection{Receiving messages}
 
-\begin{lstlisting}[language=csharp, caption={\texttt{LoopReadAsync} method}]
+\begin{lstlisting}[language=csharp, caption={\texttt{TcpClient.LoopReadAsync} method}]
 private async $Task$ #LoopReadAsync#() {
     try {
         while (!_cts.IsCancellationRequested) {
@@ -880,7 +490,7 @@ private async $Task$ #LoopReadAsync#() {
                 return;
             }
 
-            _logger?.#LogDebug#("Reading {bytesRead} bytes...");
+            _logger?.#LogDebug#("...");
 
             var byteChunk = $Encoding$.ASCII.#GetString#(
                 _buffer, 0, bytesRead);
@@ -888,7 +498,7 @@ private async $Task$ #LoopReadAsync#() {
         }
     }
     catch ($Exception$ e) {
-        _logger?.#LogError#("TCP Reading loop failed: {e.Message}");
+        _logger?.#LogError#("...");
     }
 }
 \end{lstlisting}
@@ -901,7 +511,7 @@ Since the new data is always at the start of the buffer, we can pass it to the \
 
 \subsubsection{Sending messages}
 
-\begin{lstlisting}[language=csharp, caption={\texttt{SendMessageAsync} method}]
+\begin{lstlisting}[language=csharp, caption={\texttt{TcpClient.SendMessageAsync} method}]
     public async $Task$ #SendMessageAsync#(string message) {
         await _sendQueue.Writer.#WriteAsync#(message);
     }
@@ -909,7 +519,7 @@ Since the new data is always at the start of the buffer, we can pass it to the \
 
 For sending messages we utilize the .NET's \texttt{Channel} class. This a thread safe implementation of the concurrent producer/consumer pattern. It is a FIFO data structure, so we call the instanse \texttt{\_sendQueue} in our code. The messages are added to the channel through the \texttt{Writer} property and removed through the \texttt{Reader} property. The channel is unbounded, meaning that it doesn't block the writing thread, if the number of items reaches a certain limit. 
 
-\begin{lstlisting}[language=csharp, caption={\texttt{LoopWriteAsync} method}]
+\begin{lstlisting}[language=csharp, caption={\texttt{TcpClient.LoopWriteAsync} method}]
 private async $Task$ #LoopWriteAsync#() {
     try {
         while (await _sendQueue.Reader.#WaitToReadAsync#()) {
@@ -930,39 +540,11 @@ The write loop reads from the \texttt{\_sendQueue}. It blocks the thread until t
 
 \subsection{\texttt{TcpMessageHandler} class}
 
-\begin{lstlisting}[language=csharp, caption={\texttt{TcpMessageHandler} class}]
-public class $TcpMessageHandler$ : $IIpcAdapter$ {
-    
-    public char Delimeter => ';';
-    public bool IsConnected => _client.Connected;
-    
-    public event $Action$<$Event$>? ReceivedEventEvent;
-    
-    private $TcpClient$ _client;
-    private $IEncoder$ _encoder;
-    private $ILogger$? _logger;
-    private $StringBuilder$ _messageBuilder = new();
-
-    public $TcpMessageHandler$(
-        $TcpClient$ client, 
-        $IEncoder$ encoder, 
-        $ILogger$? logger = null) { ... }
-
-        public async $Task$<bool> #TryConnectAsync#() => 
-        await _client.#TryConnectAsync#();
-        
-    public void #SendEvent#($Event$ @event) { ... }
-    public void #Disconnect#() => _client.#Disconnect#();
-    private void #OnBytesRead#(string bytechunk) { ... }
-    private void #HandleMessage#(string message) { ... }
-}
-\end{lstlisting}
-
 The \texttt{TcpMessageHandler} implements the \texttt{IIpcAdapter} and owns our \texttt{TcpClient} wrapper. It let's the client handle the \texttt{TryConnect} and \texttt{Disconnect} interface method by calling the client's methods with the same name. The \texttt{SendEvent} method is implemented by encoding the event, appending the delimiter, and passing it to the client's \texttt{SendMessageAsync} method in a new task. When the client's \textit{ReachedEof} is invoked, the handler tries to reconnect using the method inherited from the interface.
 
 \subsubsection{Handling incoming messages}
 
-\begin{lstlisting}[language=csharp, caption={\texttt{OnBytesRead} method}]
+\begin{lstlisting}[language=csharp, caption={\texttt{TcpClient.OnBytesRead} method}]
 private void #OnBytesRead#(string bytechunk) {
     foreach (char c in bytechunk) {
         if (c == Delimeter) {
@@ -995,79 +577,9 @@ The \texttt{TwoWayBuffer} implementing the \texttt{IIpcAdapter} now plays the ro
 
 \subsection{\texttt{CircularBuffer} class}
 
-\begin{lstlisting}[language=csharp, caption={\texttt{CircularBuffer} class}]
-public class $CircularBuffer$ {
-    public const long PRODUCER_PTR_LOCATION = 0;
-    public const long CONSUMER_PTR_LOCATION = 8;
-    public const long BUFFER_LOCATION = 16;
-    
-    private $MemoryMappedViewAccessor$ _mappedRegion;
-
-    public long BufferSize => _mappedRegion.Capacity - BUFFER_LOCATION;
-    public long BytesAvailable => BufferSize - BytesFilled;
-    public long BytesFilled => 
-        Math.#Abs#(ProducerOffset - ConsumerOffset);
-
-    public bool IsEmpty => ConsumerOffset == ProducerOffset;
-    public long ProducerOffset { get; set; }
-    public long ConsumerOffset { get; set; }
-
-    public $CircularBuffer$(
-        $MemoryMappedFile$ mappedMemory, 
-        long offset, 
-        long size) { ... }
-
-    public bool #Write#($ReadOnlySpan$<byte> data) { ... }
-    public bool #Write#(string data) => 
-        #Write#($Encoding$.$ASCII$.#GetBytes#(data));
-
-    public byte[]? #ConsumeUntil#(byte delimeter) { ... }
-
-    private bool #FindDelimeter#(
-        byte delimeter, 
-        out long foundAtOffset) { ... }
-
-    private long #ShiftOffset#(long offset, long shift) => 
-        (offset + shift) % BufferSize;
-}
-\end{lstlisting}
-
-The class owns the \texttt{MemoryMappedViewAccessor}. It still offers the \texttt{Write} and \texttt{ConsumeUntil} methods. We didn't define a dedicated iterator for the buffer so we need to implement finding the delimeter manually. The \texttt{Write} method is little less flexible, as it only accepts string and spans of bytes. In the backend, we converted any type into a span of bytes anyways, so the body of method stays basically the same. Just instead of the \texttt{memcpy} function with pointers we use the accessor's \texttt{ReadArray} and \texttt{WriteArray} methods addressed directly with offsets. For full context see \ref{subsec:b_circular_buffer}
+The class owns the \texttt{MemoryMappedViewAccessor}. It still offers the \texttt{Write} and \texttt{ConsumeUntil} methods. We didn't define a dedicated iterator for the buffer so we need to implement finding the delimeter manually. The \texttt{Write} method is little less flexible, as it only accepts string and spans of bytes. In the backend, we converted any type into a span of bytes anyways, so the body of the method stays basically the same. Just instead of the \texttt{memcpy} function with pointers we use the accessor's \texttt{ReadArray} and \texttt{WriteArray} methods addressed directly with offsets. For full context see \ref{subsec:b_circular_buffer}
 
 \subsection{\texttt{TwoWayBuffer} class}
-
-\begin{lstlisting}[language=csharp, caption={\texttt{TwoWayBuffer} class}]
-public class $TwoWayBuffer$ : $IIpcAdapter$ {
-    public const string POSIX_SHARED_MEMORY_PATH = "/dev/shm/";
-    public const char MESSAGE_DELIMETER = ';';
-    
-    public bool IsConnected { get; private set; }
-    public event $Action$<$Event$>? ReceivedEventEvent;
-
-    private string _memoryName;
-    private int _memorySize;
-    
-    private $MemoryMappedFile$? _mappedMemory;
-    private $CircularBuffer$? _consumingBuffer;
-    private $CircularBuffer$? _producingBuffer;
-    private $IEncoder$ _encoder;
-    private $ILogger$? _logger;
-
-    public $TwoWayBuffer$(
-        string name, 
-        int pages, 
-        $IEncoder$ encoder, 
-        $ILogger$? logger = null) { ... }
-    
-    public void #SendEvent#($Event$ @event) { ... }
-    public $Task$<bool> #TryConnectAsync#() => $Task$.#Run#(#TryConnect#);
-    private bool #TryConnect#() { ... }
-    public void #Disconnect#() { ... }
-    private $MemoryMappedFile$ #OpenSharedMemory#(string name) 
-        { ... }
-    private void #ListenForRemoteEvents#() { ... }
-}
-\end{lstlisting}
 
 \texttt{TwoWayBuffer} is also very similar to how the same class and the adapter were implemented in the back. It still opens and owns shared memory in the form of \texttt{MemoryMappedFile} object. It also owns and accesses both the consuming and the producing \texttt{CircularBuffer}. The \texttt{SendEvent} and \texttt{ListenForRemoteEvents} methods are equivalent to the \texttt{on\_event} and \texttt{run\_shmem\_consumer} in \texttt{shmemAdapter.cpp} (see \ref{subsec:shmemadapter}).
 
