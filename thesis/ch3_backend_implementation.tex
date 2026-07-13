@@ -235,7 +235,7 @@ At each of these parts we can encounter a value that doesn't conform to its expe
 
 IPC over TCP is implemented using the \texttt{boost::asio} library. It serves as an abstraction over asynchronous I/O and networking resources of the OS. The core class of the library is the \texttt{io\_context} type, in which the network operations are scheduled and executed. The \texttt{tcp::acceptor} type attaches to the context and listens for any TCP connection on the given endpoint (ip and port). At that time \texttt{ConnectionHandler} instance is created. This happens within the \texttt{TcpServer} class.
 
-Once a connection has been established, it connects to a socket owned by the \texttt{ConnectionHandler}. Inside its \texttt{handle} method, the connection handler waits asynchrnously for any incoming data. Once data are available, and the message delimeter is found within them, the data is passed to the \texttt{handle\_message} where it is preprocessed and the passed to a handler callback passed to the class from the TCP adapter.
+Once a connection has been established, it connects to a socket owned by the \texttt{ConnectionHandler}. Inside its \texttt{handle} method, the connection handler waits asynchrnously for any incoming data. Once data are available, and the message delimiter is found within them, the data is passed to the \texttt{handle\_message} where it is preprocessed and the passed to a handler callback passed to the class from the TCP adapter.
 
 If a message needs to be sent over TCP, it is first passed to \texttt{TcpServer} and that passes it to the \texttt{ConnectionHandler}. It is put to an outbox queue and sent asynchronously over the same socket, within the same \texttt{io\_context}.
 \footnote{The general outline of the server and connection handler is taken from \texttt{boost::asio} tutorials \cite{asio_async_server}. A CppCon presentation by Michael Caisse \cite{caisse_asio} was incredibly helpful for practical understanding of the library and common patterns. }
@@ -452,7 +452,7 @@ The data structure occupies the entire space defined by the underlying \texttt{M
 
 To simplify this notion we defined a forward iterator with this offset as the underlying iteration unit. It dereferences into \texttt{uint8\_t}. Incrementing over the boundary of the memory region sets the offset back to 0. \texttt{producer\_it} and \texttt{consumer\_it} turn the offsets stored in the raw memory into these iterators. They can be written back with the \texttt{write\_producer} and \texttt{write\_consumer} methods.
 
-For the purpose of writing and reading messages (or bigger structures in general), we define the \texttt{write} an \texttt{consume\_until} methods. These implicitly access the data at \texttt{producer\_it}, respectively \texttt{consumer\_it}, onwards. \texttt{write} comes in two variants, one for contiguous ranges and one for any other templated type. The return value indicates whether or not does the buffer have enough available space to insert the type. \texttt{consume\_until} takes a delimeter as the point at which to stop reading the data. It returns the read bytes in an \texttt{std::vector} and moves the producer offset. 
+For the purpose of writing and reading messages (or bigger structures in general), we define the \texttt{write} an \texttt{consume\_until} methods. These implicitly access the data at \texttt{producer\_it}, respectively \texttt{consumer\_it}, onwards. \texttt{write} comes in two variants, one for contiguous ranges and one for any other templated type. The return value indicates whether or not does the buffer have enough available space to insert the type. \texttt{consume\_until} takes a delimiter as the point at which to stop reading the data. It returns the read bytes in an \texttt{std::vector} and moves the producer offset. 
 
 \subsubsection{Writing to buffer}
 
@@ -499,18 +499,18 @@ Then we check if there is enough space left until the end of the buffer. If not,
 
 \begin{lstlisting}[language=csharp, caption={\texttt{CircularBuffer::consume\_until} method}]
 $std$::$vector$<uint8_t> $CircularBuffer$::#consume_until#(
-    uint8_t delimeter)
+    uint8_t delimiter)
 {
     $iterator_t$ producerIt = #producer_it#();
     $iterator_t$ consumerIt = #consumer_it#();
 
-    auto delimeterIt = $std$::#find#(
-        consumerIt, producerIt, delimeter);
-    bool delimeterNotFound = delimeterIt == producerIt;
-    if (delimeterNotFound) return {};
+    auto delimiterIt = $std$::#find#(
+        consumerIt, producerIt, delimiter);
+    bool delimiterNotFound = delimiterIt == producerIt;
+    if (delimiterNotFound) return {};
 
-    // +1 to include the delimeter
-    size_t dataLength = delimeterIt - consumerIt + 1;
+    // +1 to include the delimiter
+    size_t dataLength = delimiterIt - consumerIt + 1;
     size_t wrapsAround = dataLength > #end#() - consumerIt;
     $std$::$vector$<uint8_t> result(dataLength);
 
@@ -519,19 +519,19 @@ $std$::$vector$<uint8_t> $CircularBuffer$::#consume_until#(
     }
     else { // message lies on the boundary
         size_t firstBytesLength = #end#() - consumerIt;
-        size_t lastBytesLength = delimeterIt - #begin#();
+        size_t lastBytesLength = delimiterIt - #begin#();
 
         $std$::#memcpy#(&result[0], &*consumerIt, firstBytesLength);
         $std$::#memcpy#(
             &result[firstBytesLength], &*#begin#(), lastBytesLength);
     }
 
-    #write_consumer#(delimeterIt + 1);
+    #write_consumer#(delimiterIt + 1);
     return result;
 }
 \end{lstlisting}
 
-First we need to copy the producer offset as it can change during the execution of the function. Since \texttt{iterator\_t} is a fully qualified forward iterator, we can pass the offset iterators as arguments of \texttt{std::find} in order to find the iterator of the delimeter. If the delimeter hasn't been found, we return an empty vector, indicating that the operation doesn't make sense with the current state of the buffer. 
+First we need to copy the producer offset as it can change during the execution of the function. Since \texttt{iterator\_t} is a fully qualified forward iterator, we can pass the offset iterators as arguments of \texttt{std::find} in order to find the iterator of the delimiter. If the delimiter hasn't been found, we return an empty vector, indicating that the operation doesn't make sense with the current state of the buffer. 
 
 Otherwise we proceed analogously to \texttt{write}. We determine the length of the message, and if it could fit until the end of the buffer. If not, it lies on the boundary, so we have to copy portion of the data from the end of the buffer, and portion from its beginning.
 
@@ -553,7 +553,7 @@ static void #run_shmem_consumer#()
         while (!_shmem->#consumer#().#is_empty#()) {
             $std$::$vector$<uint8_t> data = _shmem->#consumer#()
                 .#consume_until#(
-                    MESSAGE_DELIMETER);
+                    MESSAGE_DELIMITER);
 
             if (data.#empty#()) {
                 IpcLogger->#log_error#("...");
@@ -575,4 +575,4 @@ static void #run_shmem_consumer#()
 }
 \end{lstlisting}
 
-The adapter utilizes the shared memory through the high level \texttt{TwoWayBuffer} wrapper. It provides it its name and size in pages from options. Then it creates a single thread that infinitely checks for new messages in the consumer buffer. Instead of the spin lock (inner while loop in \texttt{run\_shmem\_consumer}) it would be more appropriate to use interprocess semaphore to check the contents of the buffer, saving some resources. Inside the loop a message delimeted by a semicolon is retrieved, decoded and enqueued. \texttt{on\_event} method is as simple as encoding the event and writing it to the buffer, given there is enough space.
+The adapter utilizes the shared memory through the high level \texttt{TwoWayBuffer} wrapper. It provides it its name and size in pages from options. Then it creates a single thread that infinitely checks for new messages in the consumer buffer. Instead of the spin lock (inner while loop in \texttt{run\_shmem\_consumer}) it would be more appropriate to use interprocess semaphore to check the contents of the buffer, saving some resources. Inside the loop a message delimited by a semicolon is retrieved, decoded and enqueued. \texttt{on\_event} method is as simple as encoding the event and writing it to the buffer, given there is enough space.

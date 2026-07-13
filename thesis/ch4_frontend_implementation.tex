@@ -664,7 +664,7 @@ The \texttt{TcpMessageHandler} implements the \texttt{IIpcAdapter} and owns our 
 \begin{lstlisting}[language=csharp, caption={\texttt{TcpClient.OnBytesRead} method}]
 private void #OnBytesRead#(string bytechunk) {
     foreach (char c in bytechunk) {
-        if (c == Delimeter) {
+        if (c == Delimiter) {
             #HandleMessage#(_messageBuilder.#ToString#());
             _messageBuilder.#Clear#();
         }
@@ -675,7 +675,7 @@ private void #OnBytesRead#(string bytechunk) {
 }
 \end{lstlisting}
 
-The handler's \texttt{OnBytesRead} method subscribes to the client's \textit{ReadBytesEvent}. It receives a string that may contain the entire message, multiple messages, or just their pieces. So we add any incoming characters to the \texttt{\_messageBuilder} and look for the delimeter. Once a whole message has been put together, it is passed to the \texttt{HandleMessage} method, and the builder is cleared.
+The handler's \texttt{OnBytesRead} method subscribes to the client's \textit{ReadBytesEvent}. It receives a string that may contain the entire message, multiple messages, or just their pieces. So we add any incoming characters to the \texttt{\_messageBuilder} and look for the delimiter. Once a whole message has been put together, it is passed to the \texttt{HandleMessage} method, and the builder is cleared.
 
 In \texttt{HandleMessage}, the message is decoded into an \texttt{Event} struct and the \textit{ReceivedEventEvent} is invoked.
 
@@ -694,7 +694,7 @@ The \texttt{TwoWayBuffer} implementing the \texttt{IIpcAdapter} now plays the ro
 
 \subsection{\texttt{CircularBuffer} class}
 
-The class owns the \texttt{MemoryMappedViewAccessor}. It still offers the \texttt{Write} and \texttt{ConsumeUntil} methods. We didn't define a dedicated iterator for the buffer so we need to implement finding the delimeter manually. The \texttt{Write} method is little less flexible, as it only accepts string and spans of bytes. In the backend, we converted any type into a span of bytes anyways, so the body of the method stays basically the same. Just instead of the \texttt{memcpy} function with pointers we use the accessor's \texttt{ReadArray} and \texttt{WriteArray} methods addressed directly with offsets. For full context see \ref{subsec:b_circular_buffer}
+The class owns the \texttt{MemoryMappedViewAccessor}. It still offers the \texttt{Write} and \texttt{ConsumeUntil} methods. We didn't define a dedicated iterator for the buffer so we need to implement finding the delimiter manually. The \texttt{Write} method is little less flexible, as it only accepts string and spans of bytes. In the backend, we converted any type into a span of bytes anyways, so the body of the method stays basically the same. Just instead of the \texttt{memcpy} function with pointers we use the accessor's \texttt{ReadArray} and \texttt{WriteArray} methods addressed directly with offsets. For full context see \ref{subsec:b_circular_buffer}
 
 \subsection{\texttt{TwoWayBuffer} class}
 
