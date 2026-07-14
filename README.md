@@ -13,6 +13,11 @@ Goal of this work is to skip the emulation process and create a working Arduino 
 
 Bundled with this simulator is a graphic application for creating and testing logical circuits. This GUI is written with Avalonia framework and will contain Arduino as it's main component. The point of this application is to attach to the running Arduino simulator and visualize the expected Arduino behavior with user's code on a given circuit. We want to give the user the power to compose their own circuits, and define the behavior and looks of their components. Additionally, the user will be able to debug their program, while the GUI is running, using their preferred IDE and C++ debugger, providing real-time feedback and inspection when stepping through the code.
 
+## Example
+Using Arduino to draw chevron-like patterns
+
+![Wave scene](./res/wave_scene.png)
+
 ## Software prerequisites:
 
 * **arduino-cli**
