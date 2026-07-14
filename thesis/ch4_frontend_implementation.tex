@@ -213,7 +213,7 @@ The \texttt{MainController} intializes the majority of the application. It invok
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=\textwidth,keepaspectratio]{./img/uml/f_Main.pdf}
-    \caption{\texttt{Main} project architecture \xxx{GeometryExtensions missing}}
+    \caption{\texttt{Main} project architecture}
     \label{fig:main_project}
 \end{figure}
 
@@ -319,11 +319,9 @@ Subsequently, the IPC logger, the text encoder and the IPC adapter is initialize
 
 \subsection{\texttt{ComponentControl} custom control}
 
-\xxx{Adjust Alt key behavior}
-
 The \texttt{ComponentControl} wires up the elements of the circuit canvas to the \texttt{Component} class in the \texttt{Component Management} project. The class inherites from \texttt{Control}, in order to override its \texttt{Render} method, and respond to Avalonia \textit{events}. The \texttt{InvalidateVisual} method is called when the sprite of the \texttt{Component} changes. It notifies the Avalonia renderer, that it is time to redraw the control. The \texttt{Render} method is then called, using the new sprite.
 
-\texttt{OnPointerPressed} and \texttt{OnPointerReleased} are tied to the components \texttt{OnControlPress} and \texttt{OnControlRelease} methods. These are called when the user clicks the control on the canvas with their mouse. \texttt{OnAttachedToVisualTree} and \texttt{OnDetachedFromVisualTree} are used here, to subcribe to the global Alt key \textit{event}. The Alt key modifies whether should the control be still pressed, when the pointer is released.
+\texttt{OnPointerPressed} and \texttt{OnPointerReleased} are tied to the components \texttt{OnControlPress} and \texttt{OnControlRelease} methods. These are called when the user clicks the control on the canvas with their mouse. The Alt key modifies whether should the control be still pressed, when the pointer is released.
 
 We need to specify which \texttt{Component} instance from \texttt{CircuitCanvas} view is tied to this control. I.e. we need to define a property, we can set up from the canvas' XAML, that we can then access from the control. Unfortunately, Avalonia is very obtuse with its property system, and requires quite a lot of boilerplate.
 

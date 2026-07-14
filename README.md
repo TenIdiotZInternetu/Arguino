@@ -35,9 +35,10 @@
 - `--shmem-size` - Size of the memory mapped region per buffer in pages [= `1`]
  
 ## Gui controls
+- `Left mouse button` - Interact with controls (e.g. buttons)
 - `Mouse wheel scroll` - Zoom and unzoom canvas
 - `Mouse wheel press` - Pan canvas
-- `Alt hold` - Hold mode. All controls clicked on will remain in a press state when clicked, until the Alt key is released. For example when holding multiple buttons is required 
+- `Holding Alt key` - Hold mode. All controls clicked on will remain in a pressed state when clicked, until the control is clicked again. For example when holding multiple buttons is required.
 
 ## Examples
 ### Scene with 2 buttons and 4 LEDs (WIP)

@@ -57,6 +57,15 @@ First make sure you comply with the software prerequisites from the section \ref
 
 For frontend and backend to communicate properly, it is necessary that they connect to the same IPC object. For TCP, it is the port (\texttt{-p} option for both programs), and for shared memory it is the shared memory's object name (\texttt{-{}-shmem-name} option for both programs). These default to the same value for both of the aforementioned options, port \texttt{8888} and memory named \texttt{Arguino-ipc}.
 
+\subsubsection{GUI controls}
+
+\begin{description}
+  \item[\texttt{Left mouse button}] Interact with controls (e.g. buttons)
+  \item[\texttt{Mouse wheel scroll}] Zoom and unzoom canvas
+  \item[\texttt{Mouse wheel press}] Pan canvas
+  \item[\texttt{Holding Alt key}] Hold mode. All controls clicked on will remain in a pressed state when clicked, until the control is clicked again. For example when holding multiple buttons is required.
+\end{description}
+
 \footnotetext{\texttt{Gui.exe} on Windows}
 
 \subsection{Command-Line Arguments}
@@ -88,14 +97,16 @@ Listed below are all the available command line options for the backend and fron
 \subsubsection{Common for shared memory usage}
 \begin{description}
     \item[\texttt{-{}-shmem-name <string>}] Name of the memory-mapped file. [\texttt{Arguino-ipc}]
-    \item[\texttt{-{}-shmem-size <int>}] Size of the memory-mapped region per circular buffer, specified in pages (usually $page = 4096B$). [\texttt{1}]
+    \item[\texttt{-{}-shmem-size <int>}] Size of the memory-mapped region per circular buffer, specified in pages.{\footnotemark} [\texttt{1}]
 \end{description}
+
+\footnotetext{On Linux and Windows, one page is usually 4096B.}
 
 \section{Defining components and scenes} \label{sec:component_spec}
 Extensibility of the frontend through custom components and circuits is an important part the project. Here are necessary steps and requirements to create and use new components.
 
 \subsection{Required file structure}
-All of the components must reside in one directory, referred to as \textit{definitions directory}. Each component is represented by exactly one directory, referred to as \textit{component directory}, placed in the definitions directory. The definitions directory must be supplied through the \texttt{-c} command line argument. These files must be present in the component directory:
+All components must reside in one directory, referred to as \textit{definitions directory}. Each component is represented by exactly one directory, referred to as \textit{component directory}, placed in the definitions directory. The definitions directory must be supplied through the \texttt{-c} command line argument. These files must be present in the component directory:
 
 \begin{itemize}
     \item C\# behavior script
