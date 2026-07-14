@@ -3,37 +3,35 @@ using System.Diagnostics;
 namespace Logger;
 
 public class FileLogger : ILogger, IDisposable {
-    private const float FLUSH_INTERVAL = 2f;
-
     public LogLevel Verbosity { get; set; }
     public Stopwatch? Timer { get; set; }
     
-    StreamWriter _writer;
-    PeriodicTimer _flushTimer;
-    Task _flushTask;
+    private readonly StreamWriter _writer;
+    private readonly object _lock = new();
     
     public FileLogger(string path, LogLevel verbosity = LogLevel.Info) {
-        _writer = new StreamWriter(path);
-        _flushTimer = new PeriodicTimer(TimeSpan.FromSeconds(FLUSH_INTERVAL));
-        _flushTask = BackgroundFlushAsync();
+        _writer = new StreamWriter(path) { AutoFlush = true };
         Verbosity = verbosity;
     }
     
     public void Log(string message) {
-        _writer.WriteLine($"{GetTimestamp()} {message}");
+        lock (_lock) {
+            _writer.WriteLine($"{GetTimestamp()} {message}");
+        }
     }
     
     public void Log(IMessage message) {
         if (message.LogLevel < Verbosity) return;
         
-        _writer.WriteLine($"{GetTimestamp()}[{message.Type()}] {message.AsString()}");
+        lock (_lock) {
+            _writer.WriteLine($"{GetTimestamp()}[{message.Type()}] {message.AsString()}");
+        }
     }
 
     public void Dispose() {
-        _writer.Flush();
-        _writer.Dispose();
-        _flushTimer.Dispose();
-        _flushTask.Dispose();
+        lock (_lock) {
+            _writer.Dispose();
+        }
     }
 
     private string GetTimestamp() {
@@ -42,11 +40,5 @@ public class FileLogger : ILogger, IDisposable {
         }
         
         return $"[{Timer.Elapsed:mm\\:ss\\.ffffff}]";
-    }
-    
-    private async Task BackgroundFlushAsync() {
-        while (await _flushTimer.WaitForNextTickAsync()) {
-            await _writer.FlushAsync();
-        }
     }
 }
