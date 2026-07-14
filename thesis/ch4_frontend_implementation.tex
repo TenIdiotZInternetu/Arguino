@@ -6,13 +6,13 @@ Until now we've been talking about events exclusively in the context of IPC. But
 
 \section{Component Management project - Circuitry and Scenes} \label{sec:cm_project_circuitry_and_scenes}
 
-Classes of the \texttt{Circuitry} and \texttt{Scenes} directories are a tightly coupled system, encapsulating the core logic of the frontend. The \texttt{Scene} classes comprises of nothing more than a list of components and a list of electrical nodes. Components of the same electrical node interact with each other through the interface of pins. These can either listen to changes of digital state on the node, or they could assert a high state to it (driving).
+Classes of the \texttt{Circuitry} and \texttt{Scenes} directories are a tightly coupled system, encapsulating the core logic of the frontend. The \texttt{Scene} classes consists of nothing more than a list of components and a list of electrical nodes. Components of the same electrical node interact with each other through the interface of pins. These can either listen to changes of digital state on the node, or they could assert a high state to it (driving).
 
 \texttt{Component} is the class overridden by user in order to create a custom component. It holds \texttt{ComponentConfiguration} structs statically in a dictionary. This struct contains the metadata of a \texttt{Component} subtype, available sprites and pin identifiers. Each \texttt{Component} instance owns a set of \texttt{Pin} instances orchestrating the circuit's logic. 
 
-One of the \texttt{Component} subtypes included in this project is the \texttt{Arduino} class. It is the component that connects from IPC to the backend simulator. Since the component is so important and it depends so heavily on the \texttt{IIpcAdapter} (it is basically the frontend for the adapter) we decided to document it in the IPC Adapter project section (\ref{sec:f_ipcadapter}). 
+One of the \texttt{Component} subtypes included in this project is the \texttt{Arduino} class. It is the component that connects from IPC to the backend simulator. Since the component is so important, and it depends so heavily on the \texttt{IIpcAdapter} (it is basically the frontend for the adapter) we decided to document it in the IPC Adapter project section (\ref{sec:f_ipcadapter}). 
 
-Components, sprites and nodes of a scene are created by the static \texttt{SceneFactory} class and its loader interfaces. These are documentated in detail in the section \ref{sec:f_factory}.
+Components, sprites and nodes of a scene are created by the static \texttt{SceneFactory} class and its loader interfaces. These are documented in detail in the section \ref{sec:f_factory}.
 
 \begin{figure}[htbp]
     \centering
@@ -25,7 +25,7 @@ Components, sprites and nodes of a scene are created by the static \texttt{Scene
 
 \texttt{IsDriving} and \texttt{State} are the most important properties of the \texttt{Pin}. \texttt{State} is a read only getter property, that evaluates based on the state of the node it is connected to (if any). \texttt{IsDriving} can be changed by the owner \texttt{Component} by using either \texttt{SetHigh}, \texttt{SetLow} or \texttt{SetValue} methods. For read only pins, these methods trigger a warning, and the value isn't changed. If the value is different from before these methods were called, the \textit{DrivingChangedEvent} is invoked. This notifies the connected node to update its internal driving pins counter.
 
-By default, the pin is not connected to any node. \texttt{ConnectToNode} method is called within the \texttt{ElectricalNode} to change that. In this method, the pin is added to the node's list of pins. The \texttt{NotifyStateChanged} method is called by the node, when its state changes. The method is also called right after the pin has been succesfully connected or disconnected.
+By default, the pin is not connected to any node. \texttt{ConnectToNode} method is called within the \texttt{ElectricalNode} to change that. In this method, the pin is added to the node's list of pins. The \texttt{NotifyStateChanged} method is called by the node, when its state changes. The method is also called right after the pin has been successfully connected or disconnected.
 
 The \texttt{Disconnect} method is implemented for cases, when \texttt{ConnectToNode} is called, while the pin is already connected to a different node. Or when such a request comes from the GUI. But at the time of writing this thesis, such mechanisms haven't been implemented yet. The pin is ever connected only once during the initialization of a node in the \texttt{SceneFactory}. These changes in connection are signaled by \textit{PinConnectedEvent} and \textit{PinDisconnectedEvent}.
 
@@ -51,7 +51,7 @@ The user should define the logic of their custom type through the virtual method
 
 The \texttt{ComponentConfiguration} structs are stored statically inside the class as a dictionary, with component type name as the key. They store the metadata, but more importantly the pin prototypes from which pin instances are created, and the dictionary of compiled sprites, with the SVG file name as the key (excluding the \texttt{.svg} extension). 
 
-The pins are instantiated in the \texttt{InitPins} method, by passing the \texttt{PinPrototype} to the \texttt{Pin} constructor. Its \textit{events} are subscribed to here.
+The pins are instantiated in the \texttt{InitPins} method, by passing the \texttt{PinPrototype} to the \texttt{Pin} constructor. Its \textit{events} are subscribed to here as well.
 
 \begin{lstlisting}[language=csharp, caption={\texttt{ComponentConfiguration.cs}}]
 public record $ComponentConfiguration$() {
@@ -204,7 +204,7 @@ After all components exist, the \texttt{InstantiateNodes} iterates through the l
 
 The \texttt{Main} project has been imlemented with the MVVM architecture in mind. The only model of the application is the \texttt{Component} class from the \texttt{Component Management} project (see \ref{sec:cm_project_circuitry_and_scenes}).
 
-The views and viewmodel files are put in separate directories. Views consist of \texttt{.axaml} files and the codebehind \texttt{.axaml.cs} files. These codebehind files contain a partial class with a name of the the view, inheriting from Avalonia's \texttt{UserControl} class. These can be used to write logic for the views as well, but we delibarately left them empty. The only exception is the \texttt{App.axaml.cs}, which has to call the \texttt{MainController} once the UI is initialized.
+The views and viewmodel files are put in separate directories. Views consist of \texttt{.axaml} files and the codebehind \texttt{.axaml.cs} files. These codebehind files contain a partial class with a name of the the view, inheriting from Avalonia's \texttt{UserControl} class. These can be used to write logic for the views as well, but we deliberately left them empty. The only exception is the \texttt{App.axaml.cs}, which has to call the \texttt{MainController} once the UI is initialized.
 
 The \texttt{.axaml} files define the visual tree of the application. The root of this application is \texttt{App.axaml}, which owns the main window and includes some default styles from \texttt{Styles/General.axaml}. Our application doesn't create any other windows, everything is situated in the \texttt{MainWindow.axaml} and its controls.
 
@@ -244,9 +244,9 @@ public override void #OnFrameworkInitializationCompleted#() {
 
 \subsubsection{Main window}
 
-Layouts of views (more accurately controls) are defined by so called panels. Panels are designed to contain other controls in an organized manner. The layout of the \texttt{MainWindow} uses the \texttt{Grid} panel. It works very similarly to how the grid display method works in CSS. The cells of the grid are merged into bigger wholes, which contain other panels. Between these wholes are placed elements called \texttt{GridSplitter}, that can resize the wholes by dragging them with a cursor.
+Layouts of views (more accurately controls) are defined by so-called panels. Panels are designed to contain other controls in an organized manner. The layout of the \texttt{MainWindow} uses the \texttt{Grid} panel. It works very similarly to how the grid display method works in CSS. The cells of the grid are merged into bigger wholes, which contain other panels. Between these wholes are placed elements called \texttt{GridSplitter}, that can resize the wholes by dragging them with a cursor.
 
-The grid has been prepared such that menu bar and tool bar would be at the top, inspector of components would be on the left, the circuit canvas on the right, and the log messages would be displayed at the bottom. Out of these, only the circuit canvas has yet been implemented.
+The grid has been prepared such that menu bar and toolbar would be at the top, inspector of components would be on the left, the circuit canvas on the right, and the log messages would be displayed at the bottom. Out of these, only the circuit canvas has yet been implemented.
 
 \begin{figure}
     \includegraphics[width=\textwidth, keepaspectratio]{./img/window.png}
@@ -258,7 +258,7 @@ The timer visible in the main window simply shows the time elapse from the start
 
 \subsection{\texttt{MainController} static class}
 
-This class initializes all the important systems and brings them together. It stores a reference to the \texttt{MainWindow} from the desktop lifetime, so that we can access the visual tree. Then it parses and stores the program options with the \texttt{CommandLineArguments} struct, implemented with the \texttt{CommandLineParser} NuGet package. After that it initialzies loggers, the scene, the IPC and the \texttt{Arduino} component, if present in the scene.
+This class initializes all the important systems and brings them together. It stores a reference to the \texttt{MainWindow} from the desktop lifetime, so that we can access the visual tree. Then it parses and stores the program options with the \texttt{CommandLineArguments} struct, implemented with the \texttt{CommandLineParser} NuGet package. After that it initializes loggers, the scene, the IPC and the \texttt{Arduino} component, if present in the scene.
 
 \subsubsection{Scene initialization}
 
@@ -281,13 +281,12 @@ The scene is created by the \texttt{SceneFactory} from the files specified in th
 
 As we mentioned at the beginning of this section, all the views have a codebehind with a partial class named after the view. The other parts of this class are generated during compilation of the \texttt{.axaml} file. The XAML knows the name of the partial class it should generate thanks to the mandatory \texttt{x:Class} attribute in the root element of the control.
 
-We never explicitly defined a \texttt{CircuitCanvas} property in the \texttt{MainWindow} codebehind. Instead we added the attribute \texttt{x:Name="CircuitCanvas"} to the concrete \texttt{CircuitCanvas} XAML element. This tells the XAML compiler to generate the property with the given name in the \texttt{MainWindow} class, and populate it automatically with the concrete instance during Avalonia initialization. That is with all the properties set either through the codebehind, or through the attributes on the XAML element itself. \cite{avalonia_name_generator}
+We never explicitly defined a \texttt{CircuitCanvas} property in the \texttt{MainWindow} codebehind. Instead, we added the attribute \texttt{x:Name="CircuitCanvas"} to the concrete \texttt{CircuitCanvas} XAML element. This tells the XAML compiler to generate the property with the given name in the \texttt{MainWindow} class, and populate it automatically with the concrete instance during Avalonia initialization. That is with all the properties set either through the codebehind, or through the attributes on the XAML element itself. \cite{avalonia_name_generator}
 
-\texttt{DataContext} is a property inherent to all the controls. It can be an instance of any one class, with which the control exchanges data through binding. That means, the control can change properties automatically when the values of the binded property changes. And in the other direction, the property of the data context automatically updates when a user interacts with the control. \footnotemark 
+\texttt{DataContext} is a property inherent to all the controls. It can be an instance of any one class, with which the control exchanges data through binding. That means, the control can change properties automatically when the values of the bound property changes. And in the other direction, the property of the data context automatically updates when a user interacts with the control. \footnotemark 
 
 In MVVM, data contexts are the best way to bind views to their viewmodels. \cite{avalonia_data_context} The type of the \texttt{DataContext} must be set to match the type of the view model in XAML. This can be done in more than one way. We do it by adding the \texttt{x:DataType} attribute to the root element of \texttt{CircuitCanvas.axaml}. The code below shows a simplified XAML example of how these two steps have been done.
 
-\xxx{syntax highlight}
 \begin{lstlisting}[language={xaml}, caption={Data context setup in XAML}]
 <Window ...
         $xmlns:uc$="clr-namespace:Gui.Views.UserControls"
@@ -299,9 +298,8 @@ In MVVM, data contexts are the best way to bind views to their viewmodels. \cite
 </Window>
 
 <UserControl ...
-             $xmlns:vm$="clr-namespace:Gui.ViewModels"
              $x:Class$="Gui.Views.UserControls.CircuitCanvas"
-             $x:DataType$="vm:CircuitCanvas">
+             $x:DataType$="Gui.ViewModels.CircuitCanvas">
 
     <ItemsControl $ItemsSource$="{Binding Components}">
         ...
@@ -315,9 +313,9 @@ In MVVM, data contexts are the best way to bind views to their viewmodels. \cite
 
 \subsubsection{Arduino initialization}
 
-First we try to find the \texttt{Arduino} component in the scene. It is perfectly valid to have a scene without Arduino, so in that case we only throw a warning and skip the rest of the initilazition. With the way this is handled, only one Arduino can reasonably work in a scene. A better implementation, would be to initialize the Arduino with IPC inside the component itself, and get the IPC arguments like port or shared memory name from extra properties in the scene file. That way, it would be possible to have multiple Arduino components in the scene, each connected to its own simulator. But the approach has not been properly tested. Since the IPC arguments are at the moment passed through the command line, we can only have one Arduino anyway.
+First we try to find the \texttt{Arduino} component in the scene. It is perfectly valid to have a scene without Arduino, so in that case we only throw a warning and skip the rest of the initialization. With the way this is handled, only one Arduino can reasonably work in a scene. A better implementation, would be to initialize the Arduino with IPC inside the component itself, and get the IPC arguments like port or shared memory name from extra properties in the scene file. That way, it would be possible to have multiple Arduino components in the scene, each connected to its own simulator. But the approach has not been properly tested. Since the IPC arguments are at the moment passed through the command line, we can only have one Arduino anyway.
 
-Subsequently the IPC logger, the text encoder and the IPC adapter is initialized. The \texttt{IIpcAdapter} implementation is chosen based on the \texttt{IpcType} option from the command line arguments. If the chosen type is \texttt{None}, the function is skipped completely. After instantiating the adapter, we perodically try to connect to it in a new task, and immediately pass it to the \texttt{Arduino} component. Once the adapter connects (if ever), the component will be able to react to the incoming events.
+Subsequently, the IPC logger, the text encoder and the IPC adapter is initialized. The \texttt{IIpcAdapter} implementation is chosen based on the \texttt{IpcType} option from the command line arguments. If the chosen type is \texttt{None}, the function is skipped completely. After instantiating the adapter, we perodically try to connect to it in a new task, and immediately pass it to the \texttt{Arduino} component. Once the adapter connects (if ever), the component will be able to react to the incoming events.
 
 \subsection{\texttt{ComponentControl} custom control}
 
@@ -329,7 +327,7 @@ The \texttt{ComponentControl} wires up the elements of the circuit canvas to the
 
 We need to specify which \texttt{Component} instance from \texttt{CircuitCanvas} view is tied to this control. I.e. we need to define a property, we can set up from the canvas' XAML, that we can then access from the control. Unfortunately, Avalonia is very obtuse with its property system, and requires quite a lot of boilerplate.
 
-First we define the \texttt{\_component} backing field. Then we define a static \texttt{DirectProperty} field, intialized by the \texttt{RegisterDirect} method, templated by the type of the control and type of the backing field. Then we define a regular property with getter and setter. The setter must contain the \texttt{SetAndRaise} in order to notify the control when its value changes. The property is passed to \texttt{RegisterDirect} and \texttt{DirectProperty} is passed to \texttt{SetAndRaise}. Then, once the value of the property changes through XAML binding, the \texttt{OnPropertyChanged} method is called. From the argument of this call we determine the property changed was our \texttt{Component}, and we can subscribe or unsubscribe from its \textit{SpriteChangedEvent}.
+First we define the \texttt{\_component} backing field. Then we define a static \texttt{DirectProperty} field, initialized by the \texttt{RegisterDirect} method, templated by the type of the control and type of the backing field. Then we define a regular property with getter and setter. The setter must contain the \texttt{SetAndRaise} in order to notify the control when its value changes. The property is passed to \texttt{RegisterDirect} and \texttt{DirectProperty} is passed to \texttt{SetAndRaise}. Then, once the value of the property changes through XAML binding, the \texttt{OnPropertyChanged} method is called. From the argument of this call we determine the property changed was our \texttt{Component}, and we can subscribe or unsubscribe from its \textit{SpriteChangedEvent}.
 
 \begin{lstlisting}[language=csharp, caption={Property setup in \texttt{ComponentControl}}]
 private $Component$ _component = null!;
@@ -356,7 +354,7 @@ protected override void #OnPropertyChanged#(
 }
 \end{lstlisting}
 
-We used direct properties since they are the most performant and appropriate for read only values (we don't change the \texttt{Component} from the control itself). There are more types of propreties appropriate for different use cases. \cite{avalonia_properties}
+We used direct properties since they are the most performant and appropriate for read only values (we don't change the \texttt{Component} from the control itself). There are more types of properties appropriate for different use cases. \cite{avalonia_properties}
 
 \subsection{\texttt{SvgDrawOp} drawing operation}
 
@@ -374,7 +372,7 @@ public bool #HitTest#($Point$ p) {
 }
 \end{lstlisting}
 
-This method is called during pointer \textit{events}, e.g. when the user clicks on the canvas. It checks whether or not is the pointer located on top of the control. We use this in order to trigger the \texttt{OnPointerPressed} and \texttt{OnPointerReleased} handlers of the \texttt{ComponentControl}. 
+This method is called during pointer \textit{events}, e.g. when the user clicks on the canvas. It checks whether is the pointer located on top of the control. We use this in order to trigger the \texttt{OnPointerPressed} and \texttt{OnPointerReleased} handlers of the \texttt{ComponentControl}. 
 
 The argument \texttt{p} is the location of the pointer relative to the circuit canvas. The \texttt{\_hitBox} is given by the SVG. It is the rectangle in which the picure is inscribed. We described its coordinates in the local space of the picture. The rectangle's left corner is located in the origin of the local space, and its dimensions are given by \texttt{ImageSize} property we specified in the component's configuration. Using the inverse of the tranformation matrix, we can map \texttt{p} from the space of the canvas, to the picture's local space. If it lies within the \texttt{\_hitBox} area, we consider it a hit.
 
@@ -401,7 +399,7 @@ public void #Render#($ImmediateDrawingContext$ context) {
 
 The method takes \texttt{ImmediateDrawingContext} as an argument, which is passed down from the argument of the \texttt{Render} method of \texttt{Control}. It defines the environment in which the picture is going to be drawn. We need to access the API of the Skia's canvas, upon which the Avalonia's drawing contexts are built and render their own vector graphics. We use it to draw our own \texttt{SKSvg} sprite. We do that by obtaining the SkiaSharp API lease from the context's features. \footnotemark
 
-The Skia canvas coordinates are already in the vector space of the parent control (the \texttt{CircuitCanvas}). So we can just multiply the tranformation matrix of the canvas with the transformation matrix of the control, in order to place it on the canvas with the right translation, rotation and scale. The \texttt{Concat} method does exactly that. Then we rasterise the picture with the \texttt{DrawPicture} method.
+The Skia canvas coordinates are already in the vector space of the parent control (the \texttt{CircuitCanvas}). So we can just multiply the transformation matrix of the canvas with the transformation matrix of the control, in order to place it on the canvas with the right translation, rotation and scale. The \texttt{Concat} method does exactly that. Then we rasterize the picture with the \texttt{DrawPicture} method.
 
 We need to call \texttt{Save} and \texttt{Restore} methods, because the same canvas will be used for many more controls on the visual tree, we can't leave it in the local space of our control.
 
@@ -440,7 +438,7 @@ The \texttt{CircuitCanvas} is a user control, that contains component controls a
 
 \texttt{ItemsPanel} describes the layout of the container in which the items will be drawn. We want to freely choose the exact coordinates of where our components should be drawn to. So we chose to use \texttt{Canvas}, a type of panel made exactly for that purpose. \texttt{ItemTemplate} describes how should the individual items be styled. This could be a text box, another panel, or our custom drawn \texttt{ComponentControl}. The control must be enclosed in a \texttt{DataTemplate} element. The data type of the collection's item is specified through its \texttt{DataType} property. Using the \texttt{Binding} keyword, we assign each of the collection's elements to one of the controls.
 
-The \texttt{ZoomBorder} element from the \texttt{PanAndZoom} NuGet package allows us to freely pan and zoom its child element using the mouse buttons. Unfortunately this moves with the entire \texttt{Canvas} element. And because of how most panels are implemented, children located outside of its bounds are never rendered. I.e. any elements with at least one negative coordinate, and elements with coordinates greater than the size of the canvas in its unzoomed state. The canvas fills the entirety of its parent's space, so more elements can fit into it by resizing the panel, but of course that's not a good solution. We made numerous unsuccessful attempts to fix the canvas in one place, and instead concatenate the tranformations of components and the transformation of the \texttt{ZoomBorder}. We didn't find a way to bind to the border's events.
+The \texttt{ZoomBorder} element from the \texttt{PanAndZoom} NuGet package allows us to freely pan and zoom its child element using the mouse buttons. Unfortunately this moves with the entire \texttt{Canvas} element. And because of how most panels are implemented, children located outside its bounds are never rendered. I.e. any elements with at least one negative coordinate, and elements with coordinates greater than the size of the canvas in its unzoomed state. The canvas fills the entirety of its parent's space, so more elements can fit into it by resizing the panel, but of course that's not a good solution. We made numerous unsuccessful attempts to fix the canvas in one place, and instead concatenate the transformations of components and the transformation of the \texttt{ZoomBorder}. We didn't find a way to bind to the border's events.
 
 The viewmodel of the canvas itself is very simple. It contains just one property of the \texttt{ObservableCollection} type from the \texttt{CommunityToolkit.Mvvm} package. It ensures that every time an item is added, removed or modified within the collection, the properties binding to this collection are properly notified.
 
@@ -462,7 +460,7 @@ public class $CircuitCanvas$ : $ObservableObject$ {
 
 This project attempts to unify the behavior of the TCP adapter and the shared memory adapter in a similar manner the \texttt{ipcAdapter.hpp} did in the backend. \texttt{IIpcAdapter} is initialized by the \texttt{MainController} and the implementation is chosen based on command line arguments. It is then passed to the \texttt{Arduino} component to handle.
 
-This time around, the adapter is not dependant on a \texttt{Simulator}-like entity to pass the events to. It simply invokes the \textit{ReceivedEventEvent}, which passes the event to any subscribed handler, i.e. the \texttt{Arduino} class. The actions of the \texttt{Event} struct are also not defined by static methods, but determined in the \texttt{Arduino} class itself.
+This time around, the adapter is not dependent on a \texttt{Simulator}-like entity to pass the events to. It simply invokes the \textit{ReceivedEventEvent}, which passes the event to any subscribed handler, i.e. the \texttt{Arduino} class. The actions of the \texttt{Event} struct are also not defined by static methods, but determined in the \texttt{Arduino} class itself.
 
 \subsection{\texttt{Event} struct}
 
@@ -509,7 +507,7 @@ public interface $IIpcAdapter$ {
 }
 \end{lstlisting}
 
-The \texttt{SendEvent} method is similar to the \texttt{on\_event} method of the \texttt{ipcAdapter.hpp}. It is also used to send an event over IPC, by first encoding it to a message, just the dependencies are now inversed. The adapter isn't dependant on the simulator but vice versa. So we don't need to pass it anywhere, just call it directly from a component. And the events are not directly applied by calling the component, but by invoking the \textit{ReceivedEventEvent} that the components subscribe to.
+The \texttt{SendEvent} method is similar to the \texttt{on\_event} method of the \texttt{ipcAdapter.hpp}. It is also used to send an event over IPC, by first encoding it to a message, just the dependencies are now inversed. The adapter isn't dependant on the simulator but vice versa. So we don't need to pass it anywhere, just call it directly from a component. The events are not directly applied by calling the component, but by invoking the \textit{ReceivedEventEvent} that the components subscribe to.
 
 The interface also offers some more methods for handling the connection. \texttt{TryConnectAsync} and \texttt{Disconnect} must be implemented by the concrete adapters as they are dependant on the technology used. We want them exposed, because in the future, it could be desirable to change the IPC setup during runtime (for example, connecting to a simulator on a different port).
 
@@ -523,11 +521,11 @@ The implementaion defines constants for formats of individual parts, and it stil
 
 \subsection{Arduino component}
 
-The configuration of the component defines 14 digital pins (\texttt{D0} up to \texttt{D13}) and 6 analog pins (\texttt{A0} up to \texttt{A5}). It has exactly one sprite, simply named \texttt{Arduino}. The partial class \texttt{Arduino} is split into two files \texttt{Arduino.cs} and \texttt{Arduino.Events.cs}. This is to establish seperation of concerns while still having access to all the private methods of both the side handling pin interaction and the side handling consumption and creation of events.
+The configuration of the component defines 14 digital pins (\texttt{D0} up to \texttt{D13}) and 6 analog pins (\texttt{A0} up to \texttt{A5}). It has exactly one sprite, simply named \texttt{Arduino}. The partial class \texttt{Arduino} is split into two files \texttt{Arduino.cs} and \texttt{Arduino.Events.cs}. This is to establish separation of concerns while still having access to all the private methods of both the side handling pin interaction and the side handling consumption and creation of events.
 
 \subsubsection{\texttt{Arduino.cs}}
 
-The front end side of the class defines a method for connecting to the IPC and some helper functions for conversion between pin indices and pin instances. The rest of the methods each reflects one of the possible IPC events. \texttt{WriteToPin} sets a value on a digital pin,\texttt{SetPinMode} sets a pin to write only or read only mode, and \texttt{Reboot} defaults all pins to a low state.
+The front end side of the class defines a method for connecting to the IPC and some helper functions for conversion between pin indices and pin instances. The rest of the methods each reflects one of the possible IPC events. \texttt{WriteToPin} sets a value on a digital pin,\texttt{SetPinMode} sets a pin to write only or read-only mode, and \texttt{Reboot} defaults all pins to a low state.
 
 \begin{lstlisting}[language=csharp, caption={\texttt{Arduino.ConnectToSimulator} method}]
 public void #ConnectToSimulator#($IIpcAdapter$ ipc) {
@@ -555,7 +553,7 @@ public override void #OnPinStateChanged#($Pin$ pin) {
 }
 \end{lstlisting}
 
-The rest of the logic is simple. If we detect a change on one of the input pins, we check that IPC is connected. If it is, we create the appropriate event with the appropiate arguements.
+The rest of the logic is simple. If we detect a change on one of the input pins, we check that IPC is connected. If it is, we create the appropriate event with the appropriate arguments.
  
 \subsubsection{\texttt{Arduino.Events.cs}}
 
@@ -590,9 +588,9 @@ When the component needs to produce an event, we call one of the \texttt{Invoke*
 
 \subsection{\texttt{TcpClient} class}
 
-The TCP Adapter is built on the .NET's native TCP Client implementation. It uses the \texttt{NetworkStream}, through which the actual data is sent. Our own \texttt{TcpClient} class wraps around the client. It establishes connection on the given port and initializes loops for sending and receiving data in new tasks. The received chunks of data are passed to the \texttt{TcpMessageHandler}, which divides them into individual messages. Messages to be sent are passed over to the \texttt{TcpClient} thorugh the handler as well. \texttt{TcpMessageHandler} implements the \texttt{IIpcAdapter}.
+The TCP Adapter is built on the .NET's native TCP Client implementation. It uses the \texttt{NetworkStream}, through which the actual data is sent. Our own \texttt{TcpClient} class wraps around the client. It establishes connection on the given port and initializes loops for sending and receiving data in new tasks. The received chunks of data are passed to the \texttt{TcpMessageHandler}, which divides them into individual messages. Messages to be sent are passed over to the \texttt{TcpClient} through the handler as well. \texttt{TcpMessageHandler} implements the \texttt{IIpcAdapter}.
 
-The \texttt{TcpClient} is constructed with an IP address and a port (i.e. localhost and the port of the backend). Only in the \texttt{TryConnectAsync} method is the underlying \texttt{\_client} created and connected to asynchronously. Its \texttt{NetworkStream} is acquired. The \texttt{LoopReadAsync} and \texttt{LoopWriteAsync} methods are then run in seperate tasks. The cancellation token (\texttt{\_cts}) is created. The token can be used to terminate these loops, once a disconnect or an error occurs. The \texttt{Disconnect} method cancels this token, and disposes of both the stream and the client.
+The \texttt{TcpClient} is constructed with an IP address and a port (i.e. localhost and the port of the backend). Only in the \texttt{TryConnectAsync} method is the underlying \texttt{\_client} created and connected to asynchronously. Its \texttt{NetworkStream} is acquired. The \texttt{LoopReadAsync} and \texttt{LoopWriteAsync} methods are then run in separate tasks. The cancellation token (\texttt{\_cts}) is created. The token can be used to terminate these loops, once a disconnect or an error occurs. The \texttt{Disconnect} method cancels this token, and disposes of both the stream and the client.
 
 \subsubsection{Receiving messages}
 
@@ -620,7 +618,7 @@ private async $Task$ #LoopReadAsync#() {
 }
 \end{lstlisting}
 
-The read loop is conditioned by the \texttt{\_cts} token. Inside, the stream's \texttt{ReadAsync} method is used to read any new available data on the stream, and copy it to the \texttt{\_buffer}. \texttt{\_buffer} is a simple array with size of 4096 bytes. We could choose any other size, but this one gives us a lot of breathing room if the stream happens to get clogged by many messages. The method blocks until new data is available.
+The read loop is conditioned by the \texttt{\_cts} token. Inside, the stream's \texttt{ReadAsync} method is used to read any new available data on the stream, and copy it to the \texttt{\_buffer}. \texttt{\_buffer} is a simple array with size of 4096 bytes. We could choose any other size, but this one gives us a lot of breathing room if the stream happens to get clogged by many messages. The method blocks until new data are available.
 
 By passing 0 to the 2nd argument of the method, new data will always be copied to the start of the buffer, overwriting any old data. By passing the \texttt{\_cts} token as argument, the method will throw an \texttt{OperationCancelledException} once the token has been canceled. The method returns the number of bytes it has successfully read. If this number is 0, it means the connection has been gracefully closed. \cite{msdocs_network_stream}. In that case we invoke the \textit{ReachedEof event}.
 
@@ -634,7 +632,7 @@ Since the new data is always at the start of the buffer, we can pass it to the \
     }
 \end{lstlisting}
 
-For sending messages we utilize the .NET's \texttt{Channel} class. This a thread safe implementation of the concurrent producer/consumer pattern. It is a FIFO data structure, so we call the instance \texttt{\_sendQueue} in our code. The messages are added to the channel through the \texttt{Writer} property and removed through the \texttt{Reader} property. The channel is unbounded, meaning that it doesn't block the writing thread, if the number of items reaches a certain limit. 
+For sending messages we utilize the .NET's \texttt{Channel} class. This is a thread safe implementation of the concurrent producer/consumer pattern. It is a FIFO data structure, so we call its instance \texttt{\_sendQueue} in our code. The messages are added to the channel through the \texttt{Writer} property and removed through the \texttt{Reader} property. The channel is unbounded, meaning that it doesn't block the writing thread, if the number of items reaches a certain limit. 
 
 \begin{lstlisting}[language=csharp, caption={\texttt{TcpClient.LoopWriteAsync} method}]
 private async $Task$ #LoopWriteAsync#() {
@@ -653,7 +651,7 @@ private async $Task$ #LoopWriteAsync#() {
 }
 \end{lstlisting}
 
-The write loop reads from the \texttt{\_sendQueue}. It blocks the thread until there is at least one item available to be read. If the channel has been invalidated, the method returns false. In the inner loop, all available string messages are read and converted to ASCII bytes. The bytes are then copied asynchonously into the network stream.
+The write loop reads from the \texttt{\_sendQueue}. It blocks the thread until there is at least one item available to be read. If the channel has been invalidated, the method returns false. In the inner loop, all available string messages are read and converted to ASCII bytes. The bytes are then copied asynchronously into the network stream.
 
 \subsection{\texttt{TcpMessageHandler} class}
 
@@ -698,6 +696,6 @@ The class owns the \texttt{MemoryMappedViewAccessor}. It still offers the \textt
 
 \subsection{\texttt{TwoWayBuffer} class}
 
-\texttt{TwoWayBuffer} is also very similar to how the same class and the adapter were implemented in the back. It still opens and owns shared memory in the form of \texttt{MemoryMappedFile} object. It also owns and accesses both the consuming and the producing \texttt{CircularBuffer}. The \texttt{SendEvent} and \texttt{ListenForRemoteEvents} methods are equivalent to the \texttt{on\_event} and \texttt{run\_shmem\_consumer} in \texttt{shmemAdapter.cpp} (see \ref{subsec:shmemadapter}).
+\texttt{TwoWayBuffer} is also very similar to how the same class and the adapter were implemented in the backend. It still opens and owns shared memory in the form of \texttt{MemoryMappedFile} object. It also owns and accesses both the consuming and the producing \texttt{CircularBuffer}. The \texttt{SendEvent} and \texttt{ListenForRemoteEvents} methods are equivalent to the \texttt{on\_event} and \texttt{run\_shmem\_consumer} in \texttt{shmemAdapter.cpp} (see \ref{subsec:shmemadapter}).
 
 Only acquiring the shared memory object needs a little more work than before. Providing the object's name is not enough. We need to locate the virtual file created by the backend. This happens in the \texttt{OpenSharedMemory} method. The location changes drastically depending on the host's operating system. For specifics, see the subsection \ref{subsec:shmem_specs}.

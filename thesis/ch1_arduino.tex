@@ -2,15 +2,15 @@
 
 \section{Sketches} \label{sec:sketches}
 
-The Arduino programs are commonly referred to as \textit{sketches}. A sketch is not a single file, but an entire directory, usually populated by files with the \texttt{.ino} extension, contaning the source code of the program. \texttt{.cpp}, \texttt{.c}, \texttt{.S} (assembly files), and header files like \texttt{.h} are also accepted as files contaning source code. Every sketch must contain a \texttt{.ino} file with a file name matching the sketch root directory name \cite{arduino_sketch_specs}.
+The Arduino programs are commonly referred to as \textit{sketches}. A sketch is not a single file, but an entire directory, usually populated by files with the \texttt{.ino} extension, containing the source code of the program. \texttt{.cpp}, \texttt{.c}, \texttt{.S} (assembly files), and header files like \texttt{.h} are also accepted as files containing source code. Every sketch must contain a \texttt{.ino} file with a file name matching the sketch root directory name \cite{arduino_sketch_specs}.
 
-The Arduino programming language, in which \texttt{.ino} files are written, is a C++ dialect with very subtle differences, mostly concerning linking of files and ommitting function declarations. Bodies of function definitions and variable declarations can be considered as a perfectly valid C/C++ code. 
+The Arduino programming language, in which \texttt{.ino} files are written, is a C++ dialect with very subtle differences, mostly concerning linking of files and omitting function declarations. Bodies of function definitions and variable declarations can be considered as a perfectly valid C/C++ code. 
 
 The essential functions that an Arduino programmer has to define in their sketch are \texttt{void setup()} and \texttt{void loop()}. The \texttt{setup()} function is called once, when the program is booted. That is when the Arduino board is powered up, the program is uploaded to it, or when the reset button is pressed. The \texttt{loop()} function is called in a loop indefinitely. This is the proper place to define any interactions with the board, detecting inputs, updating timers, etc.
 
 \section{Arduino board interface} \label{sec:arduino_io}
 
-The target board \texttt{Arduino Uno R3 SMD} provides 6 analog and 14 digital general purpose pins, some of which can be used for I2C and SPI protocol communication, or PWM modulation. The most simple to use and simulate are the digital pins for general purpose I/O, so this thesis focuses exlucively on using these pins as such. \cite{arduino_r3_smd_specs}
+The target board \texttt{Arduino Uno R3 SMD} provides 6 analog and 14 digital general purpose pins, some of which can be used for I2C and SPI protocol communication, or PWM modulation. The most simple to use and simulate are the digital pins for general purpose I/O, so this thesis focuses exclusively on using these pins as such. \cite{arduino_r3_smd_specs}
 
 The digital pins can be manipulated using only these 3 functions:
 \begin{description}
@@ -45,6 +45,6 @@ Before the code is compiled, all \texttt{.ino} go through a simple preprocessing
 
 It is also at this where we steer away from the standard compilation process, and apply our own \texttt{Arduino.h} implementation in our simulator. Usually, the C++ code would be linked to an implementation that contains binaries and constants for the given microchip installed on the target board. Then it would be compiled with a compiler for the given instruction set (e.g. \texttt{avr-gcc}). The code would be then transmitted over USB to the user's Arduino \cite{arduino_sketch_build}.
 
-In our case, we include the entire preprocessed sketch in our simulator project written in C++, and compile it as whole for the instruction set of the host machine. This executable will implement mock functions declared in the \texttt{Arduino.h}, arduino's internal state, and a way to communicate the change of state to an external GUI application.
+In our case, we include the entire preprocessed sketch in our simulator project written in C++, and compile it as whole for the instruction set of the host machine. This executable will implement mock functions declared in the \texttt{Arduino.h}, Arduino's internal state, and a way to communicate the change of state to an external GUI application.
 
 The entire process from preprocessing to compilation, can be orchestrated with the use of \texttt{arduino-cli} command line application. We will use it to preprocess the \texttt{.ino} for us, so that we end up with a clean C++ file we can include in our project. 

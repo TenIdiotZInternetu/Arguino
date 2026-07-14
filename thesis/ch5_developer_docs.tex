@@ -55,12 +55,12 @@ First make sure you comply with the software prerequisites from the section \ref
     
 \end{enumerate}
 
-For frontend and backend to communicate properly, it is necessary that they connect to the same IPC object. For TCP it is the port (\texttt{-p} option for both programs), and for shared memory it is the shared memory's object name (\texttt{-{}-shmem-name} option for both programs). These default to the same value for both of the aforementioned options, port \texttt{8888} and memory named \texttt{Arguino-ipc}.
+For frontend and backend to communicate properly, it is necessary that they connect to the same IPC object. For TCP, it is the port (\texttt{-p} option for both programs), and for shared memory it is the shared memory's object name (\texttt{-{}-shmem-name} option for both programs). These default to the same value for both of the aforementioned options, port \texttt{8888} and memory named \texttt{Arguino-ipc}.
 
 \footnotetext{\texttt{Gui.exe} on Windows}
 
 \subsection{Command-Line Arguments}
-Listed below are all the available command line options for the backend and frontend executables. Default values, if defined, are specified in the square brackets. Expected arguments are in the angle brackets. For arguments accepting only specific enumeration of values, all available values are listed in the angle brackets seperated by a vertical bar (\texttt{|}). In square brackets is the default value used, when the option is omitted.
+Listed below are all the available command line options for the backend and frontend executables. Default values, if defined, are specified in the square brackets. Expected arguments are in the angle brackets. For arguments accepting only specific enumeration of values, all available values are listed in the angle brackets separated by a vertical bar (\texttt{|}). In square brackets is the default value used, when the option is omitted.
 
 
 \subsubsection{Backend}
@@ -138,7 +138,7 @@ pinNames?:
 \lstinputlisting[language=yaml, caption={Component configuration example: \texttt{Led.yaml}}]{../frontend/ComponentManagement/Components/Led/Led.yaml}
 
 \subsection{Component behavior script specification} \label{subsec:specs_component_class}
-How does the component interact with the rest of the circuit is described by the C\# class with the named the same as the component type. This class must inherit from the abstract \texttt{Component} class. The file containg the class must be added to the \texttt{ComponentManagement.csproj} project. In order to compile, the user's class must also define a constructor like this:
+How does the component interact with the rest of the circuit is described by the C\# class with the named the same as the component type. This class must inherit from the abstract \texttt{Component} class. The file containing the class must be added to the \texttt{ComponentManagement.csproj} project. In order to compile, the user's class must also define a constructor like this:
 
 \begin{lstlisting}[language=csharp]
     public #MyComponent#(string definitionPath) 
@@ -150,16 +150,16 @@ However, no code is required in the body of the constructor. The constructor can
 \subsubsection{Component functions and properties}
 \begin{description}
     \item[\texttt{virtual void OnInitialized()}]
-    Gets called when all of the component instances have been initialized and scene created.
+    Gets called when the component instance has been completed and all of its assets are available (config, pins, sprites, transform, etc.)
 
     \item[\texttt{virtual void OnPinConnected(Pin)}]
     Gets called when a component's pin connects to an electric node. The connected pin is passed as argument.
 
     \item[\texttt{virtual void OnPinDisconnected(Pin)}]
-    Gets called when a component's pin disonnects from an electric node. The disconnected pin is passed as argument.
+    Gets called when a component's pin disconnects from an electric node. The disconnected pin is passed as argument.
 
     \item[\texttt{virtual void OnPinStateChanged(Pin)}]
-    Gets called when a component's pin detected a change in digital state of a node it has been connected to. It can be thought of as changing input value on the pin. Pins set to WriteOnly mode by design don't detect this change. The detected pin is passed as argument.
+    Gets called when a component's pin detected a change in digital state of a node it has been connected to. It can be thought of as changing input value on the pin. Pins set to write only mode by design don't detect this change. The detected pin is passed as argument.
 
     \item[\texttt{virtual void OnControlPress(Vector2)}]
     Gets called when the component has been pressed on the circuit canvas. The cursor position at the time of the press is passed as argument.
@@ -174,7 +174,7 @@ However, no code is required in the body of the constructor. The constructor can
     Returns a Pin object with the name given in the argument. The name must be defined in the component's \texttt{namedPins} list. Returns null if no such pin exists.
 
     \item[\texttt{Pin? GetPin(uint)}]
-    Returns a Pin object with the id given in the argument. The allowed range of Ids is from \texttt{0} to $pins + namedPins.Length$. With unnamed pins starting from the id \texttt{0} and named pins starting from the id \texttt{pins}. Returns null if the pin id is out of range.
+    Returns a Pin object with the ID given in the argument. The allowed range of Ids is from \texttt{0} to $pins + namedPins.Length$. With unnamed pins starting from the ID \texttt{0} and named pins starting from the ID \texttt{pins}. Returns null if the pin ID is out of range.
 \end{description}
 
 \subsubsection{Pin functions and properties}
@@ -186,7 +186,7 @@ However, no code is required in the body of the constructor. The constructor can
     Name of the pin as described in the component configuration.
 
     \item[\texttt{bool Pin.IsDriving}]
-    True if the pin is driving. That is, if it actively forces the digital state on the connected node to be high. If the node has at least 1 driving pin, it's digital state will be high. It will be low otherwise.
+    True if the pin is driving. That is, if it actively forces the digital state on the connected node to be high. If the node has at least 1 driving pin, its digital state will be high. It will be low otherwise.
 
     \item[\texttt{bool Pin.IsHigh}]
     True if the digital state of the connected node is high.
@@ -272,7 +272,7 @@ In the example above, we have defined a behavior of a \texttt{Button} component.
 
 In the overridden \texttt{OnInitialized} we set the \texttt{buttonUp} image as the default sprite. In the overridden \texttt{OnControlPress} and \texttt{OnControlRelease} methods we update the internal state of the button: whether it is pressed or not. We change the actively displayed sprite accordingly.
 
-\texttt{UpdatePins} is a helper method specific to this component. For both of the unnamed pins (retrieved by the \texttt{GetPin} method) it checks whether the value of the pin should be changed. A pin is set to be driving (\texttt{SetHigh} method), if the button is pushed, and the other pin reads a high value. We have to be careful, just because a pin reads a high value, it doesn't mean we want to set it to driving. Once a state of a node drops back to low, we want states of both pins drop back to low as well, regardless of whether the button is pushed or not. \footnotemark This update method is called everytime a button is pressed, released, or a value on of its pins changes (\texttt{OnPinStateChanged} override).
+\texttt{UpdatePins} is a helper method specific to this component. For both of the unnamed pins (retrieved by the \texttt{GetPin} method) it checks whether the value of the pin should be changed. A pin is set to be driving (\texttt{SetHigh} method), if the button is pushed, and the other pin reads a high value. We have to be careful, just because a pin reads a high value, it doesn't mean we want to set it to driving. Once a state of a node drops back to low, we want states of both pins drop back to low as well, regardless of whether the button is pushed or not. \footnotemark This update method is called every time a button is pressed, released, or a value on of its pins changes (\texttt{OnPinStateChanged} override).
 
 \footnotetext{Unless, of course, the node at the other side is also high. That means the pin was, and will stay driving}
 
@@ -315,7 +315,7 @@ nodes:
     Clockwise rotation angle in degrees on the circuit canvas.
 
     \item[\texttt{scale}]
-    Relative scaling along x an y axis on the circuit canvas.
+    Relative scaling along x and y axis on the circuit canvas.
 
     \item[\texttt{extraProps}]
     A directory of custom properties defined in the component subclass as keys and values to assign to them. The properties must match the case and the type of the property. The property must be public and have a public setter.
@@ -333,7 +333,7 @@ The example scene in the listing \ref{lst:scene} contains 2 LEDs, 1 button and 1
 \section{IPC interface} \label{sec:ipc_spec}
 This section describes how to set up IPC communication of a custom frontend application with the backend simulator. The two processes can communicate together either via TCP connection or through shared memory. The only requirement for a TCP connection, is that the client on the frontend listens to the same port as the server on the backend. IPC over shared memory requires a few more considerations, so that the memory accesses match the memory layout of shared internal structure created by the backend. This structure is described in the subsection \ref{subsec:shmem_specs};
 
-The processes communicate using concrete events with up to 3 integer arguments. These events are encoded into a human readable text messages, seperated by a common delimiter. The messages are then sent over IPC.
+The processes communicate using concrete events with up to 3 integer arguments. These events are encoded into a human-readable text messages, separated by a common delimiter. The messages are then sent over IPC.
 
 \subsection{Text message format} \label{sec:msg_format}
 Individual messages are delimited by the semicolon character (\texttt{;}). The individual values within one message are delimited by the colon character (\texttt{:}). The integer values are written in decimal system, using the ASCII characters of the actual digits. The semantics of these values are better described in the chapter about architecture, subsection \ref{subsec:events}. The format of the message then looks as the following:
@@ -348,7 +348,7 @@ Individual messages are delimited by the semicolon character (\texttt{;}). The i
 
 \begin{description}
     \item[\texttt{sim\_time}] Simulation time, 64-bit signed integer. Real time elapsed from the start of the backend's simulation represented in microseconds. The backend has no use for this value.
-    \item[\texttt{lvt}] Local virtual time, 64-bit signed integer. It describes an order in which the event occured, relative to other events.
+    \item[\texttt{lvt}] Local virtual time, 64-bit signed integer. It describes an order in which the event occurred, relative to other events.
     \item[\texttt{event\_type}] A single character representing the type of the event. This type decides the action taken upon consuming the event. Recognized event types and their corresponding characters are described in the next subsection.
     \item[\texttt{arg1, arg2, arg3}] 32-bit signed integers. Values have meaning depending on the event. Arguments not defined by the event type can be omitted. Make sure that the number of colons match the number of passed arguments.
 \end{description}
