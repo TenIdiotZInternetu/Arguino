@@ -47,44 +47,22 @@ public class ComponentControl : Control {
      
      protected override void OnPointerPressed(PointerPressedEventArgs e) {
           bool leftPressed = e.Properties.IsLeftButtonPressed;
+          bool altPressed = e.KeyModifiers.HasFlag(KeyModifiers.Alt);
           var position = e.GetCurrentPoint(this).Position;
           
-          if (leftPressed && !_pressHeld) {
-               _component.OnControlPress(position.ToVector2());
+          if (leftPressed) {
+               if (!_pressHeld) {
+                    _component.OnControlPress(position.ToVector2());
+               }
+               
+               _pressHeld = !_pressHeld && altPressed;
           }
-          
-          _pressHeld = e.KeyModifiers.HasFlag(KeyModifiers.Alt);
      }
 
      protected override void OnPointerReleased(PointerReleasedEventArgs e) {
           if (!_pressHeld) {
                _component.OnControlRelease();
           }
-     }
-     
-     protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e) {
-          base.OnAttachedToVisualTree(e);
-
-          var topLevel = TopLevel.GetTopLevel(this);
-          if (topLevel != null) {
-               topLevel.KeyUp += OnGlobalKeyUp;
-          }
-     }
-
-     protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e) {
-          base.OnDetachedFromVisualTree(e);
-
-          var topLevel = TopLevel.GetTopLevel(this);
-          if (topLevel != null) {
-               topLevel.KeyUp -= OnGlobalKeyUp;
-          }
-     }
-
-     private void OnGlobalKeyUp(object? _, KeyEventArgs e) {
-          if (_pressHeld && e.PhysicalKey == PhysicalKey.AltLeft) {
-               _component.OnControlRelease();
-               _pressHeld = false;
-          } 
      }
 
      private void InvalidateVisual(SKSvg _)  => InvalidateVisual();
