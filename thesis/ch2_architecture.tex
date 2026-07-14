@@ -33,11 +33,15 @@ Another question is what will we encode in our message. At first, we encoded the
 
 \subsection{Snapshotting}
 
-In the early iterations, a snapshot of the Arduino state was sent over one message. That included the pinout state, pin modes, timer, etc. The state was periodically requested by the client with a \textit{Read} message without payload. When a new value is read on an input pin in the frontend, a \textit{Write} message with the state as payload would be sent to the server and the values of input pins would be overwritten atomically to the backend's internal state. 
+In the early iterations, a snapshot of the Arduino state was sent over one message. That included the pinout state, pin modes, timer, etc. The state was periodically requested by the frontend with a \textit{Read} message without payload. When a new value is read on an input pin in the frontend, a \textit{Write} message with the state as payload would be sent to the backend and the values of input pins would be overwritten atomically to the backend's internal state. 
 
-This approach was easy to implement but flawed. The main issue was the frequency of reads. At lower frequencies, the system is prone to temporal aliasing. \xxx{Find temporal aliasing definition}. Some events, like very short impulses, can be missed completely. This is not much of an issue in purely combinational circuits. But we want our frontend to support stateful components. For example shift registers, which are controlled by digital writes less than a microsecond apart.
+This approach was easy to implement but flawed. The main issue was the frequency of reads. At lower frequencies, the system is prone to temporal aliasing. \footnotemark Some events, like very short impulses, can be missed completely. This is not much of an issue in purely combinational circuits. But we want our frontend to support stateful components. For example shift registers, which are controlled by digital writes less than a microsecond apart. \footnotemark
 
-Highering the frequency to such an extent is not viable. \xxx{elaborate}
+\footnotetext[\numexpr\value{footnote}-1]{Aliasing is an effect better known in signal analysis, that occurs when the sampling frequency of a measured pattern is less than twice the frequency of the pattern itself. It makes false patterns appear in the sampled data. Temporal aliasing simply means that samples are taken in time intervals. In our case that could be, e.g., seeing LEDs blink at a wrong frequency.}
+
+\footnotetext{Highering the frequency to such an extent is not viable. It would mean taking a snapshot between every instruction of the Arduino code, which obviously takes much longer than the executed code itself.}
+
+Sending snapshots can still be helpful, but not asynchronously, and not in set intervals as was the case in our approach. They could be sent occasionally from within the larger event system, in order to fix some cases of desynchronization.
 
 \subsection{Events}\label{subsec:events}
 
