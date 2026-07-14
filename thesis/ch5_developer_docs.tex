@@ -336,7 +336,7 @@ This section describes how to set up IPC communication of a custom frontend appl
 The processes communicate using concrete events with up to 3 integer arguments. These events are encoded into a human-readable text messages, separated by a common delimiter. The messages are then sent over IPC.
 
 \subsection{Text message format} \label{sec:msg_format}
-Individual messages are delimited by the semicolon character (\texttt{;}). The individual values within one message are delimited by the colon character (\texttt{:}). The integer values are written in decimal system, using the ASCII characters of the actual digits. The semantics of these values are better described in the chapter about architecture, subsection \ref{subsec:events}. The format of the message then looks as the following:
+Individual messages are delimited by the semicolon character (\texttt{;}). The individual values within one message are delimited by the colon character (\texttt{:}). The integer values are written in decimal system, using the ASCII characters of the actual digits. The numbers can be padded with zeros.\footnotemark The semantics of these values are better described in the chapter about architecture, subsection \ref{subsec:events}. The format of the message then looks as the following:
 
 \begin{lstlisting}[
     caption={Format of an IPC text message},
@@ -345,6 +345,8 @@ Individual messages are delimited by the semicolon character (\texttt{;}). The i
 ]
     <sim_time>:<lvt>:<event_type>:<arg1>:<arg2>:<arg3>;
 \end{lstlisting}
+
+\footnotetext{The actual implementations pad the numbers in such a manner, that all messages of the same event type have the same length. }
 
 \begin{description}
     \item[\texttt{sim\_time}] Simulation time, 64-bit signed integer. Real time elapsed from the start of the backend's simulation represented in microseconds. The backend has no use for this value.
@@ -362,8 +364,6 @@ For example, this next message encodes the \texttt{Write} event passing 2 argume
 ]
     000264997488:0000016:W:08:1;
 \end{lstlisting}
-
-\xxx{Decide on whether to describe or remove the zero paddings}.
 
 \subsection{Recognized event types}
 
