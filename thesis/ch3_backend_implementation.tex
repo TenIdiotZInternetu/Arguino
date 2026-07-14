@@ -79,8 +79,6 @@ At this point, the LVT of the event is not known. That is the responsibility of 
 
 The event queue is in reality two queues. One storing local and one storing remote events. As we only have two threads running concurrently in the backend, this simplifies the synchronization significantly. We also completely avoid locking the structure in order to prevent race conditions. These queues are populated with the public \texttt{enqueue\_local} and \texttt{enqueue\_remote} methods.
 
-\xxx{nextLvt, processedEvents}
-
 \subsubsection{\texttt{execute\_next\_event} method}
 
 \begin{lstlisting}[language=csharp, caption={\texttt{EventQueue::execute\_next\_event} method}]
@@ -96,9 +94,7 @@ void $EventQueue$::#execute_next_event#()
     queueAhead.#pop#();
 
     processedEvent.#action#();
-    _nextLvt = $std$::#max#(
-        _nextLvt, processedEvent.localVirtualTime + 1);
-    _processedEvents.#push#(processedEvent);
+    _lastExecuteEvent = processedEvent;
 }
 \end{lstlisting}
 

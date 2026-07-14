@@ -9,7 +9,6 @@ void EventQueue::enqueue_local(Event& event)
     event.localVirtualTime = _nextLvt;
     ++_nextLvt;
     _localEvents.push(event);
-    _lastLvt = std::max(_lastLvt, event.localVirtualTime);
 
     Simulator::log_debug("Enqueued local event " + event.to_string());
 }
@@ -17,7 +16,7 @@ void EventQueue::enqueue_local(Event& event)
 void EventQueue::enqueue_remote(Event event)
 {
     _remoteEvents.push(event);
-    _lastLvt = std::max(_lastLvt, event.localVirtualTime);
+    _nextLvt = std::max(_nextLvt + 1, event.localVirtualTime);
 }
 
 void EventQueue::execute_next_event()
@@ -30,26 +29,16 @@ void EventQueue::execute_next_event()
     queueAhead.pop();
 
     processedEvent.action();
-    _nextLvt = std::max(_nextLvt, processedEvent.localVirtualTime + 1);
-    _processedEvents.push(processedEvent);
+    _lastExecuteEvent = processedEvent;
 }
 
 void EventQueue::clear()
 {
     _localEvents = std::queue<Event>();
     _remoteEvents = std::queue<Event>();
-    _processedEvents = std::queue<Event>();
     _nextLvt = 0;
+    _lastExecuteEvent = Event();
 }
-
-void EventQueue::clear_events_before(size_t lvt)
-{
-    // TODO
-}
-
-void EventQueue::clear_events_after(size_t lvt) {}
-
-void EventQueue::rollback_to(size_t lvt) {}
 
 size_t EventQueue::earliest_queue_lvt(const std::queue<Event>& queue)
 {

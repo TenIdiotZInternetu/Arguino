@@ -18,9 +18,7 @@ void Simulator::handle_event(Event event)
     auto& queue = s_instance->_eventQueue;
     queue.enqueue_local(event);
 
-    do {  // TODO: replace by handle_events() and get rid of id?
-        queue.execute_next_event();
-    } while (event.id() != queue.last_executed_event().id());
+    handle_events();
 
     s_instance->f_eventCallback(event);
 }
@@ -30,11 +28,9 @@ void Simulator::handle_events()
     auto& queue = s_instance->_eventQueue;
     if (queue.is_empty()) return;
 
-    auto lastLvt = queue.last_lvt();
-
     do {
         queue.execute_next_event();
-    } while (lastLvt < queue.last_executed_event().localVirtualTime);
+    } while (queue.next_lvt() < queue.last_executed_event().localVirtualTime);
 }
 
 
