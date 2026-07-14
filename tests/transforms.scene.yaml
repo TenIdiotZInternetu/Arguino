@@ -1,7 +1,8 @@
 components:
   Vcc:
     Source:
-      position: 20 400
+      position: 1000 20
+      rotation: 180
   Button:
     Btn_0_0:
       position: 20 20

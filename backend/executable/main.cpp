@@ -25,9 +25,10 @@ void init_simulator(Simulator::event_callback_fnct eventCallback)
 
 void simulator_loop()
 {
-    Simulator::state().init_timer();
-
+    std::cout << "Simulator running..." << std::endl;
     Simulator::handle_event(Event::reboot());
+
+    Simulator::state().init_timer();
     Simulator::log_info("Simulator initialized.");
     setup();
     Simulator::log_info("setup() finished successfully. Running loop().");

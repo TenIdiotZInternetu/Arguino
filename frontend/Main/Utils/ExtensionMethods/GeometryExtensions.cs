@@ -22,6 +22,7 @@ public static class GeometryExtensions {
         return new Point(vector.X, vector.Y);
     }
 
+    // ReSharper disable once InconsistentNaming
     public static SKMatrix ToSKMatrix(this ComponentManagement.Scenes.Transform transform) {
         // TODO: Translate to coordinates origin, then translate
         var originShift = SKMatrix.CreateTranslation(-transform.BaseSize.X / 2, -transform.BaseSize.Y / 2);

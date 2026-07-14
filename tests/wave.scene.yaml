@@ -1,0 +1,124 @@
+components:
+  Arduino:
+    Arduino:
+      position: 50 70
+  Button:
+    Btn:
+      position: 50 370
+  Vcc:
+    Source:
+      position: 50 10
+  Led:
+    Led_0_0:
+      position: 300 70
+    Led_0_1:
+      position: 350 70
+    Led_0_2:
+      position: 400 70
+    Led_0_3:
+      position: 450 70
+    Led_0_4:
+      position: 500 70
+    Led_0_5:
+      position: 550 70
+    Led_0_6:
+      position: 600 70
+    Led_0_7:
+      position: 650 70
+    Led_1_0:
+      position: 300 120
+    Led_1_1:
+      position: 350 120
+    Led_1_2:
+      position: 400 120
+    Led_1_3:
+      position: 450 120
+    Led_1_4:
+      position: 500 120
+    Led_1_5:
+      position: 550 120
+    Led_1_6:
+      position: 600 120
+    Led_1_7:
+      position: 650 120
+    Led_2_0:
+      position: 300 170
+    Led_2_1:
+      position: 350 170
+    Led_2_2:
+      position: 400 170
+    Led_2_3:
+      position: 450 170
+    Led_2_4:
+      position: 500 170
+    Led_2_5:
+      position: 550 170
+    Led_2_6:
+      position: 600 170
+    Led_2_7:
+      position: 650 170
+    Led_3_0:
+      position: 300 220
+    Led_3_1:
+      position: 350 220
+    Led_3_2:
+      position: 400 220
+    Led_3_3:
+      position: 450 220
+    Led_3_4:
+      position: 500 220
+    Led_3_5:
+      position: 550 220
+    Led_3_6:
+      position: 600 220
+    Led_3_7:
+      position: 650 220
+    Led_4_0:
+      position: 300 270
+    Led_4_1:
+      position: 350 270
+    Led_4_2:
+      position: 400 270
+    Led_4_3:
+      position: 450 270
+    Led_4_4:
+      position: 500 270
+    Led_4_5:
+      position: 550 270
+    Led_4_6:
+      position: 600 270
+    Led_4_7:
+      position: 650 270
+    Led_5_0:
+      position: 300 320
+    Led_5_1:
+      position: 350 320
+    Led_5_2:
+      position: 400 320
+    Led_5_3:
+      position: 450 320
+    Led_5_4:
+      position: 500 320
+    Led_5_5:
+      position: 550 320
+    Led_5_6:
+      position: 600 320
+    Led_5_7:
+      position: 650 320
+
+nodes:
+  - [Source.0, Btn.1]
+  - [Arduino.D0, Btn.0]
+  - [Arduino.D1, Led_0_0.cathode]
+  - [Arduino.D2, Led_0_1.cathode, Led_1_0.cathode]
+  - [Arduino.D3, Led_0_2.cathode, Led_1_1.cathode, Led_2_0.cathode]
+  - [Arduino.D4, Led_0_3.cathode, Led_1_2.cathode, Led_2_1.cathode, Led_3_0.cathode]
+  - [Arduino.D5, Led_0_4.cathode, Led_1_3.cathode, Led_2_2.cathode, Led_3_1.cathode, Led_4_0.cathode]
+  - [Arduino.D6, Led_0_5.cathode, Led_1_4.cathode, Led_2_3.cathode, Led_3_2.cathode, Led_4_1.cathode, Led_5_0.cathode]
+  - [Arduino.D7, Led_0_6.cathode, Led_1_5.cathode, Led_2_4.cathode, Led_3_3.cathode, Led_4_2.cathode, Led_5_1.cathode]
+  - [Arduino.D8, Led_0_7.cathode, Led_1_6.cathode, Led_2_5.cathode, Led_3_4.cathode, Led_4_3.cathode, Led_5_2.cathode]
+  - [Arduino.D9, Led_1_7.cathode, Led_2_6.cathode, Led_3_5.cathode, Led_4_4.cathode, Led_5_3.cathode]
+  - [Arduino.D10, Led_2_7.cathode, Led_3_6.cathode, Led_4_5.cathode, Led_5_4.cathode]
+  - [Arduino.D11, Led_3_7.cathode, Led_4_6.cathode, Led_5_5.cathode]
+  - [Arduino.D12, Led_4_7.cathode, Led_5_6.cathode]
+  - [Arduino.D13, Led_5_7.cathode]
