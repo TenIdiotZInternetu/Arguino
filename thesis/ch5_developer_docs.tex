@@ -19,10 +19,10 @@ First make sure you comply with the software prerequisites from the section \ref
 
 \subsubsection{Backend process}
 \begin{enumerate}
-    \item Run \texttt{preprocess.sh} with the sketch directory. On Windows, use the \texttt{preprocess.bat} script instead. For example:
+    \item Run \texttt{preprocess.sh} from the repository's root directory with the sketch directory as an argument. On Windows, use the \texttt{preprocess.bat} script instead. For example:
     
     \begin{lstlisting}[language=shell]
-    ./preprocess.sh tests/buttons.
+    ./preprocess.sh #tests/buttons#.
     \end{lstlisting}
     
     \item Build \texttt{backend/CMakeLists.txt}. Available targets are:
@@ -48,7 +48,7 @@ First make sure you comply with the software prerequisites from the section \ref
     \item Run the \texttt{Gui} executable\footnotemark with the desired scene. For example, executing from the \texttt{frontend} directory:
     
     \begin{lstlisting}[language=shell]
-    <build dir>/Gui -s ../tests/buttons.scene.yaml
+    <build dir>/Gui -s #../tests/buttons.scene.yaml#
     \end{lstlisting}
     
     If you built the TCP version of the backend, be sure to add the flag \texttt{-i Tcp}.
