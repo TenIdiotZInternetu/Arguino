@@ -495,9 +495,24 @@ First we turn the range into a span of bytes, so we can access each one of them 
 
 Then we check if there is enough space left until the end of the buffer. If not, we will have to write the data on its boundary by splitting it in two. The \texttt{firstBytes} get copied to the producer offset, and the rest at the offset 0.
 
+To update the producer offset, we need to use atomic instructions to write it back to the memory. This is because the compiler can make optimizations that would reorder the reorder or omit memory access instructions. It could possibly order writes to the buffer's main memory to be executed after write to the producer offset. It could also leave the offset in an invalid state, as normal store is not an atomic operation. We use the \texttt{std::memory\_order\_release} as an argument for the atomic store, which prevents any prior read and write from being reordered after this atomic store.
+
+\begin{lstlisting}[language=csharp, caption={\texttt{write\_producer} method}]
+void $CircularBuffer$::#write_producer#($iterator_t$ producer_it)
+{
+    $std$::$atomic_ref$<$uint64_t$> #atomic_producer#(
+        _memoryRegion->#at#<$uint64_t$>(PRODUCER_PTR_LOCATION));
+
+    atomic_producer.#store#(
+        producer_it.offset, $std$::$memory_order_release);
+}
+\end{lstlisting}
+
 \subsubsection{Reading from buffer}
 
-\begin{lstlisting}[language=csharp, caption={\texttt{CircularBuffer::consume\_until} method}]
+First we need to copy the producer offset as it can change during the execution of the function. Since \texttt{iterator\_t} is a fully qualified forward iterator, we can pass the offset iterators as arguments of \texttt{std::find} in order to find the iterator of the delimiter. If the delimiter hasn't been found, we return an empty vector, indicating that the operation doesn't make sense with the current state of the buffer.
+
+\begin{lstlisting}[language=csharp, caption={Finding delimiter using the \texttt{std::find} function}]
 $std$::$vector$<uint8_t> $CircularBuffer$::#consume_until#(
     uint8_t delimiter)
 {
@@ -506,32 +521,12 @@ $std$::$vector$<uint8_t> $CircularBuffer$::#consume_until#(
 
     auto delimiterIt = $std$::#find#(
         consumerIt, producerIt, delimiter);
+
     bool delimiterNotFound = delimiterIt == producerIt;
     if (delimiterNotFound) return {};
-
-    // +1 to include the delimiter
-    size_t dataLength = delimiterIt - consumerIt + 1;
-    size_t wrapsAround = dataLength > #end#() - consumerIt;
-    $std$::$vector$<uint8_t> result(dataLength);
-
-    if (!wrapsAround) {
-        $std$::#memcpy#(&result[0], &*consumerIt, dataLength);
-    }
-    else { // message lies on the boundary
-        size_t firstBytesLength = #end#() - consumerIt;
-        size_t lastBytesLength = delimiterIt - #begin#();
-
-        $std$::#memcpy#(&result[0], &*consumerIt, firstBytesLength);
-        $std$::#memcpy#(
-            &result[firstBytesLength], &*#begin#(), lastBytesLength);
-    }
-
-    #write_consumer#(delimiterIt + 1);
-    return result;
+    ...
 }
 \end{lstlisting}
-
-First we need to copy the producer offset as it can change during the execution of the function. Since \texttt{iterator\_t} is a fully qualified forward iterator, we can pass the offset iterators as arguments of \texttt{std::find} in order to find the iterator of the delimiter. If the delimiter hasn't been found, we return an empty vector, indicating that the operation doesn't make sense with the current state of the buffer. 
 
 Otherwise, we proceed analogously to \texttt{write}. We determine the length of the message, and if it could fit until the end of the buffer. If not, it lies on the boundary, so we have to copy portion of the data from the end of the buffer, and portion from its beginning.
 

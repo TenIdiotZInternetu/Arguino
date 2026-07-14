@@ -3,6 +3,7 @@
 #include <math.h>
 
 #include <algorithm>
+#include <atomic>
 #include <vector>
 
 namespace arguino::shmem {
@@ -44,7 +45,6 @@ std::vector<uint8_t> CircularBuffer::consume_until(uint8_t delimeter)
         std::memcpy(&result[firstBytesLength], &*begin(), lastBytesLength);
     }
 
-    // TODO - barrier
     write_consumer(delimeterIt + 1);
     return result;
 }
@@ -60,29 +60,33 @@ CircularBuffer::iterator_t CircularBuffer::end()
     return iterator_t(this, buffer_size());
 }
 
-CircularBuffer::iterator_t CircularBuffer::at(size_t offset)
+CircularBuffer::iterator_t CircularBuffer::at(uint64_t offset)
 {
     return iterator_t(this, offset);
 }
 
 CircularBuffer::iterator_t CircularBuffer::producer_it()
 {
-    return iterator_t(this, _memoryRegion->at<size_t>(PRODUCER_PTR_LOCATION));
+    return iterator_t(this, _memoryRegion->at<uint64_t>(PRODUCER_PTR_LOCATION));
 }
 
 CircularBuffer::iterator_t CircularBuffer::consumer_it()
 {
-    return iterator_t(this, _memoryRegion->at<size_t>(CONSUMER_PTR_LOCATION));
+    return iterator_t(this, _memoryRegion->at<uint64_t>(CONSUMER_PTR_LOCATION));
 }
 
 void CircularBuffer::write_producer(iterator_t producer_it)
 {
-    _memoryRegion->at<size_t>(PRODUCER_PTR_LOCATION) = producer_it.offset;
+    std::atomic_ref<uint64_t> atomic_producer(  //
+        _memoryRegion->at<uint64_t>(PRODUCER_PTR_LOCATION));
+    atomic_producer.store(producer_it.offset, std::memory_order_release);
 }
 
 void CircularBuffer::write_consumer(iterator_t consumer_it)
 {
-    _memoryRegion->at<size_t>(CONSUMER_PTR_LOCATION) = consumer_it.offset;
+    std::atomic_ref<uint64_t> atomic_consumer(  //
+        _memoryRegion->at<uint64_t>(CONSUMER_PTR_LOCATION));
+    atomic_consumer.store(consumer_it.offset, std::memory_order_release);
 }
 
 size_t CircularBuffer::bytes_filled()
