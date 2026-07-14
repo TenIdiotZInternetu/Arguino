@@ -223,7 +223,7 @@ The project has been created from an Avalonia UI template, which includes these 
 
 The \texttt{App} class is defined by the \texttt{App.axaml} and \texttt{App.axaml.cs} files. The \texttt{.axaml} consists of nothing else but the \texttt{<Application.Style>} element, which includes styles from the \texttt{Styles/General.axaml}. It mainly defines background colors for panels and canvases.
 
-Much more important is the \texttt{App} codebehind. It  overrides the method \texttt{OnFrameworkInitializationCompleted} inherited from the Avalonia's \texttt{Application} class. This is where we create the instance of \texttt{MainWindow} class and set it to be the first only window opened by the application. The we call our \texttt{MainController}. \xxx{lifetimes}
+Much more important is the \texttt{App} codebehind. It  overrides the method \texttt{OnFrameworkInitializationCompleted} inherited from the Avalonia's \texttt{Application} class. At this point we can access to the \texttt{ApplicationLifetime}. It is an interface that defines in what kind of environment our application runs, like if we can have one or multiple windows, or when should the application be shut down. This is an important factor when we develop for Android or iOS for example. We target Windows and Linux PCs, so our lifetime is of type \texttt{IClassicDesktopStyleApplicationLifetime}. We create the instance of \texttt{MainWindow} class and pass it to the lifetime. Then we call our \texttt{MainController} with the lifetime as an argument.
 
 \begin{lstlisting}[language=csharp, caption={\texttt{App.OnFrameworkInitializationCompleted} override}]
 public override void #OnFrameworkInitializationCompleted#() {
