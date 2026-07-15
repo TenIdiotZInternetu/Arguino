@@ -5,7 +5,7 @@
 #include "Simulator.hpp"
 #include "ipcAdapter.hpp"
 #include "programOptions.hpp"
-#include "sketch.cpp"
+#include "sketch/sketch.cpp"
 
 using logger_t = logger::FileLogger;
 using namespace arguino::simulator;
