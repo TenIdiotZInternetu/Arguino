@@ -36,7 +36,7 @@ For example, to run the \texttt{wave} sketch, you can execute these commands fro
 \begin{lstlisting}[language=shell, caption={Example build process of the backend}]
     cmake -S #./backend# -B .#/backend/build# #-DSKETCH=tests/wave#
     cmake --build #./backend/build# --target #arguino#
-    ./backend/build/exacutable/arguino-wave
+    ./backend/build/executable/arguino-wave
 \end{lstlisting}
 
 \footnotetext{The path of the actual executable may change depending on the build tool. The example shows usage with Linux and Clang. On Windows, the \texttt{.exe} extension is usually appended, i.e. \texttt{.../<target>-<sketch>.exe}.}
