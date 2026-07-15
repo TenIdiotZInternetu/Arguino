@@ -506,7 +506,7 @@ void $CircularBuffer$::#write_producer#($iterator_t$ producer_it)
 
 \subsubsection{Reading from buffer}
 
-First we need to copy the producer offset as it can change during the execution of the function. Since \texttt{iterator\_t} is a fully qualified forward iterator, we can pass the offset iterators as arguments of \texttt{std::find} in order to find the iterator of the delimiter. If the delimiter hasn't been found, we return an empty vector, indicating that the operation doesn't make sense with the current state of the buffer.
+First we need to copy the producer offset as it can change during the execution of the function. Reading the offset must also be an atomic operation, for the same reason as writing. The compiler could use optimizations that lead to undefined behavior. Since \texttt{iterator\_t} is a fully qualified forward iterator, we can pass the offset iterators as arguments of \texttt{std::find} in order to find the iterator of the delimiter. If the delimiter hasn't been found, we return an empty vector, indicating that the operation doesn't make sense with the current state of the buffer.
 
 \begin{lstlisting}[language=csharp, caption={Finding delimiter using the \texttt{std::find} function}]
 $std$::$vector$<uint8_t> $CircularBuffer$::#consume_until#(

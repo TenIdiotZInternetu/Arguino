@@ -67,12 +67,20 @@ CircularBuffer::iterator_t CircularBuffer::at(uint64_t offset)
 
 CircularBuffer::iterator_t CircularBuffer::producer_it()
 {
-    return iterator_t(this, _memoryRegion->at<uint64_t>(PRODUCER_PTR_LOCATION));
+    std::atomic_ref<uint64_t> atomic_producer(  //
+        _memoryRegion->at<uint64_t>(PRODUCER_PTR_LOCATION));
+
+    atomic_producer.load(std::memory_order_acquire);
+    return iterator_t(this, atomic_producer);
 }
 
 CircularBuffer::iterator_t CircularBuffer::consumer_it()
 {
-    return iterator_t(this, _memoryRegion->at<uint64_t>(CONSUMER_PTR_LOCATION));
+    std::atomic_ref<uint64_t> atomic_consumer(  //
+        _memoryRegion->at<uint64_t>(PRODUCER_PTR_LOCATION));
+
+    atomic_consumer.load(std::memory_order_acquire);
+    return iterator_t(this, atomic_consumer);
 }
 
 void CircularBuffer::write_producer(iterator_t producer_it)
