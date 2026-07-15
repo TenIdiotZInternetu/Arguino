@@ -191,8 +191,10 @@ The file structure of the repository is as follows:
 			\item[\texttt{.clang-format}] specification of the automatic code formatting.
 			\item[\texttt{.gitignore}] exclusion of build files.
 			\item[\texttt{CMakeLists.txt}] main metabuild specification for the backend. References CMake files in the module subdirectories.
-			\item[\texttt{CMakePresets.json}] build configurations using Clang on Linux and MSVC on Windows.
+			\item[\texttt{CMakePresets.json}] default build configurations using Clang on Linux and MSVC on Windows.
 			\item[\texttt{vcpkg.json}] specifies Vcpkg dependencies for the Boost libraries.
+			\item[\texttt{preprocess.sh}] shell script performing basic sketch preprocessing using \texttt{arduino-cli}. For use on Linux.
+			\item[\texttt{preprocess.bat}] same as \texttt{preprocess.sh} but for the use on Windows. 
 		\end{description}
 	\item[\texttt{docs/}] Contains year project specification and other documentation:
 		\begin{description}
@@ -206,8 +208,6 @@ The file structure of the repository is as follows:
 	\item[\texttt{thesis/}] contains source files for this document, e.g. \texttt{.tex} files, bibliography files and figures.
 	\item[\texttt{.gitignore}] excludes build and Visual Studio files
 	\item[\texttt{README.md}] describes the usage and build process of both the backend and the frontend in the scope of the section \ref{sec:usage}.
-	\item[\texttt{preprocess.sh}] shell script performing basic sketch preprocessing using \texttt{arduino-cli}. For use on Linux.
-	\item[\texttt{preprocess.bat}] same as \texttt{preprocess.sh} but for the use on Windows. 
 \end{description}
 
 \end{document}
