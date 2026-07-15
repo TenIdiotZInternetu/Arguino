@@ -1,4 +1,7 @@
 {
-    "cmake.sourceDirectory": "/home/touster/Kodiky/arguino/backend",
+    "cmake.sourceDirectory": "${workspaceFolder}/backend",
     "cmake.buildDirectory": "${workspaceFolder}/backend/build",
+    "cmake.configureArgs": [
+        "-DSKETCH=${workspaceFolder}/tests/wave"
+    ],
 }
