@@ -427,7 +427,7 @@
       \field{labeltitlesource}{title}
       \field{abstract}{Avalonia.Samples aims to provide some minimal samples focusing on a particular issue at a time. This should help getting new users started. - {AvaloniaUI}/Avalonia.Samples}
       \field{langid}{english}
-      \field{title}{Avalonia.Samples/src/Avalonia.Samples/{CustomControls}/{SnowflakesControlSample}/Controls/{ScoreRenderer}.cs}
+      \field{title}{Avalonia samples - SnowflakesControlSample}
       \field{titleaddon}{{GitHub}}
       \field{urlday}{11}
       \field{urlmonth}{7}
