@@ -2,6 +2,7 @@ project(arguino.executable)
 
 find_package(Boost REQUIRED COMPONENTS program_options REQUIRED)
 
+# SKETCH PREPROCESSING
 if(WIN32)
     set(PREPROCESS_SCRIPT "${CMAKE_CURRENT_SOURCE_DIR}/preprocess.bat")
 else()
@@ -10,16 +11,19 @@ endif()
 
 set(SKETCH "" CACHE PATH "Path to the sketch directory")
 get_filename_component(SKETCH_NAME "${SKETCH}" NAME)
+
+if(NOT SKETCH)
+    message(FATAL_ERROR "Sketch directory not specified!")
+endif()
+
 message("-- Setting sketch directory to: ${SKETCH}")
 
-if(SKETCH)
-    file(GLOB INO_FILES CONFIGURE_DEPENDS "${SKETCH}/*.ino")
-    file(GLOB H_FILES CONFIGURE_DEPENDS "${SKETCH}/*.h")
-    file(GLOB HPP_FILES CONFIGURE_DEPENDS "${SKETCH}/*.hpp")
-    file(GLOB C_FILES CONFIGURE_DEPENDS "${SKETCH}/*.c")
-    file(GLOB CPP_FILES CONFIGURE_DEPENDS "${SKETCH}/*.cpp")
-    file(GLOB S_FILES CONFIGURE_DEPENDS "${SKETCH}/*.S")
-endif()
+file(GLOB INO_FILES CONFIGURE_DEPENDS "${SKETCH}/*.ino")
+file(GLOB H_FILES CONFIGURE_DEPENDS "${SKETCH}/*.h")
+file(GLOB HPP_FILES CONFIGURE_DEPENDS "${SKETCH}/*.hpp")
+file(GLOB C_FILES CONFIGURE_DEPENDS "${SKETCH}/*.c")
+file(GLOB CPP_FILES CONFIGURE_DEPENDS "${SKETCH}/*.cpp")
+file(GLOB S_FILES CONFIGURE_DEPENDS "${SKETCH}/*.S")
 
 add_custom_command(
   OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/sketch/sketch.cpp"
@@ -46,7 +50,7 @@ target_link_libraries(arguino-tcp PRIVATE
     Boost::program_options
 )
 
-set_target_properties(arguino-tcp PROPERTIES SUFFIX "-${SKETCH_NAME}")
+set_target_properties(arguino-tcp PROPERTIES OUTPUT_NAME "arguino-tcp-${SKETCH_NAME}")
 
 # SHARED MEMORY IMPLEMENTATION
 add_executable(arguino main.cpp

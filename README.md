@@ -33,24 +33,22 @@ Using Arduino to draw chevron-like patterns
 ## Usage
 ### Backend process
 
-1. Run `preprocess.sh` from the repository's root directory with the sketch directory as an argument. On Windows, use the `preprocess.bat` script instead. For example:
+1. Configure the CMake project in `backend/` with a `-DSKETCH` flag specifying the path to the sketch directory. This has to be done only when changing the sketch.
     
-    ```shell
-    ./preprocess.sh tests/buttons.
-    ```
+2. Build the configured CMake directory after any change to the sketch. Available targets are:
     
-2. Build `backend/CMakeLists.txt`. Available targets are:
-    
-    * **`arguino-shared-memory`**: for IPC over shared memory
+    * **`arguino`**: for IPC over shared memory (preferred).
     * **`arguino-tcp`**: for IPC over TCP connection
-    * **`arguino`**: is an alias for the shared memory version (Default and preferred version).
 
-3. Run[^1]
-    ```shell
-    <build dir>/executable/<build target>
-    ```
+3. The executable file will have the format `<build target>-<sketch name>`
 
-[^1]: On Windows, the `.exe` extension is usually appended, i.e. `.../<build target>.exe`.
+For example, to run the `wave` sketch, you can execute these commands from the root of the repository:
+
+```shell
+cmake -S ./backend -B ./backend/build -DSKETCH=tests/wave
+cmake --build ./backend/build --target arguino
+./backend/build/exacutable/arguino-wave
+```
 
 ### Frontend process
 

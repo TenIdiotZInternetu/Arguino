@@ -19,28 +19,27 @@ First make sure you comply with the software prerequisites from the section \ref
 
 \subsubsection{Backend process}
 \begin{enumerate}
-    \item Run \texttt{preprocess.sh} from the repository's root directory with the sketch directory as an argument. On Windows, use the \texttt{preprocess.bat} script instead. For example:
+    \item Configure the CMake project in \texttt{backend/} with a \texttt{-DSKETCH} flag specifying the path to the sketch directory. This has to be done only when changing the sketch.
     
-    \begin{lstlisting}[language=shell]
-    ./preprocess.sh #tests/buttons#.
-    \end{lstlisting}
-    
-    \item Build \texttt{backend/CMakeLists.txt}. Available targets are:
+    \item Build the configured CMake directory after any change to the sketch. Available targets are:
     
     \begin{description}
-        \item[\texttt{arguino-shared-memory}] for IPC over shared memory
+        \item[\texttt{arguino}] for IPC over shared memory (preferred).
         \item[\texttt{arguino-tcp}] for IPC over TCP connection
-        \item[\texttt{arguino}] is an alias for the shared memory version (Default and preferred version).
     \end{description}
 
-    \item Run \footnotemark
-    \begin{lstlisting}[language=shell]
-    <build dir>/executable/<build target>
-    \end{lstlisting}
-    
+    \item The executable file will have the format \texttt{<build target>-<sketch name>}
 \end{enumerate}
 
-\footnotetext{On Windows, the \texttt{.exe} extension is usually appended, i.e. \texttt{.../<build target>.exe}.}
+For example, to run the \texttt{wave} sketch, you can execute these commands from the root of the repository: \footnotemark
+
+\begin{lstlisting}[language=shell, caption={Example build process of the backend}]
+    cmake -S #./backend# -B .#/backend/build# #-DSKETCH=tests/wave#
+    cmake --build #./backend/build# --target #arguino#
+    ./backend/build/exacutable/arguino-wave
+\end{lstlisting}
+
+\footnotetext{The path of the actual executable may change depending on the build tool. The example shows usage with Linux and Clang. On Windows, the \texttt{.exe} extension is usually appended, i.e. \texttt{.../<target>-<sketch>.exe}.}
 
 \subsubsection{Frontend process}
 \begin{enumerate}
