@@ -9,6 +9,7 @@ else()
 endif()
 
 set(SKETCH "" CACHE PATH "Path to the sketch directory")
+get_filename_component(SKETCH_NAME "${SKETCH}" NAME)
 message("-- Setting sketch directory to: ${SKETCH}")
 
 if(SKETCH)
@@ -24,7 +25,7 @@ add_custom_command(
   OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/sketch/sketch.cpp"
   COMMAND "${PREPROCESS_SCRIPT}" "${SKETCH}" "${CMAKE_CURRENT_SOURCE_DIR}"
   DEPENDS "${INO_FILES}" "${H_FILES}" "${HPP_FILES}" "${C_FILES}" "${CPP_FILES}" "${S_FILES}" "${PREPROCESS_SCRIPT}"
-  COMMENT "Preprocessing sketch files from ${SKETCH}..."
+  COMMENT "Preprocessing sketch files from ${SKETCH}"
   VERBATIM
 )
 
@@ -45,20 +46,19 @@ target_link_libraries(arguino-tcp PRIVATE
     Boost::program_options
 )
 
+set_target_properties(arguino-tcp PROPERTIES SUFFIX "-${SKETCH_NAME}")
+
 # SHARED MEMORY IMPLEMENTATION
-add_executable(arguino-shared-memory main.cpp
+add_executable(arguino main.cpp
     ipc/shmemAdapter.cpp
     encoders/textEncoder.cpp
 )
 
-target_compile_definitions(arguino-shared-memory PRIVATE ARGUINO_SHARED_MEMORY)
-target_link_libraries(arguino-shared-memory PRIVATE
+target_compile_definitions(arguino PRIVATE ARGUINO_SHARED_MEMORY)
+target_link_libraries(arguino PRIVATE
     arguino.simulator
     arguino.shmem
     Boost::program_options
 )
 
-# DEFAULT EXE
-set(DEFAULT_IMPL arguino-shared-memory)
-set_target_properties(${DEFAULT_IMPL} PROPERTIES OUTPUT_NAME arguino)
-add_executable(arguino ALIAS ${DEFAULT_IMPL})
+set_target_properties(arguino PROPERTIES OUTPUT_NAME "arguino-${SKETCH_NAME}")
