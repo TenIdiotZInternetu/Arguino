@@ -2,7 +2,7 @@
 
 This project is the main focus of the bachelor thesis written for the Faculty of Mathematics and Physics at Charles University in 2026.
 
-Author: Adam Balko
+Author: Adam Balko  
 Supervisor:  RNDr. David Bednárek, Ph.D.
 
 ## Introduction
