@@ -1,0 +1,8 @@
+name: 8-bit Shift Register
+description: A shift register with internal storage of 8 bits. The data is inserted sequentially through the data pin on rising edge of a clock cycle. Use latch pin to store the data.
+imageSize: 0 300
+pins: 8
+pinNames:
+  - data
+  - clock
+  - latch
