@@ -17,7 +17,7 @@ public abstract class Component {
     
     public event Action<SKSvg>? SpriteChangedEvent;
 
-    private readonly List<Pin> _pins = [];
+    public readonly List<Pin> Pins = [];
     private static readonly Dictionary<string, ComponentConfiguration> _configs = [];
     
     internal Component(string typeName) {
@@ -36,7 +36,7 @@ public abstract class Component {
 
     public Pin? GetPin(string name) {
         try {
-            return _pins.First(pin => pin.Name == name);
+            return Pins.First(pin => pin.Name == name);
         }
         catch (InvalidOperationException) {
             ComponentManager.LogError($"Accessing unknown pin '{name}' of the component {this}");
@@ -46,7 +46,7 @@ public abstract class Component {
 
     public Pin? GetPin(uint id) {
         try {
-            return _pins.First(pin => pin.Id == id);
+            return Pins.First(pin => pin.Id == id);
         }
         catch (InvalidOperationException) {
             ComponentManager.LogError($"Accessing unknown pin with '{id}' of the component {this}");
@@ -77,7 +77,7 @@ public abstract class Component {
     internal void InitPins() {
         foreach (PinPrototype prototype in Configuration.Pins) {
             var pin = new Pin(this, prototype);
-            _pins.Add(pin);
+            Pins.Add(pin);
 
             pin.StateChangedEvent += OnPinStateChanged;
             pin.PinConnectedEvent += OnPinConnected;
