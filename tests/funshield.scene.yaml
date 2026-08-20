@@ -6,7 +6,7 @@ Components:
     Funshield1:
       position: 10 10
   SegmentDisplay:
-    SD1:
+    SD:
       position: 45 25
   ShiftRegister8Bit:
     Reg1:
@@ -200,3 +200,63 @@ Components:
     R2_7:
       position: 96.1 95
       scale: 0.7 0.7
+  Vcc:
+    V:
+      position: 300 200
+      rotation: 180
+Nodes:
+  - [ A1.D13, LED1.cathode ]
+  - [ A1.D12, LED2.cathode ]
+  - [ A1.D11, LED3.cathode ]
+  - [ A1.D10, LED4.cathode ]
+  - [ A1.D4, Reg2.latch ]
+  - [ A1.D7, Reg2.clock ]
+  - [ A1.D8, Reg2.data ]
+  - [ A1.D0, Btn1.0 ]
+  - [ A1.D1, Btn2.0 ]
+  - [ A1.D2, Btn3.0 ]
+  - [ V.0, Btn1.1, Btn2.1, Btn3.1 ]
+  - [ Reg2.0, R2_0.cathode, SD.A ]
+  - [ Reg2.1, R2_1.cathode, SD.B ]
+  - [ Reg2.2, R2_2.cathode, SD.C ]
+  - [ Reg2.3, R2_3.cathode, SD.D ]
+  - [ Reg2.4, R2_4.cathode, SD.E ]
+  - [ Reg2.5, R2_5.cathode, SD.F ]
+  - [ Reg2.6, R2_6.cathode, SD.G ]
+  - [ Reg2.7, R2_7.cathode, SD.DP ]
+  - [ Reg1.0, R1_0.cathode, SD.D1 ]
+  - [ Reg1.1, R1_1.cathode, SD.D2 ]
+  - [ Reg1.2, R1_2.cathode, SD.D3 ]
+  - [ Reg1.3, R1_3.cathode, SD.D4 ]
+  - [ Reg1.4, R1_4.cathode ]
+  - [ Reg1.5, R1_5.cathode ]
+  - [ Reg1.6, R1_6.cathode ]
+  - [ Reg1.7, R1_7.cathode ]
+  - [ SD.out_1A, LED_1a.cathode ]
+  - [ SD.out_1B, LED_1b.cathode ]
+  - [ SD.out_1C, LED_1c.cathode ]
+  - [ SD.out_1D, LED_1d.cathode ]
+  - [ SD.out_1E, LED_1e.cathode ]
+  - [ SD.out_1F, LED_1f.cathode ]
+  - [ SD.out_1G, LED_1g.cathode ]
+  - [ SD.out_2A, LED_2a.cathode ]
+  - [ SD.out_2B, LED_2b.cathode ]
+  - [ SD.out_2C, LED_2c.cathode ]
+  - [ SD.out_2D, LED_2d.cathode ]
+  - [ SD.out_2E, LED_2e.cathode ]
+  - [ SD.out_2F, LED_2f.cathode ]
+  - [ SD.out_2G, LED_2g.cathode ]
+  - [ SD.out_3A, LED_3a.cathode ]
+  - [ SD.out_3B, LED_3b.cathode ]
+  - [ SD.out_3C, LED_3c.cathode ]
+  - [ SD.out_3D, LED_3d.cathode ]
+  - [ SD.out_3E, LED_3e.cathode ]
+  - [ SD.out_3F, LED_3f.cathode ]
+  - [ SD.out_3G, LED_3g.cathode ]
+  - [ SD.out_4A, LED_4a.cathode ]
+  - [ SD.out_4B, LED_4b.cathode ]
+  - [ SD.out_4C, LED_4c.cathode ]
+  - [ SD.out_4D, LED_4d.cathode ]
+  - [ SD.out_4E, LED_4e.cathode ]
+  - [ SD.out_4F, LED_4f.cathode ]
+  - [ SD.out_4G, LED_4g.cathode ]

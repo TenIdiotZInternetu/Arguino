@@ -30,7 +30,7 @@ public class SegmentDisplay : Component {
             }
         }
         
-        if (DIGIT_PINS.Contains(pin.Name)) {
+        if (SEGMENT_PINS.Contains(pin.Name)) {
             foreach (var digit in DIGIT_PINS) {
                 Pin digitPin = GetPin(digit)!;
                 Pin outPin = GetOutPin(digitPin, pin)!;
@@ -39,8 +39,8 @@ public class SegmentDisplay : Component {
         }
     }
 
-    private Pin? GetOutPin(Pin digit, Pin segment) {
-        string pinName = OUT_PIN_PREFIX + digit.ToString()[1] + segment.ToString();
+    private Pin? GetOutPin(Pin digitPin, Pin segmentPin) {
+        string pinName = OUT_PIN_PREFIX + digitPin.Name![1] + segmentPin.Name;
         return GetPin(pinName);
     }
 
