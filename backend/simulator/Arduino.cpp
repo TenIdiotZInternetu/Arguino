@@ -47,4 +47,25 @@ void pinMode(uint8_t pin, uint8_t mode)
         Event::set_pinmode(pin, pinMode)  //
     );
 }
+
+void shiftOut(uint8_t dataPin, uint8_t clockPin, uint8_t bitOrder, uint8_t val)
+{
+    constexpr int BITS = 8;
+
+    if (bitOrder == LSBFIRST) {
+        for (int i = 0; i < BITS; ++i) {
+            digitalWrite(dataPin, val >> i);
+            digitalWrite(clockPin, HIGH);
+            digitalWrite(clockPin, LOW);
+        }
+    }
+    if (bitOrder == MSBFIRST) {
+        for (int i = BITS - 1; i >= 0; --i) {
+            digitalWrite(dataPin, val >> i);
+            digitalWrite(clockPin, HIGH);
+            digitalWrite(clockPin, LOW);
+        }
+    }
+}
+
 #endif  // ARGUINO_ARDUINO_HPP
