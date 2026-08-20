@@ -33,7 +33,7 @@ public class YamlSceneLoader : ISceneLoader {
     private readonly Dictionary<string, List<Component>> _instancesByType = [];
 
     public Dictionary<string, Component> InstantiateComponents() {
-        if (_sceneDto?.Nodes == null) {
+        if (_sceneDto?.Components == null) {
             throw new InvalidOperationException("Instantiating components before loading them from file");
         }
 

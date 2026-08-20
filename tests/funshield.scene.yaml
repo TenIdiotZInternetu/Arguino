@@ -1,0 +1,202 @@
+Components:
+  Arduino:
+    A1:
+      position: 10 10
+  Funshield:
+    Funshield1:
+      position: 10 10
+  SegmentDisplay:
+    SD1:
+      position: 45 25
+  ShiftRegister8Bit:
+    Reg1:
+      position: 35 100
+      scale: 1.2 1.2
+    Reg2:
+      position: 90 100
+      scale: 1.2 1.2
+  Button:
+    Btn1:
+      position: 5 215
+      scale: 0.3 0.3
+    Btn2:
+      position: 35 215
+      scale: 0.3 0.3
+    Btn3:
+      position: 65 215
+      scale: 0.3 0.3
+  Led:
+    LED1:
+      position: 160 90
+      scale: 0.35 0.35
+    LED2:
+      position: 160 112
+      scale: 0.35 0.35
+    LED3:
+      position: 160 134
+      scale: 0.35 0.35
+    LED4:
+      position: 160 156
+      scale: 0.35 0.35
+  SegmentLed:
+    LED_1a:
+      position: 50 35
+      scale: 0.8 0.8
+    LED_1b:
+      position: 59 44
+      scale: 0.8 0.8
+      rotation: 90
+    LED_1c:
+      position: 59 62
+      scale: 0.8 0.8
+      rotation: 90
+    LED_1d:
+      position: 50 71
+      scale: 0.8 0.8
+      rotation: 180
+    LED_1e:
+      position: 41 62
+      scale: 0.8 0.8
+      rotation: 270
+    LED_1f:
+      position: 41 44
+      scale: 0.8 0.8
+      rotation: 270
+    LED_1g:
+      position: 50 53
+      scale: 0.8 0.8
+    LED_2a:
+      position: 84 35
+      scale: 0.8 0.8
+    LED_2b:
+      position: 93 44
+      scale: 0.8 0.8
+      rotation: 90
+    LED_2c:
+      position: 93 62
+      scale: 0.8 0.8
+      rotation: 90
+    LED_2d:
+      position: 84 71
+      scale: 0.8 0.8
+      rotation: 180
+    LED_2e:
+      position: 75 62
+      scale: 0.8 0.8
+      rotation: 270
+    LED_2f:
+      position: 75 44
+      scale: 0.8 0.8
+      rotation: 270
+    LED_2g:
+      position: 84 53
+      scale: 0.8 0.8
+    LED_3a:
+      position: 118 35
+      scale: 0.8 0.8
+    LED_3b:
+      position: 127 44
+      scale: 0.8 0.8
+      rotation: 90
+    LED_3c:
+      position: 127 62
+      scale: 0.8 0.8
+      rotation: 90
+    LED_3d:
+      position: 118 71
+      scale: 0.8 0.8
+      rotation: 180
+    LED_3e:
+      position: 109 62
+      scale: 0.8 0.8
+      rotation: 270
+    LED_3f:
+      position: 109 44
+      scale: 0.8 0.8
+      rotation: 270
+    LED_3g:
+      position: 118 53
+      scale: 0.8 0.8
+    LED_4a:
+      position: 152 35
+      scale: 0.8 0.8
+    LED_4b:
+      position: 161 44
+      scale: 0.8 0.8
+      rotation: 90
+    LED_4c:
+      position: 161 62
+      scale: 0.8 0.8
+      rotation: 90
+    LED_4d:
+      position: 152 71
+      scale: 0.8 0.8
+      rotation: 180
+    LED_4e:
+      position: 143 62
+      scale: 0.8 0.8
+      rotation: 270
+    LED_4f:
+      position: 143 44
+      scale: 0.8 0.8
+      rotation: 270
+    LED_4g:
+      position: 152 53
+      scale: 0.8 0.8
+  SegmentLedDp:
+    LED_1Dp:
+      position: 74 72
+    LED_2Dp:
+      position: 108 72
+    LED_3Dp:
+      position: 142 72
+    LED_4Dp:
+      position: 176 72
+    R1_0:
+      position: 77.5 95
+      scale: 0.7 0.7
+    R1_1:
+      position: 72.3 95
+      scale: 0.7 0.7
+    R1_2:
+      position: 67.1 95
+      scale: 0.7 0.7
+    R1_3:
+      position: 61.9 95
+      scale: 0.7 0.7
+    R1_4:
+      position: 56.7 95
+      scale: 0.7 0.7
+    R1_5:
+      position: 51.5 95
+      scale: 0.7 0.7
+    R1_6:
+      position: 46.3 95
+      scale: 0.7 0.7
+    R1_7:
+      position: 41.1 95
+      scale: 0.7 0.7
+    R2_0:
+      position: 132.5 95
+      scale: 0.7 0.7
+    R2_1:
+      position: 127.3 95
+      scale: 0.7 0.7
+    R2_2:
+      position: 122.1 95
+      scale: 0.7 0.7
+    R2_3:
+      position: 116.9 95
+      scale: 0.7 0.7
+    R2_4:
+      position: 111.7 95
+      scale: 0.7 0.7
+    R2_5:
+      position: 106.5 95
+      scale: 0.7 0.7
+    R2_6:
+      position: 101.3 95
+      scale: 0.7 0.7
+    R2_7:
+      position: 96.1 95
+      scale: 0.7 0.7
