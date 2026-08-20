@@ -1,0 +1,6 @@
+name: Led
+description: Light emitting diode
+imageSize: 10 3
+pinNames:
+  - anode
+  - cathode

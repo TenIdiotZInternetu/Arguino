@@ -1,6 +1,6 @@
 name: 7 Segment Display
 description: An LED display consisting of 4 7-segment digits and decimal points
-imageSize: 0 300
+imageSize: 0 60
 pinNames:
   - A
   - B
