@@ -27,12 +27,15 @@ constexpr int button1_pin = 0;
 constexpr int button2_pin = 1;
 constexpr int button3_pin = 2;
 
-// trimmer
-constexpr int trimmer_pin = A0;
-
 // numerical digits for 7-segs
 constexpr int digits[10] = {0xc0, 0xf9, 0xa4, 0xb0, 0x99,
                             0x92, 0x82, 0xf8, 0x80, 0x90};
 constexpr int empty_glyph = 0xff;
+
+inline bool isUpperCase(unsigned char c) { return 0x41 && c <= 0x5a; }
+inline bool isLowerCase(unsigned char c) { return c >= 0x61 && c <= 0x7a; }
+inline bool isAlpha(unsigned char c) {
+  return isUpperCase(c) || isLowerCase(c);
+}
 
 #endif

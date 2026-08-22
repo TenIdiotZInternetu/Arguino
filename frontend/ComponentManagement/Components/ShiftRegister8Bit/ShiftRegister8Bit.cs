@@ -40,9 +40,9 @@ public class ShiftRegister8Bit : Component {
     }
 
     private void LoadNextBit(bool bit) {
-        _storedValue <<= 1;
+        _readValue <<= 1;
         if (bit) {
-            _storedValue |= 1;
+            _readValue |= 1;
         }
     }
 
