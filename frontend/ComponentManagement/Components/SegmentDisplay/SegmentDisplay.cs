@@ -26,7 +26,7 @@ public class SegmentDisplay : Component {
             foreach (var segment in SEGMENT_PINS) {
                 Pin segmentPin = GetPin(segment)!;
                 Pin outPin = GetOutPin(pin, segmentPin)!;
-                outPin.SetValue(pin.IsHigh && segmentPin.IsHigh);
+                outPin.SetValue(pin.IsLow && segmentPin.IsLow);
             }
         }
         
@@ -34,7 +34,7 @@ public class SegmentDisplay : Component {
             foreach (var digit in DIGIT_PINS) {
                 Pin digitPin = GetPin(digit)!;
                 Pin outPin = GetOutPin(digitPin, pin)!;
-                outPin.SetValue(pin.IsHigh && digitPin.IsHigh);
+                outPin.SetValue(pin.IsLow && digitPin.IsLow);
             }
         }
     }

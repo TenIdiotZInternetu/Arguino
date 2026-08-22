@@ -9,6 +9,7 @@ public class ShiftRegister8Bit : Component {
     private Pin _dataPin = null!; 
     private Pin _clockPin = null!; 
     private Pin _latchPin = null!;
+    private Pin _dataPassPin = null!;
 
     private byte _storedValue;
     private byte _readValue;
@@ -19,10 +20,12 @@ public class ShiftRegister8Bit : Component {
         _dataPin = GetPin("data")!;
         _clockPin = GetPin("clock")!;
         _latchPin = GetPin("latch")!;
+        _dataPassPin = GetPin("data_pass")!;
         
         _dataPin.MakeReadOnly();
         _clockPin.MakeReadOnly();
         _latchPin.MakeReadOnly();
+        _dataPassPin.MakeWriteOnly();
 
         for (uint bit = 0; bit < OUTPUT_BITS; bit++) {
             GetPin(bit)!.MakeWriteOnly();
@@ -40,6 +43,10 @@ public class ShiftRegister8Bit : Component {
     }
 
     private void LoadNextBit(bool bit) {
+        const byte lastBit = 0x80;
+        bool overflownBit = (_readValue & lastBit) != 0;
+        _dataPassPin.SetValue(overflownBit);
+        
         _readValue <<= 1;
         if (bit) {
             _readValue |= 1;
