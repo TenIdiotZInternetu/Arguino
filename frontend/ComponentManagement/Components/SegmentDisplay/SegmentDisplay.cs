@@ -7,10 +7,10 @@ using Logger;
 namespace ComponentManagement.Components.SegmentDisplay;
 
 public class SegmentDisplay : Component {
-    private struct _LogMessage(string Text) : IMessage {
+    private struct _CompMessage(Component Comp, string Text) : IMessage {
         public LogLevel LogLevel => LogLevel.Debug;
         public string AsString() => Text;
-        public string Type() => "DEBUG-7SEGMENT";
+        public string Type() => "DEBUG:" + Comp.Name;
     }
     
     private static readonly string[] DIGIT_PINS = ["D1", "D2", "D3", "D4"];
@@ -35,7 +35,7 @@ public class SegmentDisplay : Component {
             foreach (var segment in SEGMENT_PINS) {
                 Pin segmentPin = GetPin(segment)!;
                 Pin outPin = GetOutPin(pin, segmentPin)!;
-                outPin.SetValue(pin.IsLow && segmentPin.IsLow);
+                outPin.SetValue(pin.IsHigh && segmentPin.IsLow);
             }
         }
         
@@ -43,7 +43,7 @@ public class SegmentDisplay : Component {
             foreach (var digit in DIGIT_PINS) {
                 Pin digitPin = GetPin(digit)!;
                 Pin outPin = GetOutPin(digitPin, pin)!;
-                outPin.SetValue(pin.IsLow && digitPin.IsLow);
+                outPin.SetValue(digitPin.IsHigh && pin.IsLow);
             }
         }
 
@@ -80,7 +80,7 @@ public class SegmentDisplay : Component {
             Pin segPin = GetPin(seg)!; 
             sb.Append(segPin.IsHigh ? "1" : "0");
         }
-        ComponentManager.Logger.Log(new _LogMessage(sb.ToString()));
+        ComponentManager.Logger.Log(new _CompMessage(this, sb.ToString()));
         sb.Clear();        
 
         sb.Append("OUT = ");
@@ -92,6 +92,6 @@ public class SegmentDisplay : Component {
             }
             sb.Append(" | ");
         }
-        ComponentManager.Logger.Log(new _LogMessage(sb.ToString()));
+        ComponentManager.Logger.Log(new _CompMessage(this, sb.ToString()));
     }
 }

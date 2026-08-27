@@ -16,8 +16,11 @@ public class Led : Component {
     private Pin _cathode = null!;
     private Pin _anode = null!;
 
-    
-    public Led(string typeName) : base(typeName) {}
+    private readonly SynchronizationContext _uiContext;
+
+    public Led(string typeName) : base(typeName) {
+        _uiContext = SynchronizationContext.Current!;
+    }
 
     internal override void OnInitialized() {
         UpdateSprite(SPRITE_LED_OFF);
@@ -41,7 +44,7 @@ public class Led : Component {
     }
 
     private void OnTurnOffTimer(object? _) {
-        SynchronizationContext.Current?.Post(_ => {
+        _uiContext.Post(_ => {
             if (_cathode.IsLow) {
                 UpdateSprite(SPRITE_LED_OFF);
             }
