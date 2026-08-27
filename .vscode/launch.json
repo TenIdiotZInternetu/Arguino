@@ -8,7 +8,7 @@
             "name": "Linux",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/backend/build/executable/arguino-segment7",
+            "program": "${workspaceFolder}/backend/build/executable/arguino-dice",
             "MIMode": "gdb",
             "cwd": "${workspaceFolder}",
             "setupCommands": [
@@ -20,9 +20,9 @@
             ],
             "args": [
                 "-v",
-                "Debug",
+                "Warning",
                 "--shmem-size",
-                "4",
+                "32",
             ]
         },
         {

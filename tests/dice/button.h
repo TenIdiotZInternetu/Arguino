@@ -22,7 +22,7 @@ public:
     // pinMode(pin, INPUT);
   }
 
-  bool isHeld() { return !digitalRead(pin); }
+  bool isHeld() { return digitalRead(pin); }
 
   bool SignalsAction(unsigned long timestamp) {
     bool isSignalOn = false;

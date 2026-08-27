@@ -5,8 +5,8 @@
 #define FUNSHIELD_CONSTANTS_H__
 
 // convenience constants for switching on/off
-constexpr int ON = LOW;
-constexpr int OFF = HIGH;
+constexpr int ON = HIGH;
+constexpr int OFF = LOW;
 
 // 7-segs
 constexpr int latch_pin = 4;

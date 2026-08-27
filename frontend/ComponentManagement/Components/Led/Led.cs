@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using ComponentManagement.Circuitry;
 using ComponentManagement.Scenes;
 
@@ -10,13 +11,19 @@ public class Led : Component {
     private const string PIN_CATHODE = "cathode";
     private const string PIN_ANODE = "anode";
 
-    private const int TURNOFF_DELAY_MS = 15;
-    private Timer _turnOffTimer;
+    private const int INTEGRATOR_INTERVAL_MS = 30;
+    private const int INTEGRATOR_TRESHOLD_MS = 4;
+    private Timer _integratorTimer;
     
     private Pin _cathode = null!;
     private Pin _anode = null!;
 
     private readonly SynchronizationContext _uiContext;
+    private readonly Stopwatch _stopwatch = new();
+
+    private TimeSpan _lastMeasuredTime;
+    private TimeSpan _integratedTime = TimeSpan.Zero;
+    private bool _turnedOn;
 
     public Led(string typeName) : base(typeName) {
         _uiContext = SynchronizationContext.Current!;
@@ -28,32 +35,39 @@ public class Led : Component {
         _cathode.MakeReadOnly();
         _anode = GetPin(PIN_ANODE)!;
 
-        _turnOffTimer = new(OnTurnOffTimer, null, TURNOFF_DELAY_MS, Timeout.Infinite);
+        _integratorTimer = new(OnIntegratorTimer, null, INTEGRATOR_INTERVAL_MS, INTEGRATOR_INTERVAL_MS);
+        _stopwatch.Start();
+        _lastMeasuredTime = _stopwatch.Elapsed;
     }
 
     public override void OnPinStateChanged(Pin pin) {
         if (pin != _cathode) return;
         
-        if (pin.IsLow) {
-            StartTimer();
+        if (pin.IsHigh) {
+            _lastMeasuredTime = _stopwatch.Elapsed;
         }
         else {
-            StopTimer();
-            UpdateSprite(SPRITE_LED_ON);
+            _integratedTime += _stopwatch.Elapsed - _lastMeasuredTime;
         }
     }
 
-    private void OnTurnOffTimer(object? _) {
+    private void OnIntegratorTimer(object? _) {
+        if (_cathode.IsHigh) {
+            _integratedTime += _stopwatch.Elapsed - _lastMeasuredTime;
+        }
+        
+        var shouldBeOn = _integratedTime.TotalMilliseconds >= INTEGRATOR_TRESHOLD_MS;
+        _lastMeasuredTime = _stopwatch.Elapsed;
+        _integratedTime = TimeSpan.Zero;
+        
+        if (shouldBeOn == _turnedOn) {
+            return;
+        }
+
+        _turnedOn = shouldBeOn;
+        
         _uiContext.Post(_ => {
-            if (_cathode.IsLow) {
-                UpdateSprite(SPRITE_LED_OFF);
-            }
+            UpdateSprite(_turnedOn ? SPRITE_LED_ON : SPRITE_LED_OFF);
         }, null);
     }
-
-    private void StartTimer() =>
-        _turnOffTimer.Change(TURNOFF_DELAY_MS, Timeout.Infinite);
-
-    private void StopTimer() =>
-        _turnOffTimer.Change(Timeout.Infinite, Timeout.Infinite);
 }
