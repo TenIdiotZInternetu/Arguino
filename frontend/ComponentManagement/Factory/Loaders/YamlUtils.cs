@@ -1,4 +1,5 @@
 using System.Numerics;
+using System.Globalization;
 
 namespace ComponentManagement.Factory.Loaders;
 
@@ -17,8 +18,8 @@ public static class YamlUtils {
 
         float x = 0, y = 0;
         bool success = true;
-        success = success && float.TryParse(values[0], out x);
-        success = success && float.TryParse(values[1], out y);
+        success = success && float.TryParse(values[0], CultureInfo.GetCultureInfo("en-US"), out x);
+        success = success && float.TryParse(values[1], CultureInfo.GetCultureInfo("en-US"), out y);
 
         if (!success) {
             ComponentManager.LogError($"Incorrect vector2 definition '{valuePair}'; Float parsing failed.");
