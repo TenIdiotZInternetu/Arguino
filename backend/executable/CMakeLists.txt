@@ -5,16 +5,20 @@ find_package(Boost REQUIRED COMPONENTS program_options REQUIRED)
 # SKETCH PREPROCESSING
 if(WIN32)
     set(PREPROCESS_SCRIPT "${CMAKE_CURRENT_SOURCE_DIR}/preprocess.bat")
+    set(PREPROCESS_COMMAND call)
 else()
     set(PREPROCESS_SCRIPT "${CMAKE_CURRENT_SOURCE_DIR}/preprocess.sh")
+    set(PREPROCESS_COMMAND)
 endif()
 
-set(SKETCH "" CACHE PATH "Path to the sketch directory")
-get_filename_component(SKETCH_NAME "${SKETCH}" NAME)
+set(SKETCH "" CACHE STRING "Path to the sketch directory")
 
 if(NOT SKETCH)
     message(FATAL_ERROR "Sketch directory not specified!")
 endif()
+
+get_filename_component(SKETCH "${SKETCH}" ABSOLUTE BASE_DIR "${CMAKE_SOURCE_DIR}")
+get_filename_component(SKETCH_NAME "${SKETCH}" NAME)
 
 message("-- Setting sketch directory to: ${SKETCH}")
 
@@ -27,7 +31,7 @@ file(GLOB S_FILES CONFIGURE_DEPENDS "${SKETCH}/*.S")
 
 add_custom_command(
   OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/sketch/sketch.cpp"
-  COMMAND "${PREPROCESS_SCRIPT}" "${SKETCH}" "${CMAKE_CURRENT_SOURCE_DIR}"
+    COMMAND ${PREPROCESS_COMMAND} "${PREPROCESS_SCRIPT}" "${SKETCH}" "${CMAKE_CURRENT_SOURCE_DIR}"
   DEPENDS "${INO_FILES}" "${H_FILES}" "${HPP_FILES}" "${C_FILES}" "${CPP_FILES}" "${S_FILES}" "${PREPROCESS_SCRIPT}"
   COMMENT "Preprocessing sketch files from ${SKETCH}"
   VERBATIM
