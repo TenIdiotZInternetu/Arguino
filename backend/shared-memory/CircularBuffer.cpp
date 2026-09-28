@@ -77,7 +77,7 @@ CircularBuffer::iterator_t CircularBuffer::producer_it()
 CircularBuffer::iterator_t CircularBuffer::consumer_it()
 {
     std::atomic_ref<uint64_t> atomic_consumer(  //
-        _memoryRegion->at<uint64_t>(PRODUCER_PTR_LOCATION));
+        _memoryRegion->at<uint64_t>(CONSUMER_PTR_LOCATION));
 
     atomic_consumer.load(std::memory_order_acquire);
     return iterator_t(this, atomic_consumer);

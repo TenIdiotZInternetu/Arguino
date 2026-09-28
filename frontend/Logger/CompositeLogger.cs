@@ -1,12 +1,13 @@
 namespace Logger;
 
 public class CompositeLogger : ILogger {
-    public LogLevel Verbosity { get; set; } = LogLevel.Info;
+    public LogLevel Verbosity { get; set; }
     
     private readonly List<ILogger> _loggers = [];
 
     public CompositeLogger(params ILogger[] loggers) {
         _loggers.AddRange(loggers);
+        Verbosity = loggers.Min(l => l.Verbosity);
     }
     
     public void Log(string message) {

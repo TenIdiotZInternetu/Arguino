@@ -8,9 +8,9 @@
             "name": "Linux",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/backend/build/clang/executable/arguino",
+            "program": "${workspaceFolder}/backend/build/executable/arguino-dice",
             "MIMode": "gdb",
-            "cwd": "${workspaceFolder}/backend",
+            "cwd": "${workspaceFolder}",
             "setupCommands": [
                 {
                     "description": "Enable pretty-printing for gdb",
@@ -18,10 +18,11 @@
                     "ignoreFailures": true
                 }
             ],
-            "preLaunchTask": "CMake: build",
             "args": [
                 "-v",
-                "Debug"
+                "Warning",
+                "--shmem-size",
+                "32",
             ]
         },
         {

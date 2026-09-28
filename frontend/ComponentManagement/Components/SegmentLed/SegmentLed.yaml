@@ -1,0 +1,6 @@
+name: SegmentLed
+description: Light emitting diode
+imageSize: 22 7
+pinNames:
+  - anode
+  - cathode

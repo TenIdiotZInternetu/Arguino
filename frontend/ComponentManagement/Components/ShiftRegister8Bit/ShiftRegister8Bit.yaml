@@ -1,0 +1,9 @@
+name: ShiftRegister8Bit
+description: A shift register with internal storage of 8 bits. The data is inserted sequentially through the data pin on rising edge of a clock cycle. Use latch pin to store the data. Overflown bits can be pushed to other register with the data_pass pin.
+imageSize: 0 20
+pins: 8
+pinNames:
+  - data
+  - clock
+  - latch
+  - data_pass

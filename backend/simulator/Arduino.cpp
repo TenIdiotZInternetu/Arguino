@@ -11,6 +11,8 @@
 // Arduino.h must be the last included header because it defines macros like INPUT and OUTPUT that
 // spoil windows.h
 
+#include <sys/types.h>
+
 #include "Arduino.h"
 
 using namespace arguino::simulator;
@@ -47,4 +49,31 @@ void pinMode(uint8_t pin, uint8_t mode)
         Event::set_pinmode(pin, pinMode)  //
     );
 }
+
+void shiftOut(uint8_t dataPin, uint8_t clockPin, uint8_t bitOrder, uint8_t val)
+{
+    constexpr int BITS = 8;
+    constexpr int LSB = 0b00000001;
+    constexpr int MSB = 0b10000000;
+
+    for (int i = 0; i < BITS; ++i) {
+        uint8_t bit;
+
+        if (bitOrder == MSBFIRST) {
+            bit = ((val << i) & MSB) != 0;
+        }
+        else if (bitOrder == LSBFIRST) {
+            bit = ((val >> i) & LSB) != 0;
+        }
+        else {
+            Simulator::log_error("Invalid bitOrder parameter during shiftOut");
+            return;
+        }
+
+        digitalWrite(dataPin, bit);
+        digitalWrite(clockPin, HIGH);
+        digitalWrite(clockPin, LOW);
+    }
+}
+
 #endif  // ARGUINO_ARDUINO_HPP
